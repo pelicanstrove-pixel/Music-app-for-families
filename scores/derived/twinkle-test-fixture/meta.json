@@ -1,0 +1,124 @@
+{
+  "asset_id": "twinkle-test-fixture",
+  "title": "Twinkle, Twinkle, Little Star (test fixture)",
+  "composer": "Traditional (French melody, 1761)",
+  "source_file": "twinkle-test-fixture.musicxml",
+  "source_sha256": "7bcfa0c561fb5925a6b405e1b2e2933d67ac371da71113778b4f6cc83402d680",
+  "license": {
+    "composition_status": "public-domain-us",
+    "edition_source": "Typed for this repo as a pipeline test",
+    "edition_license": "CC0",
+    "attribution_text": "",
+    "derivatives_allowed": "yes"
+  },
+  "recipe_file": "twinkle-test-fixture.yaml",
+  "recipe": {
+    "extract": {
+      "part": "both",
+      "measures": [
+        1,
+        12
+      ]
+    },
+    "transform": {
+      "remove_ornaments": true,
+      "drop_inner_voices": true,
+      "simplify_dotted_rhythms": false,
+      "transpose_to_key": "G",
+      "limit_range_semitones": 12,
+      "phrase_measures": 4
+    },
+    "annotate": {
+      "note_names": true,
+      "counting": true,
+      "solfege": false,
+      "chord_symbols": true,
+      "roman_numerals": false,
+      "suggested_fingering": false,
+      "fingering_every_note": false
+    },
+    "render": {
+      "engine": "verovio",
+      "large_print": true
+    },
+    "asset_id": "twinkle-test-fixture"
+  },
+  "rules_applied": [
+    {
+      "id": "E1",
+      "name": "measure range",
+      "details": [
+        "measures 1-12"
+      ]
+    },
+    {
+      "id": "T1",
+      "name": "ornaments/grace notes removed",
+      "details": [
+        "removed 1 grace notes, 2 ornament marks, 0 trill lines"
+      ]
+    },
+    {
+      "id": "T4",
+      "name": "transposed",
+      "details": [
+        "C major -> G major (P-4, -5 semitones)"
+      ]
+    },
+    {
+      "id": "T2",
+      "name": "inner voices dropped",
+      "details": [
+        "dropped 0 extra voices, thinned 24 chords to top+bottom notes"
+      ]
+    },
+    {
+      "id": "T5",
+      "name": "range limited by octave moves",
+      "details": [
+        "staff 1, measures 9-12: moved 1 octave(s) down",
+        "staff 2, measures 1-4: spans 13 semitones, wider than 12; left unchanged",
+        "staff 2, measures 5-8: spans 13 semitones, wider than 12; left unchanged",
+        "staff 2, measures 9-12: spans 13 semitones, wider than 12; left unchanged"
+      ]
+    },
+    {
+      "id": "A1",
+      "name": "note names",
+      "details": [
+        "named 66 notes"
+      ]
+    },
+    {
+      "id": "A2",
+      "name": "counting",
+      "details": [
+        "counted 42 notes and rests"
+      ]
+    },
+    {
+      "id": "A4",
+      "name": "chord symbols",
+      "details": [
+        "21 chord symbols"
+      ]
+    }
+  ],
+  "key_detected": "G major",
+  "footer": "Simplified from Traditional (French melody, 1761), Typed for this repo as a pipeline test / CC0. Rules: E1 measure range; T1 ornaments/grace notes removed; T4 transposed; T2 inner voices dropped; T5 range limited by octave moves; A1 note names; A2 counting; A4 chord symbols. Rules are explained in scores/RULES.md.",
+  "outputs": {
+    "musicxml": "twinkle-test-fixture.musicxml",
+    "pdf": "twinkle-test-fixture.pdf",
+    "pdf_large_print": "twinkle-test-fixture-large-print.pdf"
+  },
+  "musicxml_sha256": "cdf9195b918394263a092c36fd5a226becf2576447ce069117fdb2adb0ceee10",
+  "tools": {
+    "music21": "10.5.0",
+    "verovio": "6.3.0-425dd7b",
+    "engine": "verovio"
+  },
+  "generated_by": "deterministic rules only (no AI / ML)",
+  "status": "draft",
+  "reviewed_by": null,
+  "reviewed_date": null
+}

@@ -1,0 +1,7 @@
+# Install with:  pip install -r scores/requirements.txt
+music21==10.5.0
+verovio==6.3.0
+PyYAML>=6.0
+pypdf>=4.0
+reportlab>=4.0
+cairosvg>=2.7
