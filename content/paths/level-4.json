@@ -1,0 +1,596 @@
+{
+  "schema_version": 1,
+  "level": "level-4",
+  "status": "DRAFT – needs educator review",
+  "reviewed_by": "",
+  "weeks": [
+    {
+      "id": "level-4-w01",
+      "week": 1,
+      "focus": "",
+      "status": "DRAFT – needs educator review",
+      "strand_items": {
+        "technique": [
+          {
+            "id": "level-4-w01-technique-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "theory": [
+          {
+            "id": "level-4-w01-theory-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "repertoire": [
+          {
+            "id": "level-4-w01-repertoire-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "ear_training": [
+          {
+            "id": "level-4-w01-ear_training-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ]
+      },
+      "parent_notes": "",
+      "practice_chart": {
+        "minutes_per_day": null,
+        "days_per_week": null,
+        "items": []
+      },
+      "repertoire_ids": [],
+      "worksheet_topics": [],
+      "exercise_ids": []
+    },
+    {
+      "id": "level-4-w02",
+      "week": 2,
+      "focus": "",
+      "status": "DRAFT – needs educator review",
+      "strand_items": {
+        "technique": [
+          {
+            "id": "level-4-w02-technique-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "theory": [
+          {
+            "id": "level-4-w02-theory-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "repertoire": [
+          {
+            "id": "level-4-w02-repertoire-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "ear_training": [
+          {
+            "id": "level-4-w02-ear_training-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ]
+      },
+      "parent_notes": "",
+      "practice_chart": {
+        "minutes_per_day": null,
+        "days_per_week": null,
+        "items": []
+      },
+      "repertoire_ids": [],
+      "worksheet_topics": [],
+      "exercise_ids": []
+    },
+    {
+      "id": "level-4-w03",
+      "week": 3,
+      "focus": "",
+      "status": "DRAFT – needs educator review",
+      "strand_items": {
+        "technique": [
+          {
+            "id": "level-4-w03-technique-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "theory": [
+          {
+            "id": "level-4-w03-theory-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "repertoire": [
+          {
+            "id": "level-4-w03-repertoire-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "ear_training": [
+          {
+            "id": "level-4-w03-ear_training-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ]
+      },
+      "parent_notes": "",
+      "practice_chart": {
+        "minutes_per_day": null,
+        "days_per_week": null,
+        "items": []
+      },
+      "repertoire_ids": [],
+      "worksheet_topics": [],
+      "exercise_ids": []
+    },
+    {
+      "id": "level-4-w04",
+      "week": 4,
+      "focus": "",
+      "status": "DRAFT – needs educator review",
+      "strand_items": {
+        "technique": [
+          {
+            "id": "level-4-w04-technique-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "theory": [
+          {
+            "id": "level-4-w04-theory-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "repertoire": [
+          {
+            "id": "level-4-w04-repertoire-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "ear_training": [
+          {
+            "id": "level-4-w04-ear_training-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ]
+      },
+      "parent_notes": "",
+      "practice_chart": {
+        "minutes_per_day": null,
+        "days_per_week": null,
+        "items": []
+      },
+      "repertoire_ids": [],
+      "worksheet_topics": [],
+      "exercise_ids": []
+    },
+    {
+      "id": "level-4-w05",
+      "week": 5,
+      "focus": "",
+      "status": "DRAFT – needs educator review",
+      "strand_items": {
+        "technique": [
+          {
+            "id": "level-4-w05-technique-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "theory": [
+          {
+            "id": "level-4-w05-theory-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "repertoire": [
+          {
+            "id": "level-4-w05-repertoire-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "ear_training": [
+          {
+            "id": "level-4-w05-ear_training-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ]
+      },
+      "parent_notes": "",
+      "practice_chart": {
+        "minutes_per_day": null,
+        "days_per_week": null,
+        "items": []
+      },
+      "repertoire_ids": [],
+      "worksheet_topics": [],
+      "exercise_ids": []
+    },
+    {
+      "id": "level-4-w06",
+      "week": 6,
+      "focus": "",
+      "status": "DRAFT – needs educator review",
+      "strand_items": {
+        "technique": [
+          {
+            "id": "level-4-w06-technique-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "theory": [
+          {
+            "id": "level-4-w06-theory-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "repertoire": [
+          {
+            "id": "level-4-w06-repertoire-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "ear_training": [
+          {
+            "id": "level-4-w06-ear_training-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ]
+      },
+      "parent_notes": "",
+      "practice_chart": {
+        "minutes_per_day": null,
+        "days_per_week": null,
+        "items": []
+      },
+      "repertoire_ids": [],
+      "worksheet_topics": [],
+      "exercise_ids": []
+    },
+    {
+      "id": "level-4-w07",
+      "week": 7,
+      "focus": "",
+      "status": "DRAFT – needs educator review",
+      "strand_items": {
+        "technique": [
+          {
+            "id": "level-4-w07-technique-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "theory": [
+          {
+            "id": "level-4-w07-theory-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "repertoire": [
+          {
+            "id": "level-4-w07-repertoire-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "ear_training": [
+          {
+            "id": "level-4-w07-ear_training-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ]
+      },
+      "parent_notes": "",
+      "practice_chart": {
+        "minutes_per_day": null,
+        "days_per_week": null,
+        "items": []
+      },
+      "repertoire_ids": [],
+      "worksheet_topics": [],
+      "exercise_ids": []
+    },
+    {
+      "id": "level-4-w08",
+      "week": 8,
+      "focus": "",
+      "status": "DRAFT – needs educator review",
+      "strand_items": {
+        "technique": [
+          {
+            "id": "level-4-w08-technique-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "theory": [
+          {
+            "id": "level-4-w08-theory-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "repertoire": [
+          {
+            "id": "level-4-w08-repertoire-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "ear_training": [
+          {
+            "id": "level-4-w08-ear_training-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ]
+      },
+      "parent_notes": "",
+      "practice_chart": {
+        "minutes_per_day": null,
+        "days_per_week": null,
+        "items": []
+      },
+      "repertoire_ids": [],
+      "worksheet_topics": [],
+      "exercise_ids": []
+    },
+    {
+      "id": "level-4-w09",
+      "week": 9,
+      "focus": "",
+      "status": "DRAFT – needs educator review",
+      "strand_items": {
+        "technique": [
+          {
+            "id": "level-4-w09-technique-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "theory": [
+          {
+            "id": "level-4-w09-theory-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "repertoire": [
+          {
+            "id": "level-4-w09-repertoire-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "ear_training": [
+          {
+            "id": "level-4-w09-ear_training-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ]
+      },
+      "parent_notes": "",
+      "practice_chart": {
+        "minutes_per_day": null,
+        "days_per_week": null,
+        "items": []
+      },
+      "repertoire_ids": [],
+      "worksheet_topics": [],
+      "exercise_ids": []
+    },
+    {
+      "id": "level-4-w10",
+      "week": 10,
+      "focus": "",
+      "status": "DRAFT – needs educator review",
+      "strand_items": {
+        "technique": [
+          {
+            "id": "level-4-w10-technique-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "theory": [
+          {
+            "id": "level-4-w10-theory-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "repertoire": [
+          {
+            "id": "level-4-w10-repertoire-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "ear_training": [
+          {
+            "id": "level-4-w10-ear_training-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ]
+      },
+      "parent_notes": "",
+      "practice_chart": {
+        "minutes_per_day": null,
+        "days_per_week": null,
+        "items": []
+      },
+      "repertoire_ids": [],
+      "worksheet_topics": [],
+      "exercise_ids": []
+    },
+    {
+      "id": "level-4-w11",
+      "week": 11,
+      "focus": "",
+      "status": "DRAFT – needs educator review",
+      "strand_items": {
+        "technique": [
+          {
+            "id": "level-4-w11-technique-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "theory": [
+          {
+            "id": "level-4-w11-theory-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "repertoire": [
+          {
+            "id": "level-4-w11-repertoire-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "ear_training": [
+          {
+            "id": "level-4-w11-ear_training-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ]
+      },
+      "parent_notes": "",
+      "practice_chart": {
+        "minutes_per_day": null,
+        "days_per_week": null,
+        "items": []
+      },
+      "repertoire_ids": [],
+      "worksheet_topics": [],
+      "exercise_ids": []
+    },
+    {
+      "id": "level-4-w12",
+      "week": 12,
+      "focus": "",
+      "status": "DRAFT – needs educator review",
+      "strand_items": {
+        "technique": [
+          {
+            "id": "level-4-w12-technique-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "theory": [
+          {
+            "id": "level-4-w12-theory-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "repertoire": [
+          {
+            "id": "level-4-w12-repertoire-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "ear_training": [
+          {
+            "id": "level-4-w12-ear_training-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ]
+      },
+      "parent_notes": "",
+      "practice_chart": {
+        "minutes_per_day": null,
+        "days_per_week": null,
+        "items": []
+      },
+      "repertoire_ids": [],
+      "worksheet_topics": [],
+      "exercise_ids": []
+    }
+  ]
+}

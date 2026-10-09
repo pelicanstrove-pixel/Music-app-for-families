@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "exercises": [
+    {
+      "id": "example-0001",
+      "level": "level-1",
+      "strand": "theory",
+      "topic": "",
+      "age_min": 6,
+      "age_max": 10,
+      "type": "fixed",
+      "author": "",
+      "reviewed_by": "",
+      "status": "draft",
+      "body": "",
+      "answer_key": "",
+      "large_print_ok": true
+    }
+  ]
+}

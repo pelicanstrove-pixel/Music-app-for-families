@@ -1,0 +1,430 @@
+{
+  "schema_version": 1,
+  "status": "DRAFT – needs educator review",
+  "strand_sets": {
+    "kodaly": {
+      "strands": [
+        "singing",
+        "rhythm",
+        "solfege",
+        "pre_staff"
+      ],
+      "status": "DRAFT – needs educator review"
+    },
+    "graded": {
+      "strands": [
+        "technique",
+        "theory",
+        "repertoire",
+        "ear_training"
+      ],
+      "status": "DRAFT – needs educator review"
+    }
+  },
+  "levels": [
+    {
+      "id": "pre-reader",
+      "name": "Pre-reader",
+      "order": 0,
+      "pedagogy": "kodaly",
+      "strands": [
+        "singing",
+        "rhythm",
+        "solfege",
+        "pre_staff"
+      ],
+      "age_guide": {
+        "min": 4,
+        "max": 6,
+        "note": ""
+      },
+      "prerequisites": [],
+      "goals": {
+        "singing": [
+          {
+            "id": "singing-01",
+            "topic": "Matching pitch",
+            "description": "",
+            "status": "DRAFT – needs educator review"
+          },
+          {
+            "id": "singing-02",
+            "topic": "Simple songs and chants",
+            "description": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "rhythm": [
+          {
+            "id": "rhythm-01",
+            "topic": "Steady beat",
+            "description": "",
+            "status": "DRAFT – needs educator review"
+          },
+          {
+            "id": "rhythm-02",
+            "topic": "Ta and ti-ti",
+            "description": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "solfege": [
+          {
+            "id": "solfege-01",
+            "topic": "Sol-mi",
+            "description": "",
+            "status": "DRAFT – needs educator review"
+          },
+          {
+            "id": "solfege-02",
+            "topic": "La",
+            "description": "",
+            "status": "DRAFT – needs educator review"
+          },
+          {
+            "id": "solfege-03",
+            "topic": "Hand signs",
+            "description": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "pre_staff": [
+          {
+            "id": "pre_staff-01",
+            "topic": "High/low",
+            "description": "",
+            "status": "DRAFT – needs educator review"
+          },
+          {
+            "id": "pre_staff-02",
+            "topic": "Icon and line notation",
+            "description": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ]
+      },
+      "status": "DRAFT – needs educator review",
+      "parent_notes": ""
+    },
+    {
+      "id": "level-1",
+      "name": "Level 1",
+      "order": 1,
+      "pedagogy": "graded",
+      "strands": [
+        "technique",
+        "theory",
+        "repertoire",
+        "ear_training"
+      ],
+      "age_guide": {
+        "min": 6,
+        "max": 10,
+        "note": ""
+      },
+      "prerequisites": [
+        "pre-reader"
+      ],
+      "goals": {
+        "technique": [
+          {
+            "id": "technique-01",
+            "topic": "Posture and hand shape",
+            "description": "",
+            "status": "DRAFT – needs educator review"
+          },
+          {
+            "id": "technique-02",
+            "topic": "Finger numbers",
+            "description": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "theory": [
+          {
+            "id": "theory-01",
+            "topic": "Keyboard geography",
+            "description": "",
+            "status": "DRAFT – needs educator review"
+          },
+          {
+            "id": "theory-02",
+            "topic": "Staff and clefs",
+            "description": "",
+            "status": "DRAFT – needs educator review"
+          },
+          {
+            "id": "theory-03",
+            "topic": "Note values",
+            "description": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "repertoire": [
+          {
+            "id": "repertoire-01",
+            "topic": "Five-finger position pieces",
+            "description": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "ear_training": [
+          {
+            "id": "ear_training-01",
+            "topic": "Higher/lower",
+            "description": "",
+            "status": "DRAFT – needs educator review"
+          },
+          {
+            "id": "ear_training-02",
+            "topic": "Clap-back rhythms",
+            "description": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ]
+      },
+      "status": "DRAFT – needs educator review",
+      "parent_notes": ""
+    },
+    {
+      "id": "level-2",
+      "name": "Level 2",
+      "order": 2,
+      "pedagogy": "graded",
+      "strands": [
+        "technique",
+        "theory",
+        "repertoire",
+        "ear_training"
+      ],
+      "age_guide": {
+        "min": 7,
+        "max": 11,
+        "note": ""
+      },
+      "prerequisites": [
+        "level-1"
+      ],
+      "goals": {
+        "technique": [
+          {
+            "id": "technique-01",
+            "topic": "Hands together",
+            "description": "",
+            "status": "DRAFT – needs educator review"
+          },
+          {
+            "id": "technique-02",
+            "topic": "Legato and staccato",
+            "description": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "theory": [
+          {
+            "id": "theory-01",
+            "topic": "Grand staff note naming",
+            "description": "",
+            "status": "DRAFT – needs educator review"
+          },
+          {
+            "id": "theory-02",
+            "topic": "Intervals 2nd–5th",
+            "description": "",
+            "status": "DRAFT – needs educator review"
+          },
+          {
+            "id": "theory-03",
+            "topic": "Time signatures",
+            "description": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "repertoire": [
+          {
+            "id": "repertoire-01",
+            "topic": "Short pieces beyond five-finger position",
+            "description": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "ear_training": [
+          {
+            "id": "ear_training-01",
+            "topic": "Steps vs skips",
+            "description": "",
+            "status": "DRAFT – needs educator review"
+          },
+          {
+            "id": "ear_training-02",
+            "topic": "Major vs minor",
+            "description": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ]
+      },
+      "status": "DRAFT – needs educator review",
+      "parent_notes": ""
+    },
+    {
+      "id": "level-3",
+      "name": "Level 3",
+      "order": 3,
+      "pedagogy": "graded",
+      "strands": [
+        "technique",
+        "theory",
+        "repertoire",
+        "ear_training"
+      ],
+      "age_guide": {
+        "min": 8,
+        "max": 12,
+        "note": ""
+      },
+      "prerequisites": [
+        "level-2"
+      ],
+      "goals": {
+        "technique": [
+          {
+            "id": "technique-01",
+            "topic": "Scales",
+            "description": "",
+            "status": "DRAFT – needs educator review"
+          },
+          {
+            "id": "technique-02",
+            "topic": "Triads",
+            "description": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "theory": [
+          {
+            "id": "theory-01",
+            "topic": "Key signatures",
+            "description": "",
+            "status": "DRAFT – needs educator review"
+          },
+          {
+            "id": "theory-02",
+            "topic": "Ledger lines",
+            "description": "",
+            "status": "DRAFT – needs educator review"
+          },
+          {
+            "id": "theory-03",
+            "topic": "Eighth-note rhythms",
+            "description": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "repertoire": [
+          {
+            "id": "repertoire-01",
+            "topic": "Easy classical pieces",
+            "description": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "ear_training": [
+          {
+            "id": "ear_training-01",
+            "topic": "Interval recognition",
+            "description": "",
+            "status": "DRAFT – needs educator review"
+          },
+          {
+            "id": "ear_training-02",
+            "topic": "Melodic dictation",
+            "description": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ]
+      },
+      "status": "DRAFT – needs educator review",
+      "parent_notes": ""
+    },
+    {
+      "id": "level-4",
+      "name": "Level 4",
+      "order": 4,
+      "pedagogy": "graded",
+      "strands": [
+        "technique",
+        "theory",
+        "repertoire",
+        "ear_training"
+      ],
+      "age_guide": {
+        "min": 9,
+        "max": 14,
+        "note": ""
+      },
+      "prerequisites": [
+        "level-3"
+      ],
+      "goals": {
+        "technique": [
+          {
+            "id": "technique-01",
+            "topic": "Scales hands together",
+            "description": "",
+            "status": "DRAFT – needs educator review"
+          },
+          {
+            "id": "technique-02",
+            "topic": "Arpeggios",
+            "description": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "theory": [
+          {
+            "id": "theory-01",
+            "topic": "Major and minor keys",
+            "description": "",
+            "status": "DRAFT – needs educator review"
+          },
+          {
+            "id": "theory-02",
+            "topic": "Intervals to octave",
+            "description": "",
+            "status": "DRAFT – needs educator review"
+          },
+          {
+            "id": "theory-03",
+            "topic": "Chord progressions",
+            "description": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "repertoire": [
+          {
+            "id": "repertoire-01",
+            "topic": "Intermediate classical pieces",
+            "description": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "ear_training": [
+          {
+            "id": "ear_training-01",
+            "topic": "Cadences",
+            "description": "",
+            "status": "DRAFT – needs educator review"
+          },
+          {
+            "id": "ear_training-02",
+            "topic": "Rhythmic dictation",
+            "description": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ]
+      },
+      "status": "DRAFT – needs educator review",
+      "parent_notes": ""
+    }
+  ]
+}

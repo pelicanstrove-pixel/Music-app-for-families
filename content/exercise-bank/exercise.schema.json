@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "exercise.schema.json",
+  "title": "Exercise bank file",
+  "description": "One file holds a list of exercises. Only exercises with status 'approved' will be shown in the app.",
+  "type": "object",
+  "required": ["schema_version", "exercises"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "exercises": { "type": "array", "items": { "$ref": "#/$defs/exercise" } }
+  },
+  "$defs": {
+    "exercise": {
+      "type": "object",
+      "required": ["id", "level", "strand", "topic", "age_min", "age_max", "type",
+                   "author", "reviewed_by", "status", "body", "answer_key", "large_print_ok"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9-]+$", "description": "Unique, never reused. Example: l1-theory-0001" },
+        "level": { "enum": ["pre-reader", "level-1", "level-2", "level-3", "level-4"] },
+        "strand": { "enum": ["singing", "rhythm", "solfege", "pre_staff",
+                             "technique", "theory", "repertoire", "ear_training"] },
+        "topic": { "type": "string" },
+        "age_min": { "type": "integer", "minimum": 3, "maximum": 18 },
+        "age_max": { "type": "integer", "minimum": 3, "maximum": 18 },
+        "type": { "enum": ["fixed", "parametric"] },
+        "template_id": { "type": "string", "description": "Required when type is parametric. Must match a template in parametric-templates.md." },
+        "params": { "type": "object", "description": "Parametric only. Values must follow the level rules in parametric-templates.md." },
+        "author": { "type": "string", "description": "A human. Never AI-written." },
+        "reviewed_by": { "type": "string", "description": "Educator name. Empty until reviewed." },
+        "status": { "enum": ["draft", "approved"] },
+        "body": { "type": "string", "description": "Student-facing text. Written by a human." },
+        "answer_key": { "type": "string", "description": "Parent-facing answers. Written by a human." },
+        "large_print_ok": { "type": "boolean" },
+        "asset_ids": { "type": "array", "items": { "type": "string" }, "description": "Optional links to rows in /licenses/assets.csv" }
+      },
+      "allOf": [
+        { "if": { "properties": { "type": { "const": "parametric" } } },
+          "then": { "required": ["template_id", "params"] } },
+        { "if": { "properties": { "status": { "const": "approved" } } },
+          "then": { "properties": { "reviewed_by": { "minLength": 1 } } } }
+      ]
+    }
+  }
+}

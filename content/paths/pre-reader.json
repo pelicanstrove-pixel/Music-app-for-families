@@ -1,0 +1,596 @@
+{
+  "schema_version": 1,
+  "level": "pre-reader",
+  "status": "DRAFT – needs educator review",
+  "reviewed_by": "",
+  "weeks": [
+    {
+      "id": "pre-reader-w01",
+      "week": 1,
+      "focus": "",
+      "status": "DRAFT – needs educator review",
+      "strand_items": {
+        "singing": [
+          {
+            "id": "pre-reader-w01-singing-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "rhythm": [
+          {
+            "id": "pre-reader-w01-rhythm-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "solfege": [
+          {
+            "id": "pre-reader-w01-solfege-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "pre_staff": [
+          {
+            "id": "pre-reader-w01-pre_staff-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ]
+      },
+      "parent_notes": "",
+      "practice_chart": {
+        "minutes_per_day": null,
+        "days_per_week": null,
+        "items": []
+      },
+      "repertoire_ids": [],
+      "worksheet_topics": [],
+      "exercise_ids": []
+    },
+    {
+      "id": "pre-reader-w02",
+      "week": 2,
+      "focus": "",
+      "status": "DRAFT – needs educator review",
+      "strand_items": {
+        "singing": [
+          {
+            "id": "pre-reader-w02-singing-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "rhythm": [
+          {
+            "id": "pre-reader-w02-rhythm-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "solfege": [
+          {
+            "id": "pre-reader-w02-solfege-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "pre_staff": [
+          {
+            "id": "pre-reader-w02-pre_staff-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ]
+      },
+      "parent_notes": "",
+      "practice_chart": {
+        "minutes_per_day": null,
+        "days_per_week": null,
+        "items": []
+      },
+      "repertoire_ids": [],
+      "worksheet_topics": [],
+      "exercise_ids": []
+    },
+    {
+      "id": "pre-reader-w03",
+      "week": 3,
+      "focus": "",
+      "status": "DRAFT – needs educator review",
+      "strand_items": {
+        "singing": [
+          {
+            "id": "pre-reader-w03-singing-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "rhythm": [
+          {
+            "id": "pre-reader-w03-rhythm-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "solfege": [
+          {
+            "id": "pre-reader-w03-solfege-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "pre_staff": [
+          {
+            "id": "pre-reader-w03-pre_staff-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ]
+      },
+      "parent_notes": "",
+      "practice_chart": {
+        "minutes_per_day": null,
+        "days_per_week": null,
+        "items": []
+      },
+      "repertoire_ids": [],
+      "worksheet_topics": [],
+      "exercise_ids": []
+    },
+    {
+      "id": "pre-reader-w04",
+      "week": 4,
+      "focus": "",
+      "status": "DRAFT – needs educator review",
+      "strand_items": {
+        "singing": [
+          {
+            "id": "pre-reader-w04-singing-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "rhythm": [
+          {
+            "id": "pre-reader-w04-rhythm-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "solfege": [
+          {
+            "id": "pre-reader-w04-solfege-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "pre_staff": [
+          {
+            "id": "pre-reader-w04-pre_staff-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ]
+      },
+      "parent_notes": "",
+      "practice_chart": {
+        "minutes_per_day": null,
+        "days_per_week": null,
+        "items": []
+      },
+      "repertoire_ids": [],
+      "worksheet_topics": [],
+      "exercise_ids": []
+    },
+    {
+      "id": "pre-reader-w05",
+      "week": 5,
+      "focus": "",
+      "status": "DRAFT – needs educator review",
+      "strand_items": {
+        "singing": [
+          {
+            "id": "pre-reader-w05-singing-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "rhythm": [
+          {
+            "id": "pre-reader-w05-rhythm-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "solfege": [
+          {
+            "id": "pre-reader-w05-solfege-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "pre_staff": [
+          {
+            "id": "pre-reader-w05-pre_staff-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ]
+      },
+      "parent_notes": "",
+      "practice_chart": {
+        "minutes_per_day": null,
+        "days_per_week": null,
+        "items": []
+      },
+      "repertoire_ids": [],
+      "worksheet_topics": [],
+      "exercise_ids": []
+    },
+    {
+      "id": "pre-reader-w06",
+      "week": 6,
+      "focus": "",
+      "status": "DRAFT – needs educator review",
+      "strand_items": {
+        "singing": [
+          {
+            "id": "pre-reader-w06-singing-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "rhythm": [
+          {
+            "id": "pre-reader-w06-rhythm-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "solfege": [
+          {
+            "id": "pre-reader-w06-solfege-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "pre_staff": [
+          {
+            "id": "pre-reader-w06-pre_staff-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ]
+      },
+      "parent_notes": "",
+      "practice_chart": {
+        "minutes_per_day": null,
+        "days_per_week": null,
+        "items": []
+      },
+      "repertoire_ids": [],
+      "worksheet_topics": [],
+      "exercise_ids": []
+    },
+    {
+      "id": "pre-reader-w07",
+      "week": 7,
+      "focus": "",
+      "status": "DRAFT – needs educator review",
+      "strand_items": {
+        "singing": [
+          {
+            "id": "pre-reader-w07-singing-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "rhythm": [
+          {
+            "id": "pre-reader-w07-rhythm-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "solfege": [
+          {
+            "id": "pre-reader-w07-solfege-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "pre_staff": [
+          {
+            "id": "pre-reader-w07-pre_staff-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ]
+      },
+      "parent_notes": "",
+      "practice_chart": {
+        "minutes_per_day": null,
+        "days_per_week": null,
+        "items": []
+      },
+      "repertoire_ids": [],
+      "worksheet_topics": [],
+      "exercise_ids": []
+    },
+    {
+      "id": "pre-reader-w08",
+      "week": 8,
+      "focus": "",
+      "status": "DRAFT – needs educator review",
+      "strand_items": {
+        "singing": [
+          {
+            "id": "pre-reader-w08-singing-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "rhythm": [
+          {
+            "id": "pre-reader-w08-rhythm-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "solfege": [
+          {
+            "id": "pre-reader-w08-solfege-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "pre_staff": [
+          {
+            "id": "pre-reader-w08-pre_staff-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ]
+      },
+      "parent_notes": "",
+      "practice_chart": {
+        "minutes_per_day": null,
+        "days_per_week": null,
+        "items": []
+      },
+      "repertoire_ids": [],
+      "worksheet_topics": [],
+      "exercise_ids": []
+    },
+    {
+      "id": "pre-reader-w09",
+      "week": 9,
+      "focus": "",
+      "status": "DRAFT – needs educator review",
+      "strand_items": {
+        "singing": [
+          {
+            "id": "pre-reader-w09-singing-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "rhythm": [
+          {
+            "id": "pre-reader-w09-rhythm-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "solfege": [
+          {
+            "id": "pre-reader-w09-solfege-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "pre_staff": [
+          {
+            "id": "pre-reader-w09-pre_staff-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ]
+      },
+      "parent_notes": "",
+      "practice_chart": {
+        "minutes_per_day": null,
+        "days_per_week": null,
+        "items": []
+      },
+      "repertoire_ids": [],
+      "worksheet_topics": [],
+      "exercise_ids": []
+    },
+    {
+      "id": "pre-reader-w10",
+      "week": 10,
+      "focus": "",
+      "status": "DRAFT – needs educator review",
+      "strand_items": {
+        "singing": [
+          {
+            "id": "pre-reader-w10-singing-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "rhythm": [
+          {
+            "id": "pre-reader-w10-rhythm-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "solfege": [
+          {
+            "id": "pre-reader-w10-solfege-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "pre_staff": [
+          {
+            "id": "pre-reader-w10-pre_staff-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ]
+      },
+      "parent_notes": "",
+      "practice_chart": {
+        "minutes_per_day": null,
+        "days_per_week": null,
+        "items": []
+      },
+      "repertoire_ids": [],
+      "worksheet_topics": [],
+      "exercise_ids": []
+    },
+    {
+      "id": "pre-reader-w11",
+      "week": 11,
+      "focus": "",
+      "status": "DRAFT – needs educator review",
+      "strand_items": {
+        "singing": [
+          {
+            "id": "pre-reader-w11-singing-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "rhythm": [
+          {
+            "id": "pre-reader-w11-rhythm-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "solfege": [
+          {
+            "id": "pre-reader-w11-solfege-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "pre_staff": [
+          {
+            "id": "pre-reader-w11-pre_staff-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ]
+      },
+      "parent_notes": "",
+      "practice_chart": {
+        "minutes_per_day": null,
+        "days_per_week": null,
+        "items": []
+      },
+      "repertoire_ids": [],
+      "worksheet_topics": [],
+      "exercise_ids": []
+    },
+    {
+      "id": "pre-reader-w12",
+      "week": 12,
+      "focus": "",
+      "status": "DRAFT – needs educator review",
+      "strand_items": {
+        "singing": [
+          {
+            "id": "pre-reader-w12-singing-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "rhythm": [
+          {
+            "id": "pre-reader-w12-rhythm-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "solfege": [
+          {
+            "id": "pre-reader-w12-solfege-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ],
+        "pre_staff": [
+          {
+            "id": "pre-reader-w12-pre_staff-01",
+            "topic": "",
+            "goal_ref": "",
+            "status": "DRAFT – needs educator review"
+          }
+        ]
+      },
+      "parent_notes": "",
+      "practice_chart": {
+        "minutes_per_day": null,
+        "days_per_week": null,
+        "items": []
+      },
+      "repertoire_ids": [],
+      "worksheet_topics": [],
+      "exercise_ids": []
+    }
+  ]
+}
