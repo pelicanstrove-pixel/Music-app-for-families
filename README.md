@@ -27,9 +27,16 @@ content/
     reader-quiz-template.md       ← placement quiz for children who read
     prereader-observation-checklist.md  ← checklist a parent fills in by watching a young child
 licenses/
-  assets.csv                      ← one row per score/recording we link to (header only for now)
+  assets.csv                      ← one row per score/recording (now also: derivatives_allowed, source_format)
   SOURCING.md                     ← checklist for checking a license before adding a row
+scores/                           ← Phase 1.5 Part A: rule-based score simplifier (see scores/README.md)
+  RULES.md                        ← every simplification rule in plain English
+app/                              ← Phase 1.5 Part B
+  drills.html                     ← drill sheet generator; paste into a Squarespace Code block
+  DRILL-RULES.md                  ← every drill rule in plain English
 ```
+
+**assets.csv new columns:** `derivatives_allowed` = `yes`, `no`, or `share-alike` (may we make a simplified version?). `source_format` = `musicxml`, `mxl`, or `xml` for files in `scores/source/` (use `n/a` for linked-only items).
 
 **Strands:** Pre-reader uses Kodály-style strands: `singing`, `rhythm`, `solfege`, `pre_staff`.
 Levels 1–4 use: `technique`, `theory`, `repertoire`, `ear_training`.
