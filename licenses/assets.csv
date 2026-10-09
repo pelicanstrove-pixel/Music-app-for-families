@@ -1,1 +1,2 @@
-asset_id,title,composer,composition_status,edition_source,edition_license,recording_source,recording_performer,recording_license,url,attribution_text,verified_by,verified_date,notes
+asset_id,title,composer,composition_status,edition_source,edition_license,recording_source,recording_performer,recording_license,url,attribution_text,verified_by,verified_date,notes,derivatives_allowed,source_format
+twinkle-test-fixture,"Twinkle, Twinkle, Little Star (test fixture)","Traditional (French melody, 1761)",public-domain-us,Typed for this repo as a pipeline test,CC0,n/a,n/a,n/a,scores/source/twinkle-test-fixture.musicxml,,test fixture (replace with a real person),2026-10-09,Test file only. Not teaching content.,yes,musicxml

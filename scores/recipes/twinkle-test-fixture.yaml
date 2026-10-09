@@ -1,0 +1,28 @@
+# Recipe for one piece. Change values after the colon. Keep the spacing.
+# Every setting is explained in scores/RULES.md.
+asset_id: twinkle-test-fixture      # must match the file name in scores/source/ and a row in licenses/assets.csv
+
+extract:
+  part: both                        # both, right_hand, left_hand, or melody
+  measures: [1, 12]                 # [first, last] measure, or leave empty for the whole piece
+
+transform:
+  remove_ornaments: true            # T1: grace notes, trills, mordents, turns
+  drop_inner_voices: true           # T2: keep only outer voices / outer chord notes
+  simplify_dotted_rhythms: false    # T3: off by default
+  transpose_to_key: G               # T4: new key name (C, G, F, Bb, ...), or leave empty
+  limit_range_semitones: 12         # T5: max range per staff (12 = one octave), or leave empty
+  phrase_measures: 4                # T5: a "phrase" is this many measures
+
+annotate:
+  note_names: true                  # A1: letter names above the notes
+  counting: true                    # A2: 1-2-3-4 counts under the notes
+  solfege: false                    # A3: do-re-mi under the notes
+  chord_symbols: true               # A4: chord symbols above the top staff
+  roman_numerals: false             # A5: I, IV, V under the bottom staff
+  suggested_fingering: false        # A6: off by default; always labeled SUGGESTED
+  fingering_every_note: false       # A6: false = only first note of each hand position
+
+render:
+  engine: verovio                   # verovio (built in) or musescore (needs MuseScore 4 installed)
+  large_print: true                 # also make a large-print PDF
