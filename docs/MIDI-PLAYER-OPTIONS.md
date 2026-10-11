@@ -16,10 +16,12 @@ optionally send the notes to the family's digital piano over USB (Web MIDI).
 - **Where:** everywhere, with a switch (Family → Sound): Pieces (full player), drill sheets (a Play button
   on note-naming, interval and rhythm items, never printed), kid modes (a short chime when a step or tile
   is marked done). Ear-training items get sound once educators add notes to exercises.
-- **Digital piano:** Web MIDI output as a setting (Family → Sound → Play through). No input / "wait for me" yet.
+- **Digital piano:** Web MIDI output as a setting (Family → Sound → Play through), and MIDI input for wait-for-me.
 - Player options built: Play / Pause / Stop, progress, speed 40–120%, hands (both / right / left),
   bars from–to, loop, count-in, metronome, volume.
-- Not built yet: highlighting notes on the score, "wait for me" mode.
+- Also built: the score is shown with the sounding notes highlighted (tap a note to start there), and
+  **wait for me** mode: the next note or chord is marked and the app waits until the child plays it on a digital
+  piano (Web MIDI input: Chrome, Edge, Firefox) or the on-screen keys; with one hand chosen, the other hand can play along.
 
 The research below is kept for reference. Correction to the table: the FluidR3 GM files from MIDI.js are
 labeled CC-BY 3.0 by that project; the original Fluid R3 and MuseScore's FluidR3Mono are MIT.

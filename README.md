@@ -29,9 +29,12 @@ content/
     placement-rules.json          ← how placement results turn into a suggested level (educator fills in the blanks)
 licenses/
   THIRD-PARTY.md                  ← fonts, libraries and sounds inside the app, and their licenses
+  candidates.csv                  ← pieces checked for license but not yet verified by a person (not shipped)
   assets.csv                      ← one row per score/recording (now also: derivatives_allowed, source_format)
   SOURCING.md                     ← checklist for checking a license before adding a row
 scores/                           ← Phase 1.5 Part A: rule-based score simplifier (see scores/README.md)
+  candidates/                     ← draft MusicXML of candidate pieces (not shipped, see docs/REPERTOIRE-CANDIDATES.md)
+  tools/mutopia_to_musicxml.py    ← converts a Mutopia LilyPond score to MusicXML (with a note check)
   RULES.md                        ← every simplification rule in plain English
 app/                              ← Phase 1.5 Part B + main app
   drills.html                     ← drill sheet generator; paste into a Squarespace Code block
@@ -47,6 +50,7 @@ docs/
   UI-CONTEXT.md, UI-SPEC.md       ← UI design context and the approved UI spec
   UI-SPEC-REVIEW.md               ← where the two differ (owner decisions needed) + progress/backup format
   MIDI-PLAYER-OPTIONS.md          ← research: built-in player options and owner decisions
+  REPERTOIRE-CANDIDATES.md        ← research: public-domain pieces to ship, license evidence, steps to ship one
 ```
 
 **assets.csv new columns:** `derivatives_allowed` = `yes`, `no`, or `share-alike` (may we make a simplified version?). `source_format` = `musicxml`, `mxl`, or `xml` for files in `scores/source/` (use `n/a` for linked-only items).

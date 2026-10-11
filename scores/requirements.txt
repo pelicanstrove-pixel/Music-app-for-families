@@ -5,3 +5,5 @@ PyYAML>=6.0
 pypdf>=4.0
 reportlab>=4.0
 cairosvg>=2.7
+# Only for scores/tools/mutopia_to_musicxml.py (turning Mutopia LilyPond files into MusicXML):
+# lilypond>=2.24
