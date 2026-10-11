@@ -158,8 +158,13 @@ def score_notes(xml_path):
     return {"bpm": bpm, "beat": beat, "beatsPerBar": beats, "bars": bars, "end": round(float(sc.highestTime), 4), "events": events}
 
 
+def gz64(text):
+    return base64.b64encode(gzip.compress(text.encode("utf-8"), 9, mtime=0)).decode("ascii")
+
+
 def score_view(xml_path):
-    """The score drawn by Verovio (gzipped SVG pages) plus each note's start, end and hand, for highlighting."""
+    """The score drawn by Verovio (gzipped SVG pages, plus one long line for the sheet-music game) and each note's
+    start, end (in quarter notes), hand (0 right, 1 left) and MIDI pitch, for highlighting and checking."""
     import verovio  # in scores/requirements.txt
     tk = verovio.toolkit()
     tk.setOptions({"pageWidth": 2100, "pageHeight": 60000, "adjustPageHeight": True, "scale": 40, "breaks": "auto",
@@ -178,14 +183,19 @@ def score_view(xml_path):
                     if g.get("class") == "note":
                         hand[g.get("id")] = i
     notes = {}
-    for e in tk.renderToTimemap({}):
+    timemap = tk.renderToTimemap({})
+    for e in timemap:
         for nid in e.get("on", []):
             notes.setdefault(nid, [e["qstamp"], None, hand.get(nid, 0)])
         for nid in e.get("off", []):
             if nid in notes:
                 notes[nid][1] = e["qstamp"]
-    blob = gzip.compress("\u0000".join(pages).encode("utf-8"), 9, mtime=0)
-    return {"svg": base64.b64encode(blob).decode("ascii"), "notes": notes}
+    for nid, n in notes.items():
+        n.append(tk.getMIDIValuesForElement(nid).get("pitch"))
+    tk.setOptions({"breaks": "none", "adjustPageWidth": True, "pageWidth": 100000})
+    tk.redoLayout()
+    line = re.sub(r">\s+<", "><", tk.renderToSVG(1))
+    return {"svg": gz64("\u0000".join(pages)), "line": gz64(line), "notes": notes}
 
 
 def piano_samples():

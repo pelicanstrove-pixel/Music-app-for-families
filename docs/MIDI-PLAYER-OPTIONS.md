@@ -17,6 +17,17 @@ optionally send the notes to the family's digital piano over USB (Web MIDI).
   on note-naming, interval and rhythm items, never printed), kid modes (a short chime when a step or tile
   is marked done). Ear-training items get sound once educators add notes to exercises.
 - **Digital piano:** Web MIDI output as a setting (Family → Sound → Play through), and MIDI input for wait-for-me.
+- **Keyboard size** (Family → Your keyboard and listening): 1–7 octaves or 88 keys, plus the keyboard's octave
+  buttons. Pieces are moved by octaves to fit (or single notes folded in when a piece is wider than the keyboard);
+  the on-screen keys and the game show only the family's keys. Optional: count the right note in any octave.
+- **Listening and checking:** the app hears the child through a digital piano (MIDI), the **microphone** (YIN pitch
+  detection in the browser, one note at a time; nothing is recorded or sent) or the on-screen keys. *Check my
+  playing* grades every note in time (green right, red wrong, grey missed) while the app plays the other hand;
+  *Wait for me* marks right-first-time notes and gives a summary.
+- **Game** (Pieces → Game): falling notes onto a keyboard (rhythm-game style) or the sheet music scrolling past a
+  line; *Play in time* (perfect/good/miss timing, combo, score, 1–3 stars) or *Wait for me*; hands, speed, note
+  names. Best score and stars are saved per child and piece. Works for every piece the license gate lets the
+  player play, now and in future.
 - Player options built: Play / Pause / Stop, progress, speed 40–120%, hands (both / right / left),
   bars from–to, loop, count-in, metronome, volume.
 - Also built: the score is shown with the sounding notes highlighted (tap a note to start there), and
