@@ -40,6 +40,16 @@ Our app links to scores and audio. It never copies **recordings** or other peopl
 
 If any of this is unclear for a piece, leave `derivatives_allowed` as `no`: it stays link-only.
 
+**Pieces under review (owner decision, 2026-10-11).** The pieces in `licenses/candidates.csv` may be in the app before a
+person has checked them, labeled "Under review" everywhere they appear. `app/build.py` (function `candidate_reason`)
+lets a candidate in only when: `composition_status` starts with `public-domain`, `derivatives_allowed` is `yes`,
+`edition_license` is CC0 or public domain (no credit-required editions here), `conversion` is `ok`, and the score file exists.
+All 78 today are Mutopia Project editions released into the public domain by their typesetters, of music by composers who
+died in 1925 or earlier, so they are public domain in the US and in "life + 70 years" countries too. The typesetter is credited anyway.
+Three rows carry a note in `candidates.csv` (Satie: typeset from a Dover reprint; Pleyel and Wanhal: source edition not named).
+To take any piece out at once, set its `derivatives_allowed` to `no` (or remove the row) and rebuild.
+When an educator has checked a piece, move it to `assets.csv` with its approved simplified score; the label then goes away.
+
 ---
 
 ## Checklist by source
