@@ -1,0 +1,575 @@
+<!--
+  Family Piano – main app (UI-SPEC draft v1, side-menu layout).
+  This is the SOURCE template. Do not paste this file; run `python3 app/build.py`
+  and paste app/family-piano.html into a Squarespace Code block.
+  All CSS is scoped under #fp-app. All on-screen wording is in the TEXT table below
+  so an educator can rewrite it. Progress lives in this browser only (localStorage).
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+#fp-app{--navy:#1d3b5c;--blue:#1b6a8c;--yellow:#ffc83d;--text:#1d2b3a;--bg:#f2f7fb;--line:#d5e2ec;
+  --t-blue:#cfe8f5;--t-amber:#ffe3a3;--t-green:#d9f0dd;--t-pink:#f3d6ee;
+  font-family:Nunito,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;font-size:16px;line-height:1.45;color:var(--text);
+  display:flex;min-height:640px;background:var(--bg);border-radius:12px;overflow:hidden;text-align:left;box-sizing:border-box}
+#fp-app *,#fp-app *::before,#fp-app *::after{box-sizing:border-box}
+#fp-app h1,#fp-app h2,#fp-app h3,#fp-app p{margin:0;font-family:inherit;color:inherit;letter-spacing:normal;text-transform:none}
+#fp-app h1{font-size:28px;font-weight:800;line-height:1.2}
+#fp-app h2{font-size:20px;font-weight:800}
+#fp-app h3{font-size:17px;font-weight:800}
+#fp-app button,#fp-app input,#fp-app select{font-family:inherit;font-size:16px;color:inherit}
+#fp-app a{color:var(--blue)}
+#fp-app :focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
+#fp-app .fp-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* sidebar */
+#fp-app .fp-side{width:220px;flex:0 0 220px;background:var(--navy);color:#fff;padding:18px 14px;display:flex;flex-direction:column;gap:16px}
+#fp-app .fp-logo{font-weight:800;font-size:20px;display:flex;align-items:center;gap:8px}
+#fp-app .fp-logo span{background:var(--yellow);color:var(--navy);border-radius:8px;width:34px;height:34px;display:inline-flex;align-items:center;justify-content:center}
+#fp-app .fp-chip-child{background:rgba(255,255,255,.1);border-radius:10px;padding:10px}
+#fp-app .fp-chip-child b{display:block;font-size:17px}
+#fp-app .fp-chip-child small{opacity:.85;font-size:13px;display:block}
+#fp-app .fp-side label{font-size:13px;opacity:.9;display:block;margin-top:8px}
+#fp-app .fp-side select{width:100%;min-height:44px;border-radius:8px;border:0;padding:0 8px;margin-top:4px;background:#fff;color:var(--text)}
+#fp-app .fp-nav{display:flex;flex-direction:column;gap:4px;list-style:none;margin:0;padding:0}
+#fp-app .fp-nav button{width:100%;min-height:44px;text-align:left;background:transparent;border:0;color:#fff;border-radius:8px;padding:0 12px;font-weight:700;cursor:pointer}
+#fp-app .fp-nav button:hover{background:rgba(255,255,255,.1)}
+#fp-app .fp-nav button[aria-current="page"]{background:var(--yellow);color:var(--navy)}
+#fp-app .fp-side-foot{margin-top:auto;font-size:13px;display:flex;flex-direction:column;gap:8px}
+#fp-app .fp-side-foot .fp-backup-note{background:rgba(255,255,255,.1);border-radius:8px;padding:8px}
+#fp-app .fp-side-foot .fp-backup-note.fp-warn{background:var(--yellow);color:var(--navy)}
+#fp-app .fp-side-foot button.fp-link{background:none;border:0;color:#fff;text-decoration:underline;padding:0;min-height:44px;text-align:left;cursor:pointer;font-weight:700}
+
+/* main */
+#fp-app .fp-main{flex:1;min-width:0;padding:24px 28px}
+#fp-app .fp-head{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:18px}
+#fp-app .fp-head p{width:100%;color:#4a5a6a}
+#fp-app .fp-draft{background:var(--yellow);color:var(--navy);font-weight:800;font-size:13px;border-radius:999px;padding:3px 10px;white-space:nowrap}
+#fp-app .fp-ph{color:#6a7a8a;font-style:italic}
+#fp-app .fp-card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px}
+#fp-app .fp-grid4{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+#fp-app .fp-strand h3{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+#fp-app .fp-strand ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}
+#fp-app .fp-check{display:flex;align-items:center;gap:10px;min-height:44px;cursor:pointer}
+#fp-app .fp-check input{width:24px;height:24px;flex:0 0 24px;accent-color:var(--blue);margin:0}
+#fp-app .fp-btn{min-height:44px;border-radius:10px;border:2px solid var(--blue);background:#fff;color:var(--blue);font-weight:800;padding:0 16px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;text-decoration:none}
+#fp-app .fp-btn.fp-primary{background:var(--blue);color:#fff}
+#fp-app .fp-btn.fp-yellow{background:var(--yellow);border-color:var(--yellow);color:var(--navy)}
+#fp-app .fp-btn.fp-danger{border-color:#a33;color:#a33}
+#fp-app .fp-btn:disabled{opacity:.5;cursor:not-allowed}
+#fp-app .fp-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+#fp-app .fp-stack{display:flex;flex-direction:column;gap:14px}
+#fp-app .fp-dots{display:flex;flex-wrap:wrap;gap:8px;list-style:none;margin:0;padding:0}
+#fp-app .fp-dots li{width:30px;height:30px;border-radius:50%;border:2px solid var(--blue);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:var(--blue);background:#fff}
+#fp-app .fp-dots li.fp-done{background:var(--blue);color:#fff}
+#fp-app .fp-dots li.fp-now{background:var(--yellow);border-color:var(--yellow);color:var(--navy)}
+#fp-app .fp-banner{background:var(--t-amber);border-radius:12px;padding:12px 16px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+#fp-app .fp-banner.fp-ok{background:var(--t-green)}
+
+/* all 12 weeks */
+#fp-app .fp-weeks{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;list-style:none;margin:0;padding:0}
+#fp-app .fp-week{border-radius:12px;padding:12px;min-height:96px;border:2px solid var(--line);background:#fff}
+#fp-app .fp-week b{display:block;font-size:18px}
+#fp-app .fp-week .fp-state{font-size:13px;font-weight:800}
+#fp-app .fp-week.fp-done{background:var(--t-green);border-color:var(--t-green)}
+#fp-app .fp-week.fp-now{border-color:var(--yellow);background:#fff8e1}
+#fp-app .fp-week.fp-soon{opacity:.7}
+
+/* reader mode */
+#fp-app .fp-reader{font-size:26px;line-height:1.3}
+#fp-app .fp-reader ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px}
+#fp-app .fp-step{display:flex;align-items:center;gap:16px;background:#fff;border-radius:14px;padding:14px 18px;border:2px solid var(--line)}
+#fp-app .fp-step.fp-done{background:var(--t-green);border-color:var(--t-green)}
+#fp-app .fp-step .fp-num{width:48px;height:48px;flex:0 0 48px;border-radius:50%;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800}
+#fp-app .fp-step .fp-icon{font-size:36px}
+#fp-app .fp-step .fp-txt{flex:1}
+#fp-app .fp-step .fp-check{font-size:20px;font-weight:800}
+#fp-app .fp-step .fp-check input{width:32px;height:32px;flex-basis:32px}
+#fp-app .fp-stars{font-size:40px;letter-spacing:4px}
+
+/* toddler mode */
+#fp-app .fp-tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+#fp-app .fp-tile{aspect-ratio:1/1;border-radius:22px;border:4px solid transparent;font-size:72px;cursor:pointer;display:flex;align-items:center;justify-content:center;position:relative}
+#fp-app .fp-tile[aria-pressed="true"]{border-color:var(--navy)}
+#fp-app .fp-tile[aria-pressed="true"]::after{content:"\2714";position:absolute;right:12px;top:8px;font-size:40px;color:var(--navy)}
+#fp-app .fp-cue{background:var(--t-amber);border-radius:12px;padding:12px 16px;margin-bottom:16px}
+
+/* print screen */
+#fp-app .fp-printwrap{display:grid;grid-template-columns:260px minmax(0,1fr);gap:18px;align-items:start}
+#fp-app fieldset{border:1px solid var(--line);border-radius:12px;padding:12px;margin:0 0 12px;background:#fff}
+#fp-app legend{font-weight:800;padding:0 4px}
+#fp-app .fp-paper{background:#fff;color:#000;width:100%;max-width:8.5in;aspect-ratio:8.5/11;padding:.5in;box-shadow:0 2px 10px rgba(0,0,0,.15);font-family:Arial,Helvetica,sans-serif;font-size:13px;overflow:hidden}
+#fp-app .fp-paper.fp-lg{font-size:18px}
+#fp-app .fp-paper h2{font-size:1.6em;margin-bottom:.4em;font-family:Arial,Helvetica,sans-serif}
+#fp-app .fp-paper h3{font-size:1.15em;margin:.8em 0 .3em;font-family:Arial,Helvetica,sans-serif}
+#fp-app .fp-paper .fp-nameline{display:flex;gap:2em;margin-bottom:1em}
+#fp-app .fp-paper .fp-nameline span{flex:1;border-bottom:1px solid #000;padding-bottom:2px}
+#fp-app .fp-paper table{border-collapse:collapse;width:100%}
+#fp-app .fp-paper td,#fp-app .fp-paper th{border:1px solid #000;padding:.35em;text-align:left;vertical-align:top}
+#fp-app .fp-paper .fp-box{display:inline-block;width:1em;height:1em;border:1px solid #000;vertical-align:middle;margin-right:.4em}
+#fp-app .fp-paper .fp-pagebreak{border-top:1px dashed #000;margin:1.2em 0 .6em;padding-top:.4em;font-weight:bold}
+#fp-app .fp-paper .fp-foot{margin-top:1.5em;font-size:.8em}
+
+/* pieces */
+#fp-app .fp-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+#fp-app .fp-chips button{min-height:44px;border-radius:999px;border:2px solid var(--blue);background:#fff;color:var(--blue);padding:0 16px;font-weight:700;cursor:pointer}
+#fp-app .fp-chips button[aria-pressed="true"]{background:var(--blue);color:#fff}
+#fp-app .fp-piece{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center}
+#fp-app .fp-weekchip{background:var(--t-blue);border-radius:999px;padding:2px 10px;font-size:13px;font-weight:800}
+
+/* family */
+#fp-app .fp-kids{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
+#fp-app .fp-bar{height:10px;border-radius:5px;background:var(--line);overflow:hidden;margin:6px 0}
+#fp-app .fp-bar i{display:block;height:100%;background:var(--blue)}
+#fp-app .fp-form{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px}
+#fp-app .fp-form label{font-weight:700;font-size:14px;display:flex;flex-direction:column;gap:4px}
+#fp-app .fp-form input,#fp-app .fp-form select{min-height:44px;border:1px solid #9fb3c4;border-radius:8px;padding:0 10px;background:#fff}
+
+/* help */
+#fp-app details{background:#fff;border:1px solid var(--line);border-radius:10px;padding:0 14px}
+#fp-app summary{min-height:44px;display:flex;align-items:center;font-weight:800;cursor:pointer}
+#fp-app details p{padding-bottom:12px}
+
+/* phone / small tablet */
+@media (max-width:760px){
+  #fp-app{flex-direction:column}
+  #fp-app .fp-side{width:100%;flex-basis:auto}
+  #fp-app .fp-nav{flex-direction:row;flex-wrap:wrap}
+  #fp-app .fp-nav li{flex:1 1 40%}
+  #fp-app .fp-main{padding:16px}
+  #fp-app .fp-grid4,#fp-app .fp-printwrap{grid-template-columns:1fr}
+  #fp-app .fp-weeks{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #fp-app .fp-reader{font-size:22px}
+}
+
+/* print: only the paper, black and white, US Letter */
+@media print{
+  @page{size:letter;margin:.5in}
+  body *{visibility:hidden !important}
+  #fp-app .fp-paper,#fp-app .fp-paper *{visibility:visible !important;color:#000 !important;background:#fff !important}
+  #fp-app .fp-paper{position:absolute;left:0;top:0;width:100%;max-width:none;aspect-ratio:auto;padding:0;box-shadow:none;overflow:visible}
+  #fp-app .fp-paper .fp-pagebreak{break-before:page;border-top:0}
+}
+</style>
+
+<div id="fp-app" aria-live="polite"></div>
+
+<script>
+(function(){
+"use strict";
+var CONTENT = {"levels": {"schema_version": 1, "status": "DRAFT – needs educator review", "strand_sets": {"kodaly": {"strands": ["singing", "rhythm", "solfege", "pre_staff"], "status": "DRAFT – needs educator review"}, "graded": {"strands": ["technique", "theory", "repertoire", "ear_training"], "status": "DRAFT – needs educator review"}}, "levels": [{"id": "pre-reader", "name": "Pre-reader", "order": 0, "pedagogy": "kodaly", "strands": ["singing", "rhythm", "solfege", "pre_staff"], "age_guide": {"min": 4, "max": 6, "note": ""}, "prerequisites": [], "goals": {"singing": [{"id": "singing-01", "topic": "Matching pitch", "description": "", "status": "DRAFT – needs educator review"}, {"id": "singing-02", "topic": "Simple songs and chants", "description": "", "status": "DRAFT – needs educator review"}], "rhythm": [{"id": "rhythm-01", "topic": "Steady beat", "description": "", "status": "DRAFT – needs educator review"}, {"id": "rhythm-02", "topic": "Ta and ti-ti", "description": "", "status": "DRAFT – needs educator review"}], "solfege": [{"id": "solfege-01", "topic": "Sol-mi", "description": "", "status": "DRAFT – needs educator review"}, {"id": "solfege-02", "topic": "La", "description": "", "status": "DRAFT – needs educator review"}, {"id": "solfege-03", "topic": "Hand signs", "description": "", "status": "DRAFT – needs educator review"}], "pre_staff": [{"id": "pre_staff-01", "topic": "High/low", "description": "", "status": "DRAFT – needs educator review"}, {"id": "pre_staff-02", "topic": "Icon and line notation", "description": "", "status": "DRAFT – needs educator review"}]}, "status": "DRAFT – needs educator review", "parent_notes": ""}, {"id": "level-1", "name": "Level 1", "order": 1, "pedagogy": "graded", "strands": ["technique", "theory", "repertoire", "ear_training"], "age_guide": {"min": 6, "max": 10, "note": ""}, "prerequisites": ["pre-reader"], "goals": {"technique": [{"id": "technique-01", "topic": "Posture and hand shape", "description": "", "status": "DRAFT – needs educator review"}, {"id": "technique-02", "topic": "Finger numbers", "description": "", "status": "DRAFT – needs educator review"}], "theory": [{"id": "theory-01", "topic": "Keyboard geography", "description": "", "status": "DRAFT – needs educator review"}, {"id": "theory-02", "topic": "Staff and clefs", "description": "", "status": "DRAFT – needs educator review"}, {"id": "theory-03", "topic": "Note values", "description": "", "status": "DRAFT – needs educator review"}], "repertoire": [{"id": "repertoire-01", "topic": "Five-finger position pieces", "description": "", "status": "DRAFT – needs educator review"}], "ear_training": [{"id": "ear_training-01", "topic": "Higher/lower", "description": "", "status": "DRAFT – needs educator review"}, {"id": "ear_training-02", "topic": "Clap-back rhythms", "description": "", "status": "DRAFT – needs educator review"}]}, "status": "DRAFT – needs educator review", "parent_notes": ""}, {"id": "level-2", "name": "Level 2", "order": 2, "pedagogy": "graded", "strands": ["technique", "theory", "repertoire", "ear_training"], "age_guide": {"min": 7, "max": 11, "note": ""}, "prerequisites": ["level-1"], "goals": {"technique": [{"id": "technique-01", "topic": "Hands together", "description": "", "status": "DRAFT – needs educator review"}, {"id": "technique-02", "topic": "Legato and staccato", "description": "", "status": "DRAFT – needs educator review"}], "theory": [{"id": "theory-01", "topic": "Grand staff note naming", "description": "", "status": "DRAFT – needs educator review"}, {"id": "theory-02", "topic": "Intervals 2nd–5th", "description": "", "status": "DRAFT – needs educator review"}, {"id": "theory-03", "topic": "Time signatures", "description": "", "status": "DRAFT – needs educator review"}], "repertoire": [{"id": "repertoire-01", "topic": "Short pieces beyond five-finger position", "description": "", "status": "DRAFT – needs educator review"}], "ear_training": [{"id": "ear_training-01", "topic": "Steps vs skips", "description": "", "status": "DRAFT – needs educator review"}, {"id": "ear_training-02", "topic": "Major vs minor", "description": "", "status": "DRAFT – needs educator review"}]}, "status": "DRAFT – needs educator review", "parent_notes": ""}, {"id": "level-3", "name": "Level 3", "order": 3, "pedagogy": "graded", "strands": ["technique", "theory", "repertoire", "ear_training"], "age_guide": {"min": 8, "max": 12, "note": ""}, "prerequisites": ["level-2"], "goals": {"technique": [{"id": "technique-01", "topic": "Scales", "description": "", "status": "DRAFT – needs educator review"}, {"id": "technique-02", "topic": "Triads", "description": "", "status": "DRAFT – needs educator review"}], "theory": [{"id": "theory-01", "topic": "Key signatures", "description": "", "status": "DRAFT – needs educator review"}, {"id": "theory-02", "topic": "Ledger lines", "description": "", "status": "DRAFT – needs educator review"}, {"id": "theory-03", "topic": "Eighth-note rhythms", "description": "", "status": "DRAFT – needs educator review"}], "repertoire": [{"id": "repertoire-01", "topic": "Easy classical pieces", "description": "", "status": "DRAFT – needs educator review"}], "ear_training": [{"id": "ear_training-01", "topic": "Interval recognition", "description": "", "status": "DRAFT – needs educator review"}, {"id": "ear_training-02", "topic": "Melodic dictation", "description": "", "status": "DRAFT – needs educator review"}]}, "status": "DRAFT – needs educator review", "parent_notes": ""}, {"id": "level-4", "name": "Level 4", "order": 4, "pedagogy": "graded", "strands": ["technique", "theory", "repertoire", "ear_training"], "age_guide": {"min": 9, "max": 14, "note": ""}, "prerequisites": ["level-3"], "goals": {"technique": [{"id": "technique-01", "topic": "Scales hands together", "description": "", "status": "DRAFT – needs educator review"}, {"id": "technique-02", "topic": "Arpeggios", "description": "", "status": "DRAFT – needs educator review"}], "theory": [{"id": "theory-01", "topic": "Major and minor keys", "description": "", "status": "DRAFT – needs educator review"}, {"id": "theory-02", "topic": "Intervals to octave", "description": "", "status": "DRAFT – needs educator review"}, {"id": "theory-03", "topic": "Chord progressions", "description": "", "status": "DRAFT – needs educator review"}], "repertoire": [{"id": "repertoire-01", "topic": "Intermediate classical pieces", "description": "", "status": "DRAFT – needs educator review"}], "ear_training": [{"id": "ear_training-01", "topic": "Cadences", "description": "", "status": "DRAFT – needs educator review"}, {"id": "ear_training-02", "topic": "Rhythmic dictation", "description": "", "status": "DRAFT – needs educator review"}]}, "status": "DRAFT – needs educator review", "parent_notes": ""}]}, "paths": {"level-1": {"schema_version": 1, "level": "level-1", "status": "DRAFT – needs educator review", "reviewed_by": "", "weeks": [{"id": "level-1-w01", "week": 1, "focus": "", "status": "DRAFT – needs educator review", "strand_items": {"technique": [{"id": "level-1-w01-technique-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "theory": [{"id": "level-1-w01-theory-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "repertoire": [{"id": "level-1-w01-repertoire-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "ear_training": [{"id": "level-1-w01-ear_training-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}]}, "parent_notes": "", "practice_chart": {"minutes_per_day": null, "days_per_week": null, "items": []}, "repertoire_ids": [], "worksheet_topics": [], "exercise_ids": []}, {"id": "level-1-w02", "week": 2, "focus": "", "status": "DRAFT – needs educator review", "strand_items": {"technique": [{"id": "level-1-w02-technique-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "theory": [{"id": "level-1-w02-theory-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "repertoire": [{"id": "level-1-w02-repertoire-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "ear_training": [{"id": "level-1-w02-ear_training-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}]}, "parent_notes": "", "practice_chart": {"minutes_per_day": null, "days_per_week": null, "items": []}, "repertoire_ids": [], "worksheet_topics": [], "exercise_ids": []}, {"id": "level-1-w03", "week": 3, "focus": "", "status": "DRAFT – needs educator review", "strand_items": {"technique": [{"id": "level-1-w03-technique-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "theory": [{"id": "level-1-w03-theory-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "repertoire": [{"id": "level-1-w03-repertoire-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "ear_training": [{"id": "level-1-w03-ear_training-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}]}, "parent_notes": "", "practice_chart": {"minutes_per_day": null, "days_per_week": null, "items": []}, "repertoire_ids": [], "worksheet_topics": [], "exercise_ids": []}, {"id": "level-1-w04", "week": 4, "focus": "", "status": "DRAFT – needs educator review", "strand_items": {"technique": [{"id": "level-1-w04-technique-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "theory": [{"id": "level-1-w04-theory-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "repertoire": [{"id": "level-1-w04-repertoire-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "ear_training": [{"id": "level-1-w04-ear_training-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}]}, "parent_notes": "", "practice_chart": {"minutes_per_day": null, "days_per_week": null, "items": []}, "repertoire_ids": [], "worksheet_topics": [], "exercise_ids": []}, {"id": "level-1-w05", "week": 5, "focus": "", "status": "DRAFT – needs educator review", "strand_items": {"technique": [{"id": "level-1-w05-technique-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "theory": [{"id": "level-1-w05-theory-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "repertoire": [{"id": "level-1-w05-repertoire-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "ear_training": [{"id": "level-1-w05-ear_training-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}]}, "parent_notes": "", "practice_chart": {"minutes_per_day": null, "days_per_week": null, "items": []}, "repertoire_ids": [], "worksheet_topics": [], "exercise_ids": []}, {"id": "level-1-w06", "week": 6, "focus": "", "status": "DRAFT – needs educator review", "strand_items": {"technique": [{"id": "level-1-w06-technique-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "theory": [{"id": "level-1-w06-theory-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "repertoire": [{"id": "level-1-w06-repertoire-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "ear_training": [{"id": "level-1-w06-ear_training-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}]}, "parent_notes": "", "practice_chart": {"minutes_per_day": null, "days_per_week": null, "items": []}, "repertoire_ids": [], "worksheet_topics": [], "exercise_ids": []}, {"id": "level-1-w07", "week": 7, "focus": "", "status": "DRAFT – needs educator review", "strand_items": {"technique": [{"id": "level-1-w07-technique-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "theory": [{"id": "level-1-w07-theory-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "repertoire": [{"id": "level-1-w07-repertoire-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "ear_training": [{"id": "level-1-w07-ear_training-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}]}, "parent_notes": "", "practice_chart": {"minutes_per_day": null, "days_per_week": null, "items": []}, "repertoire_ids": [], "worksheet_topics": [], "exercise_ids": []}, {"id": "level-1-w08", "week": 8, "focus": "", "status": "DRAFT – needs educator review", "strand_items": {"technique": [{"id": "level-1-w08-technique-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "theory": [{"id": "level-1-w08-theory-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "repertoire": [{"id": "level-1-w08-repertoire-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "ear_training": [{"id": "level-1-w08-ear_training-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}]}, "parent_notes": "", "practice_chart": {"minutes_per_day": null, "days_per_week": null, "items": []}, "repertoire_ids": [], "worksheet_topics": [], "exercise_ids": []}, {"id": "level-1-w09", "week": 9, "focus": "", "status": "DRAFT – needs educator review", "strand_items": {"technique": [{"id": "level-1-w09-technique-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "theory": [{"id": "level-1-w09-theory-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "repertoire": [{"id": "level-1-w09-repertoire-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "ear_training": [{"id": "level-1-w09-ear_training-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}]}, "parent_notes": "", "practice_chart": {"minutes_per_day": null, "days_per_week": null, "items": []}, "repertoire_ids": [], "worksheet_topics": [], "exercise_ids": []}, {"id": "level-1-w10", "week": 10, "focus": "", "status": "DRAFT – needs educator review", "strand_items": {"technique": [{"id": "level-1-w10-technique-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "theory": [{"id": "level-1-w10-theory-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "repertoire": [{"id": "level-1-w10-repertoire-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "ear_training": [{"id": "level-1-w10-ear_training-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}]}, "parent_notes": "", "practice_chart": {"minutes_per_day": null, "days_per_week": null, "items": []}, "repertoire_ids": [], "worksheet_topics": [], "exercise_ids": []}, {"id": "level-1-w11", "week": 11, "focus": "", "status": "DRAFT – needs educator review", "strand_items": {"technique": [{"id": "level-1-w11-technique-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "theory": [{"id": "level-1-w11-theory-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "repertoire": [{"id": "level-1-w11-repertoire-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "ear_training": [{"id": "level-1-w11-ear_training-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}]}, "parent_notes": "", "practice_chart": {"minutes_per_day": null, "days_per_week": null, "items": []}, "repertoire_ids": [], "worksheet_topics": [], "exercise_ids": []}, {"id": "level-1-w12", "week": 12, "focus": "", "status": "DRAFT – needs educator review", "strand_items": {"technique": [{"id": "level-1-w12-technique-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "theory": [{"id": "level-1-w12-theory-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "repertoire": [{"id": "level-1-w12-repertoire-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "ear_training": [{"id": "level-1-w12-ear_training-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}]}, "parent_notes": "", "practice_chart": {"minutes_per_day": null, "days_per_week": null, "items": []}, "repertoire_ids": [], "worksheet_topics": [], "exercise_ids": []}]}, "level-2": {"schema_version": 1, "level": "level-2", "status": "DRAFT – needs educator review", "reviewed_by": "", "weeks": [{"id": "level-2-w01", "week": 1, "focus": "", "status": "DRAFT – needs educator review", "strand_items": {"technique": [{"id": "level-2-w01-technique-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "theory": [{"id": "level-2-w01-theory-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "repertoire": [{"id": "level-2-w01-repertoire-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "ear_training": [{"id": "level-2-w01-ear_training-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}]}, "parent_notes": "", "practice_chart": {"minutes_per_day": null, "days_per_week": null, "items": []}, "repertoire_ids": [], "worksheet_topics": [], "exercise_ids": []}, {"id": "level-2-w02", "week": 2, "focus": "", "status": "DRAFT – needs educator review", "strand_items": {"technique": [{"id": "level-2-w02-technique-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "theory": [{"id": "level-2-w02-theory-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "repertoire": [{"id": "level-2-w02-repertoire-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "ear_training": [{"id": "level-2-w02-ear_training-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}]}, "parent_notes": "", "practice_chart": {"minutes_per_day": null, "days_per_week": null, "items": []}, "repertoire_ids": [], "worksheet_topics": [], "exercise_ids": []}, {"id": "level-2-w03", "week": 3, "focus": "", "status": "DRAFT – needs educator review", "strand_items": {"technique": [{"id": "level-2-w03-technique-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "theory": [{"id": "level-2-w03-theory-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "repertoire": [{"id": "level-2-w03-repertoire-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "ear_training": [{"id": "level-2-w03-ear_training-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}]}, "parent_notes": "", "practice_chart": {"minutes_per_day": null, "days_per_week": null, "items": []}, "repertoire_ids": [], "worksheet_topics": [], "exercise_ids": []}, {"id": "level-2-w04", "week": 4, "focus": "", "status": "DRAFT – needs educator review", "strand_items": {"technique": [{"id": "level-2-w04-technique-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "theory": [{"id": "level-2-w04-theory-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "repertoire": [{"id": "level-2-w04-repertoire-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "ear_training": [{"id": "level-2-w04-ear_training-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}]}, "parent_notes": "", "practice_chart": {"minutes_per_day": null, "days_per_week": null, "items": []}, "repertoire_ids": [], "worksheet_topics": [], "exercise_ids": []}, {"id": "level-2-w05", "week": 5, "focus": "", "status": "DRAFT – needs educator review", "strand_items": {"technique": [{"id": "level-2-w05-technique-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "theory": [{"id": "level-2-w05-theory-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "repertoire": [{"id": "level-2-w05-repertoire-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "ear_training": [{"id": "level-2-w05-ear_training-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}]}, "parent_notes": "", "practice_chart": {"minutes_per_day": null, "days_per_week": null, "items": []}, "repertoire_ids": [], "worksheet_topics": [], "exercise_ids": []}, {"id": "level-2-w06", "week": 6, "focus": "", "status": "DRAFT – needs educator review", "strand_items": {"technique": [{"id": "level-2-w06-technique-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "theory": [{"id": "level-2-w06-theory-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "repertoire": [{"id": "level-2-w06-repertoire-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "ear_training": [{"id": "level-2-w06-ear_training-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}]}, "parent_notes": "", "practice_chart": {"minutes_per_day": null, "days_per_week": null, "items": []}, "repertoire_ids": [], "worksheet_topics": [], "exercise_ids": []}, {"id": "level-2-w07", "week": 7, "focus": "", "status": "DRAFT – needs educator review", "strand_items": {"technique": [{"id": "level-2-w07-technique-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "theory": [{"id": "level-2-w07-theory-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "repertoire": [{"id": "level-2-w07-repertoire-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "ear_training": [{"id": "level-2-w07-ear_training-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}]}, "parent_notes": "", "practice_chart": {"minutes_per_day": null, "days_per_week": null, "items": []}, "repertoire_ids": [], "worksheet_topics": [], "exercise_ids": []}, {"id": "level-2-w08", "week": 8, "focus": "", "status": "DRAFT – needs educator review", "strand_items": {"technique": [{"id": "level-2-w08-technique-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "theory": [{"id": "level-2-w08-theory-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "repertoire": [{"id": "level-2-w08-repertoire-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "ear_training": [{"id": "level-2-w08-ear_training-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}]}, "parent_notes": "", "practice_chart": {"minutes_per_day": null, "days_per_week": null, "items": []}, "repertoire_ids": [], "worksheet_topics": [], "exercise_ids": []}, {"id": "level-2-w09", "week": 9, "focus": "", "status": "DRAFT – needs educator review", "strand_items": {"technique": [{"id": "level-2-w09-technique-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "theory": [{"id": "level-2-w09-theory-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "repertoire": [{"id": "level-2-w09-repertoire-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "ear_training": [{"id": "level-2-w09-ear_training-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}]}, "parent_notes": "", "practice_chart": {"minutes_per_day": null, "days_per_week": null, "items": []}, "repertoire_ids": [], "worksheet_topics": [], "exercise_ids": []}, {"id": "level-2-w10", "week": 10, "focus": "", "status": "DRAFT – needs educator review", "strand_items": {"technique": [{"id": "level-2-w10-technique-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "theory": [{"id": "level-2-w10-theory-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "repertoire": [{"id": "level-2-w10-repertoire-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "ear_training": [{"id": "level-2-w10-ear_training-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}]}, "parent_notes": "", "practice_chart": {"minutes_per_day": null, "days_per_week": null, "items": []}, "repertoire_ids": [], "worksheet_topics": [], "exercise_ids": []}, {"id": "level-2-w11", "week": 11, "focus": "", "status": "DRAFT – needs educator review", "strand_items": {"technique": [{"id": "level-2-w11-technique-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "theory": [{"id": "level-2-w11-theory-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "repertoire": [{"id": "level-2-w11-repertoire-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "ear_training": [{"id": "level-2-w11-ear_training-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}]}, "parent_notes": "", "practice_chart": {"minutes_per_day": null, "days_per_week": null, "items": []}, "repertoire_ids": [], "worksheet_topics": [], "exercise_ids": []}, {"id": "level-2-w12", "week": 12, "focus": "", "status": "DRAFT – needs educator review", "strand_items": {"technique": [{"id": "level-2-w12-technique-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "theory": [{"id": "level-2-w12-theory-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "repertoire": [{"id": "level-2-w12-repertoire-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "ear_training": [{"id": "level-2-w12-ear_training-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}]}, "parent_notes": "", "practice_chart": {"minutes_per_day": null, "days_per_week": null, "items": []}, "repertoire_ids": [], "worksheet_topics": [], "exercise_ids": []}]}, "level-3": {"schema_version": 1, "level": "level-3", "status": "DRAFT – needs educator review", "reviewed_by": "", "weeks": [{"id": "level-3-w01", "week": 1, "focus": "", "status": "DRAFT – needs educator review", "strand_items": {"technique": [{"id": "level-3-w01-technique-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "theory": [{"id": "level-3-w01-theory-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "repertoire": [{"id": "level-3-w01-repertoire-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "ear_training": [{"id": "level-3-w01-ear_training-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}]}, "parent_notes": "", "practice_chart": {"minutes_per_day": null, "days_per_week": null, "items": []}, "repertoire_ids": [], "worksheet_topics": [], "exercise_ids": []}, {"id": "level-3-w02", "week": 2, "focus": "", "status": "DRAFT – needs educator review", "strand_items": {"technique": [{"id": "level-3-w02-technique-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "theory": [{"id": "level-3-w02-theory-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "repertoire": [{"id": "level-3-w02-repertoire-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "ear_training": [{"id": "level-3-w02-ear_training-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}]}, "parent_notes": "", "practice_chart": {"minutes_per_day": null, "days_per_week": null, "items": []}, "repertoire_ids": [], "worksheet_topics": [], "exercise_ids": []}, {"id": "level-3-w03", "week": 3, "focus": "", "status": "DRAFT – needs educator review", "strand_items": {"technique": [{"id": "level-3-w03-technique-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "theory": [{"id": "level-3-w03-theory-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "repertoire": [{"id": "level-3-w03-repertoire-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "ear_training": [{"id": "level-3-w03-ear_training-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}]}, "parent_notes": "", "practice_chart": {"minutes_per_day": null, "days_per_week": null, "items": []}, "repertoire_ids": [], "worksheet_topics": [], "exercise_ids": []}, {"id": "level-3-w04", "week": 4, "focus": "", "status": "DRAFT – needs educator review", "strand_items": {"technique": [{"id": "level-3-w04-technique-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "theory": [{"id": "level-3-w04-theory-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "repertoire": [{"id": "level-3-w04-repertoire-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "ear_training": [{"id": "level-3-w04-ear_training-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}]}, "parent_notes": "", "practice_chart": {"minutes_per_day": null, "days_per_week": null, "items": []}, "repertoire_ids": [], "worksheet_topics": [], "exercise_ids": []}, {"id": "level-3-w05", "week": 5, "focus": "", "status": "DRAFT – needs educator review", "strand_items": {"technique": [{"id": "level-3-w05-technique-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "theory": [{"id": "level-3-w05-theory-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "repertoire": [{"id": "level-3-w05-repertoire-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "ear_training": [{"id": "level-3-w05-ear_training-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}]}, "parent_notes": "", "practice_chart": {"minutes_per_day": null, "days_per_week": null, "items": []}, "repertoire_ids": [], "worksheet_topics": [], "exercise_ids": []}, {"id": "level-3-w06", "week": 6, "focus": "", "status": "DRAFT – needs educator review", "strand_items": {"technique": [{"id": "level-3-w06-technique-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "theory": [{"id": "level-3-w06-theory-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "repertoire": [{"id": "level-3-w06-repertoire-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "ear_training": [{"id": "level-3-w06-ear_training-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}]}, "parent_notes": "", "practice_chart": {"minutes_per_day": null, "days_per_week": null, "items": []}, "repertoire_ids": [], "worksheet_topics": [], "exercise_ids": []}, {"id": "level-3-w07", "week": 7, "focus": "", "status": "DRAFT – needs educator review", "strand_items": {"technique": [{"id": "level-3-w07-technique-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "theory": [{"id": "level-3-w07-theory-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "repertoire": [{"id": "level-3-w07-repertoire-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "ear_training": [{"id": "level-3-w07-ear_training-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}]}, "parent_notes": "", "practice_chart": {"minutes_per_day": null, "days_per_week": null, "items": []}, "repertoire_ids": [], "worksheet_topics": [], "exercise_ids": []}, {"id": "level-3-w08", "week": 8, "focus": "", "status": "DRAFT – needs educator review", "strand_items": {"technique": [{"id": "level-3-w08-technique-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "theory": [{"id": "level-3-w08-theory-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "repertoire": [{"id": "level-3-w08-repertoire-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "ear_training": [{"id": "level-3-w08-ear_training-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}]}, "parent_notes": "", "practice_chart": {"minutes_per_day": null, "days_per_week": null, "items": []}, "repertoire_ids": [], "worksheet_topics": [], "exercise_ids": []}, {"id": "level-3-w09", "week": 9, "focus": "", "status": "DRAFT – needs educator review", "strand_items": {"technique": [{"id": "level-3-w09-technique-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "theory": [{"id": "level-3-w09-theory-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "repertoire": [{"id": "level-3-w09-repertoire-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "ear_training": [{"id": "level-3-w09-ear_training-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}]}, "parent_notes": "", "practice_chart": {"minutes_per_day": null, "days_per_week": null, "items": []}, "repertoire_ids": [], "worksheet_topics": [], "exercise_ids": []}, {"id": "level-3-w10", "week": 10, "focus": "", "status": "DRAFT – needs educator review", "strand_items": {"technique": [{"id": "level-3-w10-technique-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "theory": [{"id": "level-3-w10-theory-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "repertoire": [{"id": "level-3-w10-repertoire-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "ear_training": [{"id": "level-3-w10-ear_training-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}]}, "parent_notes": "", "practice_chart": {"minutes_per_day": null, "days_per_week": null, "items": []}, "repertoire_ids": [], "worksheet_topics": [], "exercise_ids": []}, {"id": "level-3-w11", "week": 11, "focus": "", "status": "DRAFT – needs educator review", "strand_items": {"technique": [{"id": "level-3-w11-technique-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "theory": [{"id": "level-3-w11-theory-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "repertoire": [{"id": "level-3-w11-repertoire-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "ear_training": [{"id": "level-3-w11-ear_training-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}]}, "parent_notes": "", "practice_chart": {"minutes_per_day": null, "days_per_week": null, "items": []}, "repertoire_ids": [], "worksheet_topics": [], "exercise_ids": []}, {"id": "level-3-w12", "week": 12, "focus": "", "status": "DRAFT – needs educator review", "strand_items": {"technique": [{"id": "level-3-w12-technique-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "theory": [{"id": "level-3-w12-theory-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "repertoire": [{"id": "level-3-w12-repertoire-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "ear_training": [{"id": "level-3-w12-ear_training-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}]}, "parent_notes": "", "practice_chart": {"minutes_per_day": null, "days_per_week": null, "items": []}, "repertoire_ids": [], "worksheet_topics": [], "exercise_ids": []}]}, "level-4": {"schema_version": 1, "level": "level-4", "status": "DRAFT – needs educator review", "reviewed_by": "", "weeks": [{"id": "level-4-w01", "week": 1, "focus": "", "status": "DRAFT – needs educator review", "strand_items": {"technique": [{"id": "level-4-w01-technique-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "theory": [{"id": "level-4-w01-theory-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "repertoire": [{"id": "level-4-w01-repertoire-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "ear_training": [{"id": "level-4-w01-ear_training-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}]}, "parent_notes": "", "practice_chart": {"minutes_per_day": null, "days_per_week": null, "items": []}, "repertoire_ids": [], "worksheet_topics": [], "exercise_ids": []}, {"id": "level-4-w02", "week": 2, "focus": "", "status": "DRAFT – needs educator review", "strand_items": {"technique": [{"id": "level-4-w02-technique-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "theory": [{"id": "level-4-w02-theory-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "repertoire": [{"id": "level-4-w02-repertoire-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "ear_training": [{"id": "level-4-w02-ear_training-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}]}, "parent_notes": "", "practice_chart": {"minutes_per_day": null, "days_per_week": null, "items": []}, "repertoire_ids": [], "worksheet_topics": [], "exercise_ids": []}, {"id": "level-4-w03", "week": 3, "focus": "", "status": "DRAFT – needs educator review", "strand_items": {"technique": [{"id": "level-4-w03-technique-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "theory": [{"id": "level-4-w03-theory-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "repertoire": [{"id": "level-4-w03-repertoire-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "ear_training": [{"id": "level-4-w03-ear_training-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}]}, "parent_notes": "", "practice_chart": {"minutes_per_day": null, "days_per_week": null, "items": []}, "repertoire_ids": [], "worksheet_topics": [], "exercise_ids": []}, {"id": "level-4-w04", "week": 4, "focus": "", "status": "DRAFT – needs educator review", "strand_items": {"technique": [{"id": "level-4-w04-technique-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "theory": [{"id": "level-4-w04-theory-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "repertoire": [{"id": "level-4-w04-repertoire-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "ear_training": [{"id": "level-4-w04-ear_training-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}]}, "parent_notes": "", "practice_chart": {"minutes_per_day": null, "days_per_week": null, "items": []}, "repertoire_ids": [], "worksheet_topics": [], "exercise_ids": []}, {"id": "level-4-w05", "week": 5, "focus": "", "status": "DRAFT – needs educator review", "strand_items": {"technique": [{"id": "level-4-w05-technique-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "theory": [{"id": "level-4-w05-theory-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "repertoire": [{"id": "level-4-w05-repertoire-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "ear_training": [{"id": "level-4-w05-ear_training-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}]}, "parent_notes": "", "practice_chart": {"minutes_per_day": null, "days_per_week": null, "items": []}, "repertoire_ids": [], "worksheet_topics": [], "exercise_ids": []}, {"id": "level-4-w06", "week": 6, "focus": "", "status": "DRAFT – needs educator review", "strand_items": {"technique": [{"id": "level-4-w06-technique-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "theory": [{"id": "level-4-w06-theory-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "repertoire": [{"id": "level-4-w06-repertoire-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "ear_training": [{"id": "level-4-w06-ear_training-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}]}, "parent_notes": "", "practice_chart": {"minutes_per_day": null, "days_per_week": null, "items": []}, "repertoire_ids": [], "worksheet_topics": [], "exercise_ids": []}, {"id": "level-4-w07", "week": 7, "focus": "", "status": "DRAFT – needs educator review", "strand_items": {"technique": [{"id": "level-4-w07-technique-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "theory": [{"id": "level-4-w07-theory-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "repertoire": [{"id": "level-4-w07-repertoire-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "ear_training": [{"id": "level-4-w07-ear_training-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}]}, "parent_notes": "", "practice_chart": {"minutes_per_day": null, "days_per_week": null, "items": []}, "repertoire_ids": [], "worksheet_topics": [], "exercise_ids": []}, {"id": "level-4-w08", "week": 8, "focus": "", "status": "DRAFT – needs educator review", "strand_items": {"technique": [{"id": "level-4-w08-technique-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "theory": [{"id": "level-4-w08-theory-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "repertoire": [{"id": "level-4-w08-repertoire-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "ear_training": [{"id": "level-4-w08-ear_training-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}]}, "parent_notes": "", "practice_chart": {"minutes_per_day": null, "days_per_week": null, "items": []}, "repertoire_ids": [], "worksheet_topics": [], "exercise_ids": []}, {"id": "level-4-w09", "week": 9, "focus": "", "status": "DRAFT – needs educator review", "strand_items": {"technique": [{"id": "level-4-w09-technique-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "theory": [{"id": "level-4-w09-theory-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "repertoire": [{"id": "level-4-w09-repertoire-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "ear_training": [{"id": "level-4-w09-ear_training-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}]}, "parent_notes": "", "practice_chart": {"minutes_per_day": null, "days_per_week": null, "items": []}, "repertoire_ids": [], "worksheet_topics": [], "exercise_ids": []}, {"id": "level-4-w10", "week": 10, "focus": "", "status": "DRAFT – needs educator review", "strand_items": {"technique": [{"id": "level-4-w10-technique-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "theory": [{"id": "level-4-w10-theory-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "repertoire": [{"id": "level-4-w10-repertoire-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "ear_training": [{"id": "level-4-w10-ear_training-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}]}, "parent_notes": "", "practice_chart": {"minutes_per_day": null, "days_per_week": null, "items": []}, "repertoire_ids": [], "worksheet_topics": [], "exercise_ids": []}, {"id": "level-4-w11", "week": 11, "focus": "", "status": "DRAFT – needs educator review", "strand_items": {"technique": [{"id": "level-4-w11-technique-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "theory": [{"id": "level-4-w11-theory-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "repertoire": [{"id": "level-4-w11-repertoire-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "ear_training": [{"id": "level-4-w11-ear_training-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}]}, "parent_notes": "", "practice_chart": {"minutes_per_day": null, "days_per_week": null, "items": []}, "repertoire_ids": [], "worksheet_topics": [], "exercise_ids": []}, {"id": "level-4-w12", "week": 12, "focus": "", "status": "DRAFT – needs educator review", "strand_items": {"technique": [{"id": "level-4-w12-technique-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "theory": [{"id": "level-4-w12-theory-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "repertoire": [{"id": "level-4-w12-repertoire-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "ear_training": [{"id": "level-4-w12-ear_training-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}]}, "parent_notes": "", "practice_chart": {"minutes_per_day": null, "days_per_week": null, "items": []}, "repertoire_ids": [], "worksheet_topics": [], "exercise_ids": []}]}, "pre-reader": {"schema_version": 1, "level": "pre-reader", "status": "DRAFT – needs educator review", "reviewed_by": "", "weeks": [{"id": "pre-reader-w01", "week": 1, "focus": "", "status": "DRAFT – needs educator review", "strand_items": {"singing": [{"id": "pre-reader-w01-singing-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "rhythm": [{"id": "pre-reader-w01-rhythm-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "solfege": [{"id": "pre-reader-w01-solfege-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "pre_staff": [{"id": "pre-reader-w01-pre_staff-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}]}, "parent_notes": "", "practice_chart": {"minutes_per_day": null, "days_per_week": null, "items": []}, "repertoire_ids": [], "worksheet_topics": [], "exercise_ids": []}, {"id": "pre-reader-w02", "week": 2, "focus": "", "status": "DRAFT – needs educator review", "strand_items": {"singing": [{"id": "pre-reader-w02-singing-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "rhythm": [{"id": "pre-reader-w02-rhythm-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "solfege": [{"id": "pre-reader-w02-solfege-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "pre_staff": [{"id": "pre-reader-w02-pre_staff-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}]}, "parent_notes": "", "practice_chart": {"minutes_per_day": null, "days_per_week": null, "items": []}, "repertoire_ids": [], "worksheet_topics": [], "exercise_ids": []}, {"id": "pre-reader-w03", "week": 3, "focus": "", "status": "DRAFT – needs educator review", "strand_items": {"singing": [{"id": "pre-reader-w03-singing-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "rhythm": [{"id": "pre-reader-w03-rhythm-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "solfege": [{"id": "pre-reader-w03-solfege-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "pre_staff": [{"id": "pre-reader-w03-pre_staff-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}]}, "parent_notes": "", "practice_chart": {"minutes_per_day": null, "days_per_week": null, "items": []}, "repertoire_ids": [], "worksheet_topics": [], "exercise_ids": []}, {"id": "pre-reader-w04", "week": 4, "focus": "", "status": "DRAFT – needs educator review", "strand_items": {"singing": [{"id": "pre-reader-w04-singing-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "rhythm": [{"id": "pre-reader-w04-rhythm-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "solfege": [{"id": "pre-reader-w04-solfege-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "pre_staff": [{"id": "pre-reader-w04-pre_staff-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}]}, "parent_notes": "", "practice_chart": {"minutes_per_day": null, "days_per_week": null, "items": []}, "repertoire_ids": [], "worksheet_topics": [], "exercise_ids": []}, {"id": "pre-reader-w05", "week": 5, "focus": "", "status": "DRAFT – needs educator review", "strand_items": {"singing": [{"id": "pre-reader-w05-singing-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "rhythm": [{"id": "pre-reader-w05-rhythm-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "solfege": [{"id": "pre-reader-w05-solfege-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "pre_staff": [{"id": "pre-reader-w05-pre_staff-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}]}, "parent_notes": "", "practice_chart": {"minutes_per_day": null, "days_per_week": null, "items": []}, "repertoire_ids": [], "worksheet_topics": [], "exercise_ids": []}, {"id": "pre-reader-w06", "week": 6, "focus": "", "status": "DRAFT – needs educator review", "strand_items": {"singing": [{"id": "pre-reader-w06-singing-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "rhythm": [{"id": "pre-reader-w06-rhythm-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "solfege": [{"id": "pre-reader-w06-solfege-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "pre_staff": [{"id": "pre-reader-w06-pre_staff-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}]}, "parent_notes": "", "practice_chart": {"minutes_per_day": null, "days_per_week": null, "items": []}, "repertoire_ids": [], "worksheet_topics": [], "exercise_ids": []}, {"id": "pre-reader-w07", "week": 7, "focus": "", "status": "DRAFT – needs educator review", "strand_items": {"singing": [{"id": "pre-reader-w07-singing-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "rhythm": [{"id": "pre-reader-w07-rhythm-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "solfege": [{"id": "pre-reader-w07-solfege-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "pre_staff": [{"id": "pre-reader-w07-pre_staff-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}]}, "parent_notes": "", "practice_chart": {"minutes_per_day": null, "days_per_week": null, "items": []}, "repertoire_ids": [], "worksheet_topics": [], "exercise_ids": []}, {"id": "pre-reader-w08", "week": 8, "focus": "", "status": "DRAFT – needs educator review", "strand_items": {"singing": [{"id": "pre-reader-w08-singing-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "rhythm": [{"id": "pre-reader-w08-rhythm-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "solfege": [{"id": "pre-reader-w08-solfege-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "pre_staff": [{"id": "pre-reader-w08-pre_staff-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}]}, "parent_notes": "", "practice_chart": {"minutes_per_day": null, "days_per_week": null, "items": []}, "repertoire_ids": [], "worksheet_topics": [], "exercise_ids": []}, {"id": "pre-reader-w09", "week": 9, "focus": "", "status": "DRAFT – needs educator review", "strand_items": {"singing": [{"id": "pre-reader-w09-singing-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "rhythm": [{"id": "pre-reader-w09-rhythm-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "solfege": [{"id": "pre-reader-w09-solfege-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "pre_staff": [{"id": "pre-reader-w09-pre_staff-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}]}, "parent_notes": "", "practice_chart": {"minutes_per_day": null, "days_per_week": null, "items": []}, "repertoire_ids": [], "worksheet_topics": [], "exercise_ids": []}, {"id": "pre-reader-w10", "week": 10, "focus": "", "status": "DRAFT – needs educator review", "strand_items": {"singing": [{"id": "pre-reader-w10-singing-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "rhythm": [{"id": "pre-reader-w10-rhythm-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "solfege": [{"id": "pre-reader-w10-solfege-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "pre_staff": [{"id": "pre-reader-w10-pre_staff-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}]}, "parent_notes": "", "practice_chart": {"minutes_per_day": null, "days_per_week": null, "items": []}, "repertoire_ids": [], "worksheet_topics": [], "exercise_ids": []}, {"id": "pre-reader-w11", "week": 11, "focus": "", "status": "DRAFT – needs educator review", "strand_items": {"singing": [{"id": "pre-reader-w11-singing-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "rhythm": [{"id": "pre-reader-w11-rhythm-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "solfege": [{"id": "pre-reader-w11-solfege-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "pre_staff": [{"id": "pre-reader-w11-pre_staff-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}]}, "parent_notes": "", "practice_chart": {"minutes_per_day": null, "days_per_week": null, "items": []}, "repertoire_ids": [], "worksheet_topics": [], "exercise_ids": []}, {"id": "pre-reader-w12", "week": 12, "focus": "", "status": "DRAFT – needs educator review", "strand_items": {"singing": [{"id": "pre-reader-w12-singing-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "rhythm": [{"id": "pre-reader-w12-rhythm-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "solfege": [{"id": "pre-reader-w12-solfege-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}], "pre_staff": [{"id": "pre-reader-w12-pre_staff-01", "topic": "", "goal_ref": "", "status": "DRAFT – needs educator review"}]}, "parent_notes": "", "practice_chart": {"minutes_per_day": null, "days_per_week": null, "items": []}, "repertoire_ids": [], "worksheet_topics": [], "exercise_ids": []}]}}, "assets": []};
+var STORE_KEY = "familyPiano.v1";
+
+/* All on-screen wording. Draft wording – for educator review. */
+var TEXT = {
+  appName: "Family Piano",
+  draft: "Draft content",
+  ph: function(what){ return "[" + what + " – educator to write]"; },
+  nav: {
+    standard: [["week","This week"],["weeks","All 12 weeks"],["print","Print"],["pieces","Pieces"],["family","Family"]],
+    reader:   [["week","Today"],["pieces","Songs"],["stars","My stars"]],
+    toddler:  [["week","Play"]]
+  },
+  modes: { standard: "Standard", reader: "Beginner reader", toddler: "Toddler" },
+  strands: { technique:"Technique", theory:"Theory", repertoire:"Repertoire", ear_training:"Ear training",
+             singing:"Singing", rhythm:"Rhythm", solfege:"Solfege", pre_staff:"Pre-staff" },
+  icons: { technique:"✋", theory:"📖", repertoire:"🎵", ear_training:"👂",
+           singing:"🎤", rhythm:"🥁", solfege:"🙌", pre_staff:"✏️" },
+  week: "Week", of12: "of 12",
+  weekDone: "Week done", practiceChart: "Practice chart", print: "Print",
+  allDone: "All 12 weeks done!",
+  stateDone: "Done", stateNow: "This week", stateSoon: "Coming up",
+  readToMe: "Read to me", done: "Done", grownUp: "Grown-up", backToPlay: "Back to play",
+  backupNever: "No backup yet. Progress lives only in this browser.",
+  backupDays: function(n){ return n === 0 ? "Backed up today." : "Last backup: " + n + (n === 1 ? " day" : " days") + " ago."; },
+  backupNow: "Back up now",
+  help: "Help & placement",
+  noKids: "Add your first child to start.",
+  storeBlocked: "This browser is not saving data (private mode or blocked storage). Progress will be lost when you close the page.",
+  sheets: [["plan","This week's plan"],["chart","Practice chart"],["overview","12-week overview"]],
+  printOpts: { large:"Large print", key:"Answer key", nameline:"Name/date line" },
+  savePdf: "Save as PDF",
+  savePdfHint: "In the print window, choose “Save as PDF” as the printer.",
+  piecesEmpty: "No pieces are approved yet. They will show up here when the educator adds them.",
+  filters: [["all","All"],["level","This level"],["todo","Not learned"],["learned","Learned"]],
+  learned: "Learned", openScore: "Open score",
+  addChild: "Add a child", backup: "Backup & restore", startOver: "Start over",
+  startOverConfirm: "Delete all children and progress from this browser? This cannot be undone. Make a backup first if you may want it back.",
+  exportBtn: "Save backup file", importBtn: "Restore from file",
+  importOk: "Backup restored.", importBad: "That file is not a Family Piano backup.",
+  remove: "Remove", removeConfirm: function(n){ return "Remove " + n + " and their progress?"; },
+  myStars: "My stars"
+};
+
+/* ---------- state ---------- */
+var memoryOnly = false;
+function blank(){ return { version:1, children:[], activeId:null, lastBackup:null }; }
+function load(){
+  try { var raw = localStorage.getItem(STORE_KEY); if (raw) { var s = JSON.parse(raw); if (s && s.version === 1) return s; } }
+  catch(e){ memoryOnly = true; }
+  return blank();
+}
+function save(){ try { localStorage.setItem(STORE_KEY, JSON.stringify(S)); } catch(e){ memoryOnly = true; } }
+var S = load();
+var ui = { screen:"week", grown:false, sheet:"plan", opts:{large:false,key:false,nameline:true}, filter:"all", adding:false, msg:"" };
+
+/* ---------- content helpers ---------- */
+function levelById(id){ return CONTENT.levels.levels.filter(function(l){ return l.id === id; })[0]; }
+function weekOf(child, n){ var p = CONTENT.paths[child.level]; return p && p.weeks.filter(function(w){ return w.week === n; })[0]; }
+function isDraft(o){ return !o || String(o.status || "").indexOf("DRAFT") === 0 || o.status === "draft"; }
+function active(){ return S.children.filter(function(c){ return c.id === S.activeId; })[0] || S.children[0] || null; }
+function esc(s){ return String(s == null ? "" : s).replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+function txt(value, what){ return value ? esc(value) : '<span class="fp-ph">' + esc(TEXT.ph(what)) + "</span>"; }
+function plain(value, what){ return value || TEXT.ph(what); }
+function tintFor(i){ return ["var(--t-blue)","var(--t-amber)","var(--t-green)","var(--t-pink)"][i % 4]; }
+function weekItems(w){ var out = []; if (!w) return out;
+  Object.keys(w.strand_items).forEach(function(k){ w.strand_items[k].forEach(function(it){ out.push({strand:k, item:it}); }); }); return out; }
+function daysSince(iso){ if (!iso) return null; return Math.floor((Date.now() - new Date(iso).getTime()) / 864e5); }
+function draftChip(show){ return show ? '<span class="fp-draft">' + esc(TEXT.draft) + "</span>" : ""; }
+function uid(){ return "c" + Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+function weeksDoneCount(c){ return c.complete ? 12 : c.week - 1; }
+
+/* ---------- sidebar ---------- */
+function sidebar(c){
+  var mode = c ? c.mode : "standard";
+  var nav = TEXT.nav[mode].map(function(n){
+    return '<li><button type="button" data-go="' + n[0] + '"' + (ui.screen === n[0] ? ' aria-current="page"' : "") + ">" + esc(n[1]) + "</button></li>";
+  }).join("");
+  var d = daysSince(S.lastBackup);
+  var note = d === null ? TEXT.backupNever : TEXT.backupDays(d);
+  var warn = d === null || d > 7;
+  var kids = "";
+  if (c) {
+    var lv = levelById(c.level);
+    kids = '<div class="fp-chip-child"><b>' + esc(c.name) + "</b><small>" + esc(lv ? lv.name : c.level) + " · " +
+      (c.complete ? esc(TEXT.allDone) : esc(TEXT.week) + " " + c.week + " " + esc(TEXT.of12)) + "</small>";
+    if (S.children.length > 1) {
+      kids += '<label for="fp-who">Child</label><select id="fp-who" data-act="who">' + S.children.map(function(k){
+        return '<option value="' + esc(k.id) + '"' + (k.id === c.id ? " selected" : "") + ">" + esc(k.name) + "</option>"; }).join("") + "</select>";
+    }
+    kids += '<label for="fp-mode">Mode</label><select id="fp-mode" data-act="mode">' + Object.keys(TEXT.modes).map(function(m){
+      return '<option value="' + m + '"' + (m === c.mode ? " selected" : "") + ">" + esc(TEXT.modes[m]) + "</option>"; }).join("") + "</select></div>";
+  }
+  return '<nav class="fp-side" aria-label="Main">' +
+    '<div class="fp-logo"><span aria-hidden="true">♪</span>' + esc(TEXT.appName) + "</div>" + kids +
+    (c ? '<ul class="fp-nav">' + nav + "</ul>" : "") +
+    '<div class="fp-side-foot"><div class="fp-backup-note' + (warn ? " fp-warn" : "") + '">' + esc(note) + "</div>" +
+    '<button type="button" class="fp-link" data-go="help">' + esc(TEXT.help) + "</button></div></nav>";
+}
+
+/* ---------- screens ---------- */
+function head(title, draft, sub){
+  return '<div class="fp-head"><h1 tabindex="-1" id="fp-h1">' + esc(title) + "</h1>" + draftChip(draft) + (sub ? "<p>" + sub + "</p>" : "") + "</div>";
+}
+function memoryWarning(){ return memoryOnly ? '<div class="fp-banner" role="alert" style="margin-bottom:14px">' + esc(TEXT.storeBlocked) + "</div>" : ""; }
+
+function screenWeek(c){
+  if (c.mode === "reader") return weekReader(c);
+  if (c.mode === "toddler") return weekToddler(c);
+  var lv = levelById(c.level), w = weekOf(c, c.week);
+  if (c.complete) return head(TEXT.allDone, false) + '<div class="fp-card"><p>' + txt("", "Next-level advice") + "</p></div>";
+  var cards = lv.strands.map(function(s, i){
+    var items = (w.strand_items[s] || []).map(function(it){
+      return '<li><label class="fp-check"><input type="checkbox" data-act="tick" data-id="' + esc(it.id) + '"' + (c.done[it.id] ? " checked" : "") + "> " +
+        txt(it.topic, "Topic") + "</label></li>";
+    }).join("");
+    return '<section class="fp-card fp-strand" style="background:' + tintFor(i) + '"><h3><span aria-hidden="true">' + TEXT.icons[s] + "</span>" +
+      esc(TEXT.strands[s] || s) + "</h3><ul>" + items + "</ul></section>";
+  }).join("");
+  var dots = '<ol class="fp-dots" aria-label="12-week progress">' + range12().map(function(n){
+    var cls = n < c.week ? "fp-done" : n === c.week ? "fp-now" : "";
+    var st = n < c.week ? TEXT.stateDone : n === c.week ? TEXT.stateNow : TEXT.stateSoon;
+    return '<li class="' + cls + '" title="' + esc(TEXT.week + " " + n + ": " + st) + '"><span aria-hidden="true">' + n + '</span><span class="fp-sr">' + esc(TEXT.week + " " + n + ": " + st) + "</span></li>";
+  }).join("") + "</ol>";
+  return head(TEXT.week + " " + c.week + " " + TEXT.of12, isDraft(w), "<b>Focus:</b> " + txt(w.focus, "Week focus")) +
+    '<div class="fp-stack"><div class="fp-grid4">' + cards + "</div>" +
+    '<div class="fp-card"><h3>Parent notes</h3><p>' + txt(w.parent_notes, "Parent notes") + "</p></div>" +
+    '<div class="fp-card">' + dots + "</div>" +
+    '<div class="fp-row"><button type="button" class="fp-btn" data-print="plan">' + esc(TEXT.print) + "</button>" +
+    '<button type="button" class="fp-btn" data-print="chart">' + esc(TEXT.practiceChart) + "</button>" +
+    '<button type="button" class="fp-btn fp-primary" data-act="weekdone">' + esc(TEXT.weekDone) + "</button></div></div>";
+}
+
+function range12(){ var a = []; for (var i = 1; i <= 12; i++) a.push(i); return a; }
+
+function readerSteps(c){
+  var lv = levelById(c.level), w = weekOf(c, c.week);
+  return lv.strands.map(function(s){ var it = (w.strand_items[s] || [])[0]; return {strand:s, item:it}; }).filter(function(x){ return x.item; });
+}
+function weekReader(c){
+  if (c.complete) return head(TEXT.allDone, false) + '<p class="fp-stars" aria-hidden="true">⭐⭐⭐</p>';
+  var w = weekOf(c, c.week), steps = readerSteps(c), got = 0;
+  var lis = steps.map(function(x, i){
+    var done = !!c.done[x.item.id]; if (done) got++;
+    return '<li class="fp-step' + (done ? " fp-done" : "") + '"><span class="fp-num">' + (i + 1) + '</span><span class="fp-icon" aria-hidden="true">' +
+      TEXT.icons[x.strand] + '</span><span class="fp-txt">' + txt(x.item.topic, "Short line") + "</span>" +
+      '<label class="fp-check"><input type="checkbox" data-act="tick" data-id="' + esc(x.item.id) + '"' + (done ? " checked" : "") + "> " + esc(TEXT.done) + "</label></li>";
+  }).join("");
+  var stars = steps.map(function(_, i){ return i < got ? "⭐" : "☆"; }).join("");
+  return head(TEXT.nav.reader[0][1], isDraft(w)) +
+    '<div class="fp-reader"><ol>' + lis + '</ol><div class="fp-row" style="margin-top:16px">' +
+    '<button type="button" class="fp-btn fp-yellow" data-act="readme">🔊 ' + esc(TEXT.readToMe) + "</button>" +
+    '<span class="fp-stars" role="img" aria-label="' + got + " of " + steps.length + ' stars">' + stars + "</span></div></div>";
+}
+
+function weekToddler(c){
+  var lv = levelById(c.level), w = weekOf(c, c.week);
+  if (ui.grown) {
+    return head(TEXT.grownUp, isDraft(w)) + '<div class="fp-stack">' +
+      '<div class="fp-card"><h3>' + esc(TEXT.week) + " " + c.week + " " + esc(TEXT.of12) + "</h3><p><b>Focus:</b> " + txt(w.focus, "Week focus") + "</p></div>" +
+      '<div class="fp-card"><h3>Parent notes</h3><p>' + txt(w.parent_notes, "Parent notes") + "</p></div>" +
+      '<div class="fp-row"><button type="button" class="fp-btn" data-print="plan">' + esc(TEXT.print) + "</button>" +
+      '<button type="button" class="fp-btn" data-go="family">' + esc(TEXT.nav.standard[4][1]) + "</button>" +
+      '<button type="button" class="fp-btn fp-primary" data-act="weekdone">' + esc(TEXT.weekDone) + "</button>" +
+      '<button type="button" class="fp-btn fp-yellow" data-act="grown">' + esc(TEXT.backToPlay) + "</button></div></div>";
+  }
+  var tiles = lv.strands.map(function(s, i){
+    var it = (w.strand_items[s] || [])[0]; if (!it) return "";
+    var done = !!c.done[it.id];
+    return '<button type="button" class="fp-tile" style="background:' + tintFor(i) + '" data-act="tile" data-id="' + esc(it.id) + '" aria-pressed="' + done + '" aria-label="' +
+      esc(TEXT.strands[s] + (done ? ", " + TEXT.done : "")) + '"><span aria-hidden="true">' + TEXT.icons[s] + "</span></button>";
+  }).join("");
+  return '<div class="fp-cue"><b>For the grown-up:</b> ' + txt(w.parent_notes, "Parent cue") + " " + draftChip(isDraft(w)) + "</div>" +
+    '<h1 class="fp-sr" tabindex="-1" id="fp-h1">' + esc(TEXT.nav.toddler[0][1]) + '</h1><div class="fp-tiles">' + tiles + "</div>" +
+    '<div class="fp-row" style="margin-top:16px;justify-content:flex-end"><button type="button" class="fp-btn" data-act="grown">' + esc(TEXT.grownUp) + "</button></div>";
+}
+
+function screenWeeks(c){
+  var p = CONTENT.paths[c.level];
+  var cells = range12().map(function(n){
+    var w = weekOf(c, n);
+    var st = (c.complete || n < c.week) ? ["fp-done", TEXT.stateDone] : n === c.week ? ["fp-now", TEXT.stateNow] : ["fp-soon", TEXT.stateSoon];
+    var inner = "<b>" + esc(TEXT.week) + " " + n + '</b><span class="fp-state">' + esc(st[1]) + "</span><p>" + txt(w && w.focus, "Week focus") + "</p>";
+    var open = st[0] === "fp-now" && !c.complete ? '<button type="button" data-go="week" class="fp-btn" style="margin-top:6px">' + esc(TEXT.nav.standard[0][1]) + "</button>" : "";
+    return '<li class="fp-week ' + st[0] + '"' + (st[0] === "fp-now" ? ' aria-current="step"' : "") + ">" + inner + open + "</li>";
+  }).join("");
+  return head(TEXT.nav.standard[1][1], isDraft(p)) + '<ol class="fp-weeks">' + cells + "</ol>";
+}
+
+/* ----- print ----- */
+function paperHtml(c){
+  var o = ui.opts, lv = levelById(c.level), w = weekOf(c, c.week), body = "";
+  var nameline = o.nameline ? '<div class="fp-nameline"><span>Name: ' + esc(c.name) + "</span><span>Date:</span></div>" : "";
+  if (ui.sheet === "plan") {
+    body = "<h2>" + esc(lv.name) + " – " + esc(TEXT.week) + " " + c.week + "</h2>" + nameline +
+      "<p><b>Focus:</b> " + esc(plain(w.focus, "Week focus")) + "</p>" +
+      lv.strands.map(function(s){ return "<h3>" + esc(TEXT.strands[s]) + "</h3>" + (w.strand_items[s] || []).map(function(it){
+        return '<p><span class="fp-box"></span>' + esc(plain(it.topic, "Topic")) + "</p>"; }).join(""); }).join("");
+    if (o.key) body += '<div class="fp-pagebreak">ANSWER KEY / PARENT NOTES (for the parent)</div><p>' + esc(plain(w.parent_notes, "Parent notes")) + "</p>";
+  } else if (ui.sheet === "chart") {
+    var pc = w.practice_chart || {}, days = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+    var rows = (pc.items && pc.items.length ? pc.items : [TEXT.ph("Practice item"), "", ""]);
+    body = "<h2>" + esc(TEXT.practiceChart) + " – " + esc(TEXT.week) + " " + c.week + "</h2>" + nameline +
+      "<p>Minutes per day: " + esc(pc.minutes_per_day || "____") + " · Days per week: " + esc(pc.days_per_week || "____") + "</p>" +
+      "<table><thead><tr><th>Practice</th>" + days.map(function(d){ return "<th>" + d + "</th>"; }).join("") + "</tr></thead><tbody>" +
+      rows.map(function(r){ return "<tr><td style=\"height:3em\">" + esc(typeof r === "string" ? r : (r.label || r.id || "")) + "</td>" + days.map(function(){ return "<td></td>"; }).join("") + "</tr>"; }).join("") +
+      "</tbody></table>";
+    if (o.key) body += '<div class="fp-pagebreak">PARENT NOTES (for the parent)</div><p>' + esc(plain(w.parent_notes, "Parent notes")) + "</p>";
+  } else {
+    body = "<h2>" + esc(lv.name) + " – 12-week overview</h2>" + nameline + "<table><thead><tr><th>Week</th><th>Focus</th><th>Done</th></tr></thead><tbody>" +
+      range12().map(function(n){ var ww = weekOf(c, n); return "<tr><td>" + n + "</td><td>" + esc(plain(ww && ww.focus, "Week focus")) + '</td><td><span class="fp-box"></span></td></tr>'; }).join("") +
+      "</tbody></table>";
+    if (o.key) body += '<div class="fp-pagebreak">LEVEL GOALS (for the parent)</div>' + lv.strands.map(function(s){
+      return "<h3>" + esc(TEXT.strands[s]) + "</h3>" + (lv.goals[s] || []).map(function(g){ return "<p>" + esc(g.topic) + ": " + esc(plain(g.description, "Goal description")) + "</p>"; }).join(""); }).join("");
+  }
+  return '<div class="fp-paper' + (o.large ? " fp-lg" : "") + '" aria-label="Paper preview">' + body +
+    '<p class="fp-foot">' + (isDraft(w) ? "DRAFT – needs educator review" : "") + "</p></div>";
+}
+function screenPrint(c){
+  var radios = TEXT.sheets.map(function(s){
+    return '<label class="fp-check"><input type="radio" name="fp-sheet" value="' + s[0] + '" data-act="sheet"' + (ui.sheet === s[0] ? " checked" : "") + "> " + esc(s[1]) + "</label>"; }).join("");
+  var opts = Object.keys(TEXT.printOpts).map(function(k){
+    return '<label class="fp-check"><input type="checkbox" data-act="opt" data-opt="' + k + '"' + (ui.opts[k] ? " checked" : "") + "> " + esc(TEXT.printOpts[k]) + "</label>"; }).join("");
+  return head(TEXT.nav.standard[2][1], isDraft(weekOf(c, c.week)), "Prints in black and white on US Letter paper.") +
+    '<div class="fp-printwrap"><div><fieldset><legend>Sheet</legend>' + radios + "</fieldset><fieldset><legend>Options</legend>" + opts + "</fieldset>" +
+    '<div class="fp-row"><button type="button" class="fp-btn fp-primary" data-act="doprint">' + esc(TEXT.print) + "</button>" +
+    '<button type="button" class="fp-btn" data-act="doprint" data-pdf="1">' + esc(TEXT.savePdf) + "</button></div>" +
+    (ui.msg ? '<p role="status" style="margin-top:8px">' + esc(ui.msg) + "</p>" : "") + "</div>" + paperHtml(c) + "</div>";
+}
+
+/* ----- pieces ----- */
+function pieceWeeks(level){
+  var map = {}, p = CONTENT.paths[level];
+  if (p) p.weeks.forEach(function(w){ (w.repertoire_ids || []).forEach(function(id){ map[id] = map[id] || w.week; }); });
+  return map;
+}
+function screenPieces(c){
+  var weeks = pieceWeeks(c.level);
+  var chips = '<div class="fp-chips" role="group" aria-label="Filter">' + TEXT.filters.map(function(f){
+    return '<button type="button" data-act="filter" data-f="' + f[0] + '" aria-pressed="' + (ui.filter === f[0]) + '">' + esc(f[1]) + "</button>"; }).join("") + "</div>";
+  var list = CONTENT.assets.filter(function(a){
+    if (ui.filter === "level") return a.asset_id in weeks;
+    if (ui.filter === "learned") return !!c.learned[a.asset_id];
+    if (ui.filter === "todo") return !c.learned[a.asset_id];
+    return true;
+  });
+  var rows = list.length ? '<div class="fp-stack">' + list.map(function(a){
+    var wk = weeks[a.asset_id];
+    return '<div class="fp-card fp-piece"><label class="fp-check"><input type="checkbox" data-act="learned" data-id="' + esc(a.asset_id) + '"' + (c.learned[a.asset_id] ? " checked" : "") +
+      '><span class="fp-sr">' + esc(TEXT.learned + ": " + a.title) + "</span></label>" +
+      "<div><b>" + esc(a.title) + "</b> – " + esc(a.composer) + "<br><small>" + txt(a.attribution_text, "License credit") + "</small></div>" +
+      '<div class="fp-row">' + (wk ? '<span class="fp-weekchip">' + esc(TEXT.week) + " " + wk + "</span>" : "") +
+      (a.url ? '<a class="fp-btn" href="' + esc(a.url) + '" target="_blank" rel="noopener">' + esc(TEXT.openScore) + "</a>" : "") + "</div></div>";
+  }).join("") + "</div>" : '<div class="fp-card"><p>' + esc(TEXT.piecesEmpty) + "</p></div>";
+  var title = c.mode === "reader" ? TEXT.nav.reader[1][1] : TEXT.nav.standard[3][1];
+  return head(title, true) + chips + rows;
+}
+
+/* ----- stars (reader) ----- */
+function screenStars(c){
+  var n = Object.keys(c.done).filter(function(k){ return c.done[k]; }).length;
+  return head(TEXT.myStars, false) + '<div class="fp-card fp-reader"><p class="fp-stars" role="img" aria-label="' + n + ' stars">' +
+    (n ? new Array(Math.min(n, 48) + 1).join("⭐") : "☆") + '</p><p>' + n + " ⭐</p></div>";
+}
+
+/* ----- family ----- */
+function childForm(){
+  var opts = CONTENT.levels.levels.slice().sort(function(a,b){ return a.order - b.order; }).map(function(l){
+    return '<option value="' + esc(l.id) + '">' + esc(l.name + " (ages " + l.age_guide.min + "–" + l.age_guide.max + ")") + "</option>"; }).join("");
+  var modes = '<option value="">Pick for me</option>' + Object.keys(TEXT.modes).map(function(m){ return '<option value="' + m + '">' + esc(TEXT.modes[m]) + "</option>"; }).join("");
+  return '<form class="fp-card" data-form="child"><h2 style="margin-bottom:10px">' + esc(TEXT.addChild) + '</h2><div class="fp-form">' +
+    '<label>Name<input name="name" required maxlength="40" autocomplete="off"></label>' +
+    '<label>Age<input name="age" type="number" min="2" max="18" inputmode="numeric"></label>' +
+    '<label>Level<select name="level">' + opts + "</select></label>" +
+    '<label>Mode<select name="mode">' + modes + "</select></label>" +
+    '<label>Start at week<input name="week" type="number" min="1" max="12" value="1"></label></div>' +
+    '<div class="fp-row" style="margin-top:12px"><button type="submit" class="fp-btn fp-primary">' + esc(TEXT.addChild) + "</button>" +
+    (S.children.length ? '<button type="button" class="fp-btn" data-act="cancel">Cancel</button>' : "") + "</div></form>";
+}
+function backupBanner(){
+  var d = daysSince(S.lastBackup);
+  var ok = d !== null && d <= 7;
+  return '<div class="fp-banner' + (ok ? " fp-ok" : "") + '"><span>' + esc(d === null ? TEXT.backupNever : TEXT.backupDays(d)) + "</span>" +
+    '<button type="button" class="fp-btn fp-primary" data-act="export">' + esc(TEXT.backupNow) + "</button></div>";
+}
+function screenFamily(){
+  var cards = S.children.map(function(k){
+    var lv = levelById(k.level), pct = Math.round(weeksDoneCount(k) / 12 * 100);
+    return '<section class="fp-card"><h3>' + esc(k.name) + "</h3><p>" + (k.age ? "Age " + esc(k.age) + " · " : "") + esc(lv ? lv.name : k.level) + " · " + esc(TEXT.modes[k.mode]) + "</p>" +
+      "<p>" + (k.complete ? esc(TEXT.allDone) : esc(TEXT.week) + " " + k.week + " " + esc(TEXT.of12)) + "</p>" +
+      '<div class="fp-bar" role="img" aria-label="' + pct + '% done"><i style="width:' + pct + '%"></i></div>' +
+      '<div class="fp-row"><button type="button" class="fp-btn" data-act="pick" data-id="' + esc(k.id) + '">Open</button>' +
+      '<button type="button" class="fp-btn fp-danger" data-act="remove" data-id="' + esc(k.id) + '">' + esc(TEXT.remove) + "</button></div></section>";
+  }).join("");
+  var adding = ui.adding || !S.children.length;
+  return head(TEXT.nav.standard[4][1], false, S.children.length ? "" : esc(TEXT.noKids)) + memoryWarning() +
+    '<div class="fp-stack">' + backupBanner() + (cards ? '<div class="fp-kids">' + cards + "</div>" : "") +
+    (adding ? childForm() : '<div><button type="button" class="fp-btn fp-primary" data-act="add">+ ' + esc(TEXT.addChild) + "</button></div>") +
+    '<section class="fp-card"><h2 style="margin-bottom:6px">' + esc(TEXT.backup) + "</h2>" +
+    "<p>Progress is saved only in this browser. A backup file is the only way to move it to another device or get it back.</p>" +
+    '<div class="fp-row" style="margin-top:10px"><button type="button" class="fp-btn fp-primary" data-act="export">' + esc(TEXT.exportBtn) + "</button>" +
+    '<label class="fp-btn" for="fp-import">' + esc(TEXT.importBtn) + '</label><input id="fp-import" type="file" accept=".json,application/json" class="fp-sr" data-act="import"></div>' +
+    (ui.msg ? '<p role="status" style="margin-top:8px">' + esc(ui.msg) + "</p>" : "") + "</section>" +
+    '<section class="fp-card"><h2 style="margin-bottom:6px">' + esc(TEXT.startOver) + "</h2><p>Removes every child and all progress from this browser.</p>" +
+    '<button type="button" class="fp-btn fp-danger" style="margin-top:10px" data-act="reset">' + esc(TEXT.startOver) + "</button></section></div>";
+}
+
+/* ----- help ----- */
+function screenHelp(){
+  var modes = Object.keys(TEXT.modes).map(function(m){
+    return '<section class="fp-card"><h3>' + esc(TEXT.modes[m]) + "</h3><p>" + txt("", "Who this mode is for") + "</p></section>"; }).join("");
+  var levels = CONTENT.levels.levels.map(function(l){
+    return "<li><b>" + esc(l.name) + "</b> (ages " + l.age_guide.min + "–" + l.age_guide.max + "): " + txt(l.age_guide.note, "Placement description") + "</li>"; }).join("");
+  var faq = [["How do I print?", "Go to Print, pick one sheet, then press Print. To make a PDF, press Save as PDF and choose “Save as PDF” in the print window. Sheets always print in black and white."],
+             ["Where is my progress saved?", "Only in this browser on this device. Nothing is sent anywhere. Clearing your browser data deletes it, so save a backup file now and then (Family → Backup & restore)."],
+             ["Can I use another device?", "Yes. Save a backup file on this device, move the file to the other device, and use Restore from file there."],
+             ["How do I change a child's mode?", "Pick the child, then change Mode in the side menu. Their progress stays the same."]];
+  return head(TEXT.help, true) + '<div class="fp-stack"><h2>Modes</h2><div class="fp-kids">' + modes + "</div>" +
+    '<h2>Placement</h2><div class="fp-card"><ul>' + levels + "</ul></div><h2>Questions</h2>" +
+    faq.map(function(f){ return "<details><summary>" + esc(f[0]) + "</summary><p>" + esc(f[1]) + "</p></details>"; }).join("") + "</div>";
+}
+
+/* ---------- render ---------- */
+var root = document.getElementById("fp-app");
+function render(focusHead){
+  var c = active();
+  if (c && !TEXT.nav[c.mode].some(function(n){ return n[0] === ui.screen; }) && ["help","family"].indexOf(ui.screen) < 0) ui.screen = "week";
+  if (c && c.mode === "toddler" && ui.screen === "family" && !ui.grown) ui.screen = "week";
+  var body;
+  if (!c) body = ui.screen === "help" ? screenHelp() : screenFamily();
+  else body = ({week:screenWeek, weeks:screenWeeks, print:screenPrint, pieces:screenPieces, stars:screenStars, family:screenFamily, help:screenHelp}[ui.screen] || screenWeek)(c);
+  root.innerHTML = sidebar(c) + '<main class="fp-main">' + (ui.screen !== "family" ? memoryWarning() : "") + body + "</main>";
+  if (focusHead) { var h = document.getElementById("fp-h1"); if (h) h.focus(); }
+}
+
+function go(screen){ ui.screen = screen; ui.msg = ""; ui.grown = false; render(true); }
+
+function exportBackup(){
+  S.lastBackup = new Date().toISOString(); save();
+  var data = { app:"family-piano", format:1, exported:S.lastBackup, state:S };
+  var blob = new Blob([JSON.stringify(data, null, 2)], {type:"application/json"});
+  var a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = "family-piano-backup-" + S.lastBackup.slice(0,10) + ".json";
+  document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 0);
+  ui.msg = ""; render();
+}
+function importBackup(file){
+  var r = new FileReader();
+  r.onload = function(){
+    try {
+      var d = JSON.parse(r.result);
+      if (d.app !== "family-piano" || !d.state || !Array.isArray(d.state.children)) throw 0;
+      S = d.state; S.version = 1; save(); ui.msg = TEXT.importOk;
+    } catch(e){ ui.msg = TEXT.importBad; }
+    render();
+  };
+  r.readAsText(file);
+}
+function readAloud(c){
+  if (!("speechSynthesis" in window)) return;
+  window.speechSynthesis.cancel();
+  readerSteps(c).forEach(function(x, i){
+    var u = new SpeechSynthesisUtterance("Step " + (i + 1) + ". " + (x.item.topic || TEXT.strands[x.strand]));
+    u.lang = "en-US"; window.speechSynthesis.speak(u);
+  });
+}
+
+root.addEventListener("click", function(e){
+  var t = e.target.closest("[data-go],[data-print],[data-act]"); if (!t || t.tagName === "INPUT" || t.tagName === "SELECT") return;
+  var c = active();
+  if (t.dataset.go) return go(t.dataset.go);
+  if (t.dataset.print) { ui.sheet = t.dataset.print; return go("print"); }
+  switch (t.dataset.act) {
+    case "weekdone":
+      if (c.week >= 12) c.complete = true; else c.week++;
+      save(); ui.grown = false; render(true); break;
+    case "tile": c.done[t.dataset.id] = !c.done[t.dataset.id]; save(); render(); break;
+    case "grown": ui.grown = !ui.grown; render(true); break;
+    case "readme": readAloud(c); break;
+    case "doprint": ui.msg = t.dataset.pdf ? TEXT.savePdfHint : ""; render(); window.print(); break;
+    case "filter": ui.filter = t.dataset.f; render(); break;
+    case "add": ui.adding = true; render(); break;
+    case "cancel": ui.adding = false; render(); break;
+    case "pick": S.activeId = t.dataset.id; save(); go("week"); break;
+    case "remove":
+      var k = S.children.filter(function(x){ return x.id === t.dataset.id; })[0];
+      if (k && confirm(TEXT.removeConfirm(k.name))) { S.children = S.children.filter(function(x){ return x !== k; }); if (S.activeId === k.id) S.activeId = S.children[0] ? S.children[0].id : null; save(); render(); }
+      break;
+    case "export": exportBackup(); break;
+    case "reset": if (confirm(TEXT.startOverConfirm)) { S = blank(); save(); ui.adding = false; go("family"); } break;
+  }
+});
+root.addEventListener("change", function(e){
+  var t = e.target, c = active(), a = t.dataset.act;
+  if (a === "tick") { c.done[t.dataset.id] = t.checked; save(); render(); }
+  else if (a === "learned") { c.learned[t.dataset.id] = t.checked; save(); render(); }
+  else if (a === "who") { S.activeId = t.value; save(); go("week"); }
+  else if (a === "mode") { c.mode = t.value; save(); go("week"); }
+  else if (a === "sheet") { ui.sheet = t.value; render(); }
+  else if (a === "opt") { ui.opts[t.dataset.opt] = t.checked; render(); }
+  else if (a === "import" && t.files[0]) importBackup(t.files[0]);
+});
+root.addEventListener("submit", function(e){
+  var f = e.target; if (f.dataset.form !== "child") return; e.preventDefault();
+  var el = f.elements, name = el.namedItem("name").value.trim(); if (!name) return;
+  var level = el.namedItem("level").value, mode = el.namedItem("mode").value || (level === "pre-reader" ? "toddler" : "standard");
+  var week = Math.max(1, Math.min(12, parseInt(el.namedItem("week").value, 10) || 1));
+  var age = el.namedItem("age").value;
+  var k = { id:uid(), name:name, age:age ? parseInt(age, 10) : null, level:level, mode:mode, week:week, complete:false, done:{}, learned:{} };
+  S.children.push(k); S.activeId = k.id; save(); ui.adding = false; go("week");
+});
+
+if (!S.children.length) ui.screen = "family";
+render();
+})();
+</script>
