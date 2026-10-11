@@ -42,11 +42,15 @@ The app follows **UI-SPEC** for now; each item says what the app does today.
       "type": "quiz",
       "answers": { "quiz": { "A1": 2, "E1": "yes" }, "checklist": { "S1": "usually" } },
       "result": { "level": "level-2", "week": 1, "date": "2026-10-11", "type": "quiz" }
-    }
-  }]
+    },
+    "games": { "<asset_id>": { "best": 2100, "stars": 3, "acc": 96 } },
+    "songs": [{ "id": "s…", "title": "My song 1", "date": "2026-10-11", "bpm": 80, "ts": "4/4", "key": "C", "grid": 0.5, "split": 60,
+                "notes": [[0.0, 0.68, 64, 0.76]] }]
+  }],
+  "settings": { "sound": true, "output": "device", "volume": 0.8, "kbd": 88, "kbdShift": 0, "listen": "midi", "anyOctave": false }
 }
 ```
 
-`mode` is `standard`, `reader` or `toddler`. `placement` appears once a parent opens the Placement screen; answers are keyed by the item ids in `content/placement/*.md` (`yes`/`no` for the playing check, `not_yet`/`sometimes`/`usually` for the checklist, points otherwise). `done` is keyed by strand-item ids from `content/paths/*.json`; `learned` by `asset_id` from `licenses/assets.csv`.
+`mode` is `standard`, `reader` or `toddler`. `placement` appears once a parent opens the Placement screen; answers are keyed by the item ids in `content/placement/*.md` (`yes`/`no` for the playing check, `not_yet`/`sometimes`/`usually` for the checklist, points otherwise). `songs[].notes` are `[start seconds, length seconds, MIDI pitch, loudness 0–1]` as played; the sheet music is made from them each time. `done` is keyed by strand-item ids from `content/paths/*.json`; `learned` by `asset_id` from `licenses/assets.csv`.
 
 Backup file (`family-piano-backup-YYYY-MM-DD.json`): `{ "app": "family-piano", "format": 1, "exported": "<ISO time>", "state": <the object above> }`.

@@ -462,6 +462,7 @@ OTHER DEALINGS IN THE SOFTWARE.
   #fp-printout .fp-paper,#fp-printout .fp-paper *{color:#000 !important;background:#fff !important}
   #fp-printout .fp-paper{width:100%;max-width:none;aspect-ratio:auto;padding:0;box-shadow:none;overflow:visible}
   #fp-printout .fp-paper .fp-pagebreak{break-before:page;page-break-before:always;border-top:0}
+  #fp-printout .fp-paper svg{max-width:100%;height:auto}
 }
 </style>
 
@@ -1420,8 +1421,8 @@ var TEXT = {
   draft: "Draft content",
   ph: function(what){ return "[" + what + " – educator to write]"; },
   nav: {
-    standard: [["week","This week"],["weeks","All 12 weeks"],["print","Print"],["pieces","Pieces"],["family","Family"]],
-    reader:   [["week","Today"],["pieces","Songs"],["stars","My stars"]],
+    standard: [["week","This week"],["weeks","All 12 weeks"],["print","Print"],["pieces","Pieces"],["compose","Compose"],["family","Family"]],
+    reader:   [["week","Today"],["pieces","Songs"],["compose","Make a song"],["stars","My stars"]],
     toddler:  [["week","Play"]]
   },
   modes: { standard: "Standard", reader: "Beginner reader", toddler: "Toddler" },
@@ -1520,7 +1521,17 @@ var TEXT = {
   gPerfect: "Perfect!", gGood: "Good", gMiss: "Miss", gWrong: "Oops",
   gBest: function(n){ return "Best: " + n; }, gNewBest: "New best!",
   gResult: function(p, g, m, w){ return p + " perfect \u00B7 " + g + " good \u00B7 " + m + " missed \u00B7 " + w + " wrong"; },
-  gHowTo: "Notes fall toward the keys. Play each one as it reaches the yellow line."
+  gHowTo: "Notes fall toward the keys. Play each one as it reaches the yellow line.",
+  cTitleScreen: "Compose", cIntro: "Play anything. The app records it, plays it back and writes it as sheet music.",
+  cTempo: "Tempo (beats per minute)", cTime: "Time signature", cKey: "Key", cGrid: "Write notes to the nearest", cChange: "change in Family",
+  cMicNote: "With the microphone, single notes record well; chords are a best guess. A digital piano records exactly, including how long each key is held.",
+  recStart: "Record", recStop: "Stop recording", recOn: "Recording\u2026 play now", recCount: function(n){ return n + (n === 1 ? " note" : " notes"); },
+  cMySongs: "My songs", cNone: "No songs yet. Press Record and play.", cTitle: "Title",
+  cPlayAsPlayed: "Play as played", cPlayAsWritten: "Play as written", cXml: "Download sheet music (MusicXML)", cMidi: "Download MIDI", cDelete: "Delete",
+  cDeleteConfirm: function(t){ return "Delete \u201C" + t + "\u201D?"; },
+  cAbout: function(n, bpm, ts){ return n + " notes \u00B7 " + bpm + " beats per minute \u00B7 " + ts + ". Changing tempo, time, key or note detail above redraws this song."; },
+  cBy: function(name, date){ return "By " + name + " \u00B7 " + date; }, songDefault: function(n){ return "My song " + n; },
+  noNotation: "The music could not be drawn here."
 };
 
 /* ---------- state ---------- */
@@ -1960,6 +1971,7 @@ function screenHelp(){
              ["Our keyboard is small. Does that matter?", "Tell the app its size in Family \u2192 Your keyboard and listening (1 to 7 octaves, or a full piano). The app moves pieces by octaves to fit, and the on-screen keys and the game show only your keys. If your keyboard has octave buttons, say which way you moved it."],
              ["How does the app hear my child play?", "Three ways: a digital piano connected by USB or Bluetooth MIDI (Chrome, Edge or Firefox), the microphone for an acoustic piano (single notes and chords; it checks the notes it is waiting for, and for big chords one quiet note may be missing), or the on-screen keys. Pick one in Family \u2192 Your keyboard and listening. Microphone sound is checked in the browser only and never recorded or sent."],
              ["What do the colors on the music mean?", "Blue: the note playing now. Orange: the note to play next. Green: played right. Red: a wrong note. Grey: a note that was missed."],
+             ["How does Compose work?", "Press Record and play on your digital piano, the on-screen keys or (one note at a time works best) an acoustic piano with the microphone. Stop, then play it back as played or as written, print the sheet music, or download it as MusicXML (opens in MuseScore and other music programs) or MIDI. Songs are saved with each child and in backups."],
              ["Why can some pieces not be played?", "The app only plays pieces whose music is in the public domain and whose edition\u2019s license lets us make a simplified version. Everything else is a link only."]];
   var credits = "<ul><li>Piano sound: Fluid R3 SoundFont by Frank Wen, mono version (FluidR3Mono) by Michael Cowgill, MIT license.</li>" +
     "<li>Music notation on drill sheets: VexFlow by Mohit Muthanna Cheppudira and contributors, MIT license; Bravura music font by Steinberg Media Technologies, SIL Open Font License.</li>" +
@@ -2279,10 +2291,10 @@ function attachMidiInputs(){
   AU.midi.inputs.forEach(function(inp){
     inp.onmidimessage = function(ev){
       var st = ev.data[0] & 0xF0;
-      if (st === 0x90 && ev.data[2] > 0) {
-        var when = AU.ctx ? AU.ctx.currentTime - Math.max(0, (performance.now() - ev.timeStamp) / 1000) : 0;
-        if (S.settings.listen !== "screen" && S.settings.listen !== "mic") heard(ev.data[1], when, "midi");
-      }
+      var when = AU.ctx ? AU.ctx.currentTime - Math.max(0, (performance.now() - ev.timeStamp) / 1000) : 0;
+      if (S.settings.listen === "screen" || S.settings.listen === "mic") return;
+      if (st === 0x90 && ev.data[2] > 0) { REC.lastVel = ev.data[2] / 127; heard(ev.data[1], when, "midi"); }
+      else if (st === 0x80 || st === 0x90) recNoteOff(ev.data[1], when);
     };
   });
 }
@@ -2390,6 +2402,7 @@ function micStart(){
       }
       st.level = st.level * 0.6 + rms * 0.4;
       if (!st.hit) st.prev = spec;
+      if (REC.on && REC.src === "mic" && rms < 0.006) recAllOff(now - 0.05);
     }, 20);
     LISTEN.mic = { stream:stream, timer:timer };
   }, function(e){ if (e) { ui.msg = TEXT.micDenied; render(); } throw e; });
@@ -2749,6 +2762,244 @@ function gamePointer(e){
   gameInput(hit, AU.ctx.currentTime);
 }
 
+/* ----- compose a song: record what is played, play it back, turn it into sheet music ----- */
+var REC = { on:false, t0:0, notes:[], open:{}, metroTimer:null, countUntil:0 };
+var KEYS = { C:{ fifths:0, flats:false }, G:{ fifths:1, flats:false }, D:{ fifths:2, flats:false }, F:{ fifths:-1, flats:true }, Bb:{ fifths:-2, flats:true } };
+function composeOpts(){ if (!ui.compose) ui.compose = { bpm:80, ts:"4/4", grid:0.5, key:"C", metro:true, countIn:true, split:60, songId:null, playing:false }; return ui.compose; }
+function songsOf(c){ c.songs = c.songs || []; return c.songs; }
+function currentSong(c){ var o = composeOpts(); return songsOf(c).filter(function(s){ return s.id === o.songId; })[0] || null; }
+function beatsPerBar(ts){ var p = ts.split("/"); return Number(p[0]) * 4 / Number(p[1]); }   // in quarter notes
+function recNoteOn(m, when, vel){
+  if (!REC.on) return;
+  var t = when - REC.t0;
+  if (REC.open[m] !== undefined) recNoteOff(m, when);
+  if (REC.src === "mic") Object.keys(REC.open).forEach(function(k){   // a microphone cannot hear a key let go: a new attack ends the older notes
+    if (REC.notes[REC.open[k]][0] < t - 0.04) recNoteOff(Number(k), when); });
+  REC.open[m] = REC.notes.length; REC.notes.push([t, null, m, vel || 0.8]);
+  var el = document.getElementById("fp-reclive"); if (el) el.textContent = TEXT.recCount(REC.notes.length) + " · " + noteName(m);
+}
+function recNoteOff(m, when){
+  if (!REC.on || REC.open[m] === undefined) return;
+  var n = REC.notes[REC.open[m]]; n[1] = Math.max(0.05, when - REC.t0 - n[0]); delete REC.open[m];
+}
+function recAllOff(when){ Object.keys(REC.open).forEach(function(m){ recNoteOff(Number(m), when); }); }
+function recStart(){
+  var o = composeOpts(), c = active();
+  stopAll(); listenStop();
+  audioReady().then(function(){
+    var spb = 60 / o.bpm, now = AU.ctx.currentTime + 0.1, lead = o.countIn ? beatsPerBar(o.ts) * spb : 0;
+    REC = { on:true, t0:now + lead, notes:[], open:{}, metroTimer:null, src:S.settings.listen };
+    if (o.countIn) for (var i = 0; i * spb < lead - 1e-6; i++) clickAt(now + i * spb, i === 0);
+    if (o.metro) {   // keep the clicks going while recording, a little ahead of time
+      var next = REC.t0, bar = beatsPerBar(o.ts), k = 0;
+      REC.metroTimer = setInterval(function(){ while (next < AU.ctx.currentTime + 0.3) { clickAt(next, k % bar === 0); next += spb; k++; } }, 100);
+    }
+    LISTEN.fn = function(m, when){ recNoteOn(m, when, REC.src === "midi" ? REC.lastVel || 0.8 : 0.8); };
+    listenStart();
+    render();
+  }, function(){});
+}
+function recStop(){
+  if (!REC.on) return;
+  var c = active(), o = composeOpts(), end = AU.ctx.currentTime;
+  recAllOff(end); REC.on = false; clearInterval(REC.metroTimer); LISTEN.fn = null; listenStop();
+  REC.notes.forEach(function(n){ if (n[1] === null) n[1] = 0.5; });
+  var notes = REC.notes.filter(function(n){ return n[0] > -0.5; }).map(function(n){ return [Math.max(0, n[0]), n[1], n[2], n[3]]; });
+  if (notes.length) {
+    var song = { id:"s" + Date.now().toString(36), title:TEXT.songDefault(songsOf(c).length + 1), date:new Date().toISOString().slice(0, 10),
+                 bpm:o.bpm, ts:o.ts, key:o.key, grid:o.grid, split:o.split, notes:notes };
+    songsOf(c).push(song); o.songId = song.id; save();
+  }
+  render();
+}
+/* Snap the performance to the beat grid and lay it out in bars: per staff, one voice of chords, rests and ties. */
+function quantize(song){
+  var spq = 60 / song.bpm, g = song.grid, bar = beatsPerBar(song.ts);
+  var staves = [[], []];
+  song.notes.forEach(function(n){
+    var on = Math.round(n[0] / spq / g) * g, dur = Math.max(g, Math.round(n[1] / spq / g) * g);
+    staves[n[2] >= song.split ? 0 : 1].push({ on:on, dur:dur, m:n[2] });
+  });
+  var end = 0;
+  staves.forEach(function(st){ st.forEach(function(n){ end = Math.max(end, n.on + n.dur); }); });
+  var nbars = Math.max(1, Math.ceil(end / bar - 1e-9));
+  return { bar:bar, nbars:nbars, staves:staves.map(function(st){
+    var byOn = {}; st.forEach(function(n){ (byOn[n.on] = byOn[n.on] || []).push(n); });
+    var ons = Object.keys(byOn).map(Number).sort(function(a, b){ return a - b; }), chords = [];
+    ons.forEach(function(on, i){
+      var ns = byOn[on], next = i + 1 < ons.length ? ons[i + 1] : Infinity;
+      var dur = Math.min(Math.max.apply(null, ns.map(function(n){ return n.dur; })), next - on);
+      var ms = []; ns.forEach(function(n){ if (ms.indexOf(n.m) < 0) ms.push(n.m); }); ms.sort(function(a, b){ return a - b; });
+      chords.push({ on:on, dur:dur, ms:ms });
+    });
+    // fill rests, split at barlines (tie the pieces of a note)
+    var events = [], pos = 0;
+    function push(on, dur, ms){
+      var first = true;
+      while (dur > 1e-9) { var bEnd = (Math.floor(on / bar + 1e-9) + 1) * bar, piece = Math.min(dur, bEnd - on);
+        events.push({ on:on, dur:piece, ms:ms, tieNext:!!ms && dur - piece > 1e-9, tieFromPrev:!!ms && !first }); on += piece; dur -= piece; first = false; } }
+    chords.forEach(function(ch){ if (ch.on > pos + 1e-9) push(pos, ch.on - pos, null); push(ch.on, ch.dur, ch.ms); pos = ch.on + ch.dur; });
+    if (pos < nbars * bar - 1e-9) push(pos, nbars * bar - pos, null);
+    return events;
+  }) };
+}
+var NOTATE = [[4,"w",0],[3,"h",1],[2,"h",0],[1.5,"q",1],[1,"q",0],[0.75,"8",1],[0.5,"8",0],[0.375,"16",1],[0.25,"16",0]];
+function pieces(dur){ var out = []; NOTATE.forEach(function(v){ while (dur >= v[0] - 1e-9) { out.push(v); dur -= v[0]; } }); return out; }
+var SHARP = ["c","c#","d","d#","e","f","f#","g","g#","a","a#","b"], FLAT = ["c","db","d","eb","e","f","gb","g","ab","a","bb","b"];
+var KEY_ACC = { C:{}, G:{ f:"#" }, D:{ f:"#", c:"#" }, F:{ b:"b" }, Bb:{ b:"b", e:"b" } };
+function spell(m, key){ var nm = (KEYS[key].flats ? FLAT : SHARP)[m % 12]; return { letter:nm[0], acc:nm.slice(1), octave:Math.floor(m / 12) - 1 }; }
+function drawSheet(box, song){
+  var VF = window.Vex && Vex.Flow; if (!VF) { box.textContent = TEXT.noNotation; return; }
+  var q = quantize(song), w = Math.max(320, box.clientWidth || 700), perRow = Math.max(1, Math.min(4, Math.floor((w - 110) / 190)));
+  var rows = Math.ceil(q.nbars / perRow), H = rows * 250 + 20;
+  box.innerHTML = "";
+  var r = new VF.Renderer(box, VF.Renderer.Backends.SVG); r.resize(w, H);
+  var ctx = r.getContext(), ts = song.ts, tsParts = ts.split("/");
+  var ties = [], lastNote = [null, null];
+  for (var b = 0; b < q.nbars; b++) {
+    var row = Math.floor(b / perRow), col = b % perRow, y = 10 + row * 250;
+    var extra = 60 + (row === 0 ? 30 : 0), inner = (w - 20 - extra) / perRow;   // the first bar of a line also holds clef, key (and time on line 1)
+    var x = 10 + (col === 0 ? 0 : extra + col * inner), bw = col === 0 ? inner + extra : inner;
+    var st = [new VF.Stave(x, y, bw), new VF.Stave(x, y + 110, bw)];
+    if (col === 0) { st[0].addClef("treble").addKeySignature(song.key); st[1].addClef("bass").addKeySignature(song.key); }
+    if (b === 0) { st[0].addTimeSignature(ts); st[1].addTimeSignature(ts); }
+    if (b === q.nbars - 1) { st[0].setEndBarType(VF.Barline.type.END); st[1].setEndBarType(VF.Barline.type.END); }
+    st.forEach(function(s){ s.setContext(ctx).draw(); });
+    var sx = Math.max(st[0].getNoteStartX(), st[1].getNoteStartX()) + 12; st[0].setNoteStartX(sx); st[1].setNoteStartX(sx);   // after drawing: line both hands up, a little room after the barline
+    if (col === 0) { new VF.StaveConnector(st[0], st[1]).setType("brace").setContext(ctx).draw(); new VF.StaveConnector(st[0], st[1]).setType("singleLeft").setContext(ctx).draw(); }
+    new VF.StaveConnector(st[0], st[1]).setType(b === q.nbars - 1 ? "boldDoubleRight" : "singleRight").setContext(ctx).draw();
+    var voices = [], allNotes = [];
+    [0, 1].forEach(function(si){
+      var clefName = si ? "bass" : "treble", accState = {}, notes = [];
+      q.staves[si].filter(function(e){ return e.on >= b * q.bar - 1e-9 && e.on < (b + 1) * q.bar - 1e-9; }).forEach(function(e){
+        var parts = pieces(e.dur);
+        parts.forEach(function(pv, pi){
+          var sn;
+          if (!e.ms) sn = new VF.StaveNote({ clef:clefName, keys:[si ? "d/3" : "b/4"], duration:pv[1] + "r" });
+          else {
+            var sp = e.ms.map(function(m){ return spell(m, song.key); });
+            sn = new VF.StaveNote({ clef:clefName, keys:sp.map(function(s){ return s.letter + s.acc + "/" + s.octave; }), duration:pv[1], auto_stem:true });
+            sp.forEach(function(s, i){ var want = s.acc, key = s.letter + s.octave, shown = accState[key] !== undefined ? accState[key] : (KEY_ACC[song.key][s.letter] || "");
+              if (want !== shown) { sn.addModifier(new VF.Accidental(want || "n"), i); accState[key] = want; } });
+          }
+          if (pv[2]) VF.Dot.buildAndAttach([sn], { all:true });
+          if (e.ms && lastNote[si] && lastNote[si].tie) ties.push({ a:lastNote[si].note, b:sn, n:e.ms.length });
+          lastNote[si] = e.ms ? { note:sn, tie: pi < parts.length - 1 || e.tieNext } : null;
+          notes.push(sn);
+        });
+      });
+      var v = new VF.Voice({ num_beats:Number(tsParts[0]), beat_value:Number(tsParts[1]) }).setMode(VF.Voice.Mode.SOFT);
+      v.addTickables(notes); voices.push(v); allNotes.push(notes);
+    });
+    new VF.Formatter().joinVoices([voices[0]]).joinVoices([voices[1]]).format(voices, st[0].getNoteEndX() - sx - 10);
+    voices.forEach(function(v, i){ var beams = VF.Beam.generateBeams(allNotes[i].filter(function(n){ return !n.isRest(); }));
+      v.draw(ctx, st[i]); beams.forEach(function(bm){ bm.setContext(ctx).draw(); }); });
+  }
+  ties.forEach(function(t){ var idx = []; for (var i = 0; i < t.n; i++) idx.push(i);
+    new VF.StaveTie({ first_note:t.a, last_note:t.b, first_indices:idx, last_indices:idx }).setContext(ctx).draw(); });
+}
+/* Files for other music programs */
+function songMusicXML(song){
+  var q = quantize(song), div = 4, k = KEYS[song.key], tsp = song.ts.split("/");
+  var TYPES = { w:"whole", h:"half", q:"quarter", "8":"eighth", "16":"16th" };
+  function xesc(s){ return String(s).replace(/[<>&]/g, function(ch){ return { "<":"&lt;", ">":"&gt;", "&":"&amp;" }[ch]; }); }
+  var out = '<?xml version="1.0" encoding="UTF-8"?>\n<!DOCTYPE score-partwise PUBLIC "-//Recordare//DTD MusicXML 4.0 Partwise//EN" "http://www.musicxml.org/dtds/partwise.dtd">\n' +
+    '<score-partwise version="4.0"><work><work-title>' + xesc(song.title) + '</work-title></work><part-list><score-part id="P1"><part-name>Piano</part-name></score-part></part-list><part id="P1">';
+  for (var b = 0; b < q.nbars; b++) {
+    out += '<measure number="' + (b + 1) + '">';
+    if (!b) out += "<attributes><divisions>" + div + "</divisions><key><fifths>" + k.fifths + "</fifths></key><time><beats>" + tsp[0] + "</beats><beat-type>" + tsp[1] + "</beat-type></time><staves>2</staves>" +
+      '<clef number="1"><sign>G</sign><line>2</line></clef><clef number="2"><sign>F</sign><line>4</line></clef></attributes>' +
+      (b === 0 ? '<direction placement="above"><direction-type><metronome><beat-unit>quarter</beat-unit><per-minute>' + song.bpm + "</per-minute></metronome></direction-type><sound tempo=\"" + song.bpm + "\"/></direction>" : "");
+    [0, 1].forEach(function(si){
+      if (si) out += "<backup><duration>" + Math.round(q.bar * div) + "</duration></backup>";
+      var evs = q.staves[si].filter(function(e){ return e.on >= b * q.bar - 1e-9 && e.on < (b + 1) * q.bar - 1e-9; });
+      evs.forEach(function(e){
+        var parts = pieces(e.dur);
+        parts.forEach(function(pv, pi){
+          var tieStart = e.ms && (pi < parts.length - 1 || e.tieNext), tieStop = e.ms && (pi > 0 || e.tieFromPrev);
+          (e.ms || [null]).forEach(function(m, ci){
+            out += "<note>" + (ci ? "<chord/>" : "");
+            if (m === null) out += "<rest/>";
+            else { var s = spell(m, song.key), alter = s.acc === "#" ? 1 : s.acc === "b" ? -1 : 0;
+              out += "<pitch><step>" + s.letter.toUpperCase() + "</step>" + (alter ? "<alter>" + alter + "</alter>" : "") + "<octave>" + s.octave + "</octave></pitch>"; }
+            out += "<duration>" + Math.round(pv[0] * div) + "</duration>" + (tieStop ? '<tie type="stop"/>' : "") + (tieStart ? '<tie type="start"/>' : "") +
+              "<voice>" + (si ? 5 : 1) + "</voice><type>" + TYPES[pv[1]] + "</type>" + (pv[2] ? "<dot/>" : "") + "<staff>" + (si + 1) + "</staff>" +
+              (tieStart || tieStop ? "<notations>" + (tieStop ? '<tied type="stop"/>' : "") + (tieStart ? '<tied type="start"/>' : "") + "</notations>" : "") + "</note>";
+          });
+        });
+      });
+    });
+    out += "</measure>";
+  }
+  return out + "</part></score-partwise>\n";
+}
+function songMidi(song){
+  var tpq = 480, spq = 60 / song.bpm, ev = [];
+  song.notes.forEach(function(n){ var a = Math.round(n[0] / spq * tpq), b = Math.round((n[0] + n[1]) / spq * tpq);
+    ev.push([a, 1, 0x90, n[2], Math.round(n[3] * 110)]); ev.push([Math.max(a + 1, b), 0, 0x80, n[2], 0]); });
+  ev.sort(function(x, y){ return x[0] - y[0] || x[1] - y[1]; });
+  function vlq(v){ var bytes = [v & 0x7F]; while (v >>= 7) bytes.unshift((v & 0x7F) | 0x80); return bytes; }
+  var trk = [0, 0xFF, 0x51, 3].concat([(Math.round(spq * 1e6) >> 16) & 255, (Math.round(spq * 1e6) >> 8) & 255, Math.round(spq * 1e6) & 255]), last = 0;
+  ev.forEach(function(e){ trk = trk.concat(vlq(e[0] - last), [e[2], e[3], e[4]]); last = e[0]; });
+  trk = trk.concat([0, 0xFF, 0x2F, 0]);
+  var head = [0x4D,0x54,0x68,0x64, 0,0,0,6, 0,0, 0,1, tpq >> 8, tpq & 255, 0x4D,0x54,0x72,0x6B, (trk.length >> 24) & 255, (trk.length >> 16) & 255, (trk.length >> 8) & 255, trk.length & 255];
+  return new Uint8Array(head.concat(trk));
+}
+function download(name, data, type){
+  var a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([data], { type:type })); a.download = name;
+  document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 0);
+}
+function songPlay(song, written){
+  var o = composeOpts(); stopAll();
+  audioReady().then(function(){
+    var t0 = AU.ctx.currentTime + 0.1, spq = 60 / song.bpm, last = 0;
+    if (written) { var qz = quantize(song);
+      qz.staves.forEach(function(st){ st.forEach(function(e, i){
+        if (e.ms && !e.tieFromPrev) { var d = e.dur, j = i; while (st[j].tieNext && st[j + 1]) { j++; d += st[j].dur; }   // a tied note sounds once, for its whole length
+          e.ms.forEach(function(m){ noteAt(m, t0 + e.on * spq, d * spq * 0.95, 0.75); }); }
+        last = Math.max(last, (e.on + e.dur) * spq); }); }); }
+    else song.notes.forEach(function(n){ noteAt(n[2], t0 + n[0], n[1], n[3]); last = Math.max(last, n[0] + n[1]); });
+    o.playing = true; render();
+    AU.timers.push(setTimeout(function(){ o.playing = false; render(); }, (last + 0.4) * 1000));
+  }, function(){});
+}
+function kbdHtml(lo, hi){
+  var kr = kbdRange(); lo = Math.max(lo, kr[0]); hi = Math.min(hi, kr[1]);
+  var whites = 0, keys = "";
+  for (var m = lo; m <= hi; m++) {
+    var pc = m % 12, black = [1, 3, 6, 8, 10].indexOf(pc) >= 0, name = noteName(m);
+    if (black) keys += '<button type="button" class="fp-bk" data-key="' + m + '" aria-label="' + esc(name) + '" style="left:' + (whites * 44 - 15) + 'px"></button>';
+    else { keys += '<button type="button" class="fp-wk" data-key="' + m + '" aria-label="' + esc(name) + '" style="left:' + (whites * 44) + 'px">' + (pc === 0 ? esc(name) : "") + "</button>"; whites++; }
+  }
+  return '<div class="fp-kbdwrap"><div class="fp-kbd" role="group" aria-label="Piano keys" style="width:' + (whites * 44) + 'px">' + keys + "</div></div>";
+}
+function screenCompose(c){
+  var o = composeOpts(), song = currentSong(c), songs = songsOf(c);
+  function sel(act, list, val){ return '<select data-act="' + act + '">' + list.map(function(x){ return '<option value="' + x[0] + '"' + (String(val) === String(x[0]) ? " selected" : "") + ">" + esc(x[1]) + "</option>"; }).join("") + "</select>"; }
+  var listen = TEXT.listenOpts.filter(function(x){ return x[0] === S.settings.listen; })[0];
+  var setup = '<div class="fp-card fp-stack"><div class="fp-form">' +
+    '<label>' + esc(TEXT.cTempo) + '<input type="number" min="40" max="200" value="' + o.bpm + '" data-act="cbpm"></label>' +
+    "<label>" + esc(TEXT.cTime) + sel("cts", [["2/4","2/4"],["3/4","3/4"],["4/4","4/4"],["6/8","6/8"]], o.ts) + "</label>" +
+    "<label>" + esc(TEXT.cKey) + sel("ckey", [["C","C major / A minor"],["G","G major / E minor"],["D","D major / B minor"],["F","F major / D minor"],["Bb","B♭ major / G minor"]], o.key) + "</label>" +
+    "<label>" + esc(TEXT.cGrid) + sel("cgrid", [["1","Quarter notes (simplest)"],["0.5","Eighth notes"],["0.25","Sixteenth notes (most detail)"]], o.grid) + "</label></div>" +
+    '<div class="fp-row"><label class="fp-check"><input type="checkbox" data-act="ccount"' + (o.countIn ? " checked" : "") + "> " + esc(TEXT.countIn) + '</label><label class="fp-check"><input type="checkbox" data-act="cmetro"' + (o.metro ? " checked" : "") + "> " + esc(TEXT.metronome) + "</label>" +
+    '<span class="fp-range-note">' + esc(TEXT.listenWith) + ": " + esc(listen ? listen[1] : "") + " (" + esc(TEXT.cChange) + ")</span></div>" +
+    (S.settings.listen === "mic" ? '<p class="fp-range-note">' + esc(TEXT.cMicNote) + "</p>" : "") +
+    '<div class="fp-row">' + (REC.on ? '<button type="button" class="fp-btn fp-danger" data-act="recstop">■ ' + esc(TEXT.recStop) + '</button><span class="fp-wstatus" id="fp-reclive" role="status">' + esc(TEXT.recOn) + "</span>"
+                                    : '<button type="button" class="fp-btn fp-primary" data-act="recstart">● ' + esc(TEXT.recStart) + "</button>") + "</div>" +
+    (REC.on || S.settings.listen === "screen" ? kbdHtml(48, 84) : "") + "</div>";
+  var list = songs.length ? '<div class="fp-chips" role="group" aria-label="' + esc(TEXT.cMySongs) + '">' + songs.map(function(s){
+    return '<button type="button" data-act="csong" data-id="' + esc(s.id) + '" aria-pressed="' + (song && song.id === s.id) + '">' + esc(s.title) + "</button>"; }).join("") + "</div>" : "<p>" + esc(TEXT.cNone) + "</p>";
+  var view = song ? '<div class="fp-card fp-stack"><div class="fp-row"><label style="flex:1;font-weight:700">' + esc(TEXT.cTitle) + ' <input type="text" maxlength="60" value="' + esc(song.title) + '" data-act="ctitle" style="min-height:44px;width:100%;border:1px solid #9fb3c4;border-radius:8px;padding:0 10px"></label></div>' +
+    '<div class="fp-row">' + (o.playing ? '<button type="button" class="fp-btn fp-primary" data-act="cstop">■ ' + esc(TEXT.stop) + "</button>"
+      : '<button type="button" class="fp-btn fp-primary" data-act="cplay">▶ ' + esc(TEXT.cPlayAsPlayed) + '</button><button type="button" class="fp-btn" data-act="cplayw">▶ ' + esc(TEXT.cPlayAsWritten) + "</button>") +
+    '<button type="button" class="fp-btn" data-act="cprint">' + esc(TEXT.print) + '</button><button type="button" class="fp-btn" data-act="cxml">' + esc(TEXT.cXml) + '</button><button type="button" class="fp-btn" data-act="cmidi">' + esc(TEXT.cMidi) + "</button>" +
+    '<button type="button" class="fp-btn fp-danger" data-act="cdel">' + esc(TEXT.cDelete) + "</button></div>" +
+    '<p class="fp-range-note">' + esc(TEXT.cAbout(song.notes.length, song.bpm, song.ts)) + "</p>" +
+    '<div class="fp-paper" style="aspect-ratio:auto;padding:.4in"><h2>' + esc(song.title) + '</h2><p style="font-size:.9em">' + esc(TEXT.cBy(c.name, song.date)) + '</p><div id="fp-csheet"></div></div></div>' : "";
+  return head(TEXT.cTitleScreen, false, esc(TEXT.cIntro)) + '<div class="fp-stack">' + setup + '<h2>' + esc(TEXT.cMySongs) + "</h2>" + list + view + "</div>";
+}
+
 /* ---------- render ---------- */
 var root = document.getElementById("fp-app"), sideEl = document.getElementById("fp-side"),
     viewEl = document.getElementById("fp-view"), drillHost = document.getElementById("fp-drillhost");
@@ -2766,10 +3017,11 @@ function render(focusHead){
   if (c && c.mode === "toddler" && ui.screen === "family" && !ui.grown) ui.screen = "week";
   var body;
   if (!c) body = ui.screen === "help" ? screenHelp() : screenFamily();
-  else body = ({week:screenWeek, weeks:screenWeeks, print:screenPrint, pieces:screenPieces, stars:screenStars, family:screenFamily, help:screenHelp, placement:screenPlacement, game:screenGame}[ui.screen] || screenWeek)(c);
+  else body = ({week:screenWeek, weeks:screenWeeks, print:screenPrint, pieces:screenPieces, stars:screenStars, family:screenFamily, help:screenHelp, placement:screenPlacement, game:screenGame, compose:screenCompose}[ui.screen] || screenWeek)(c);
   sideEl.innerHTML = sidebar(c);
   viewEl.innerHTML = (ui.screen !== "family" ? memoryWarning() : "") + body;
   drillHost.hidden = !(c && ui.screen === "print" && ui.sheet === "drill");
+  if (ui.screen === "compose" && c) { var sg = currentSong(c), sb = document.getElementById("fp-csheet"); if (sg && sb) drawSheet(sb, sg); }
   if (ui.player && ui.screen === "pieces") { fillScore(assetById(ui.player.id)); if (W) updateWait(); }
   if (ui.screen === "game" && G && G.running) { gameSetupCanvas(); if (ui.game.view === "sheet" && !document.querySelector("#fp-gstrip svg")) gameSheetSetup(); }
   else if (ui.screen === "game") { G = G && G.result ? G : null; if (document.getElementById("fp-gcanvas")) gamePreview(); }
@@ -2777,7 +3029,7 @@ function render(focusHead){
   if (focusHead) { var h = document.getElementById("fp-h1"); if (h) h.focus(); }
 }
 
-function go(screen){ MARKS = {}; if (ui.player) { stopAll(); ui.player = null; W = null; } if (G) { gameStop(true); G = null; } listenStop(); ui.screen = screen; ui.msg = ""; ui.grown = false; ui.viewWeek = null; ui.editing = null; render(true); }
+function go(screen){ if (REC.on) recStop(); MARKS = {}; if (ui.player) { stopAll(); ui.player = null; W = null; } if (G) { gameStop(true); G = null; } listenStop(); ui.screen = screen; ui.msg = ""; ui.grown = false; ui.viewWeek = null; ui.editing = null; render(true); }
 
 /* Printing: copy the paper to a direct child of <body> and hide the rest of the page
    (works inside a Squarespace page as well as on its own). */
@@ -2852,6 +3104,16 @@ root.addEventListener("click", function(e){
     case "gmode": ui.game.mode = t.dataset.v; G = null; render(); break;
     case "ghands": ui.game.hands = t.dataset.v; G = null; render(); break;
     case "gstart": MARKS = {}; gameStart(); break;
+    case "recstart": recStart(); break;
+    case "recstop": recStop(); break;
+    case "csong": composeOpts().songId = t.dataset.id; var sgx = currentSong(c); if (sgx) ["bpm","ts","key","grid"].forEach(function(k){ composeOpts()[k] = sgx[k]; }); render(); break;
+    case "cplay": songPlay(currentSong(c), false); break;
+    case "cplayw": songPlay(currentSong(c), true); break;
+    case "cstop": stopAll(); composeOpts().playing = false; render(); break;
+    case "cprint": if (makePrintout()) { window.print(); setTimeout(removePrintout, 1000); } break;
+    case "cxml": var sx1 = currentSong(c); download(sx1.title.replace(/[^\w\- ]+/g, "") + ".musicxml", songMusicXML(sx1), "application/vnd.recordare.musicxml+xml"); break;
+    case "cmidi": var sx2 = currentSong(c); download(sx2.title.replace(/[^\w\- ]+/g, "") + ".mid", songMidi(sx2), "audio/midi"); break;
+    case "cdel": var sx3 = currentSong(c); if (sx3 && confirm(TEXT.cDeleteConfirm(sx3.title))) { c.songs = songsOf(c).filter(function(x){ return x !== sx3; }); composeOpts().songId = null; save(); render(); } break;
     case "gpause": gamePause(); break;
     case "gstop": gameStop(false); break;
     case "mictest":
@@ -2897,6 +3159,9 @@ root.addEventListener("pointerdown", function(e){
   audioReady().then(function(){ noteAt(m, AU.ctx.currentTime + 0.01, 0.6, 0.8); heard(m, AU.ctx.currentTime, "screen"); }, function(){});
 });
 root.addEventListener("pointerdown", function(e){ if (e.target.id === "fp-gcanvas") gamePointer(e); });
+["pointerup", "pointercancel", "pointerleave"].forEach(function(evn){ root.addEventListener(evn, function(e){
+  var k = e.target.closest && e.target.closest(".fp-kbd button[data-key]"); if (k && REC.on && AU.ctx) recNoteOff(Number(k.dataset.key), AU.ctx.currentTime);
+}, true); });
 root.addEventListener("keydown", function(e){   // keyboard users: Enter/Space on a focused key
   var k = e.target.closest && e.target.closest(".fp-kbd button[data-key]");
   if (k && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); var m = Number(k.dataset.key);
@@ -2937,6 +3202,13 @@ root.addEventListener("change", function(e){
   else if (a === "anyoct") { S.settings.anyOctave = t.checked; save(); }
   else if (a === "gspeed") { ui.game.speed = Number(t.value); render(); }
   else if (a === "gnames") { ui.game.names = t.checked; }
+  else if (["cbpm","cts","ckey","cgrid"].indexOf(a) >= 0) {
+    var k2 = { cbpm:"bpm", cts:"ts", ckey:"key", cgrid:"grid" }[a], v2 = a === "cbpm" ? Math.max(40, Math.min(200, Number(t.value) || 80)) : a === "cgrid" ? Number(t.value) : t.value;
+    composeOpts()[k2] = v2; var sg2 = currentSong(c); if (sg2) { sg2[k2] = v2; save(); } render();
+  }
+  else if (a === "ccount") composeOpts().countIn = t.checked;
+  else if (a === "cmetro") composeOpts().metro = t.checked;
+  else if (a === "ctitle") { var sg3 = currentSong(c); if (sg3) { sg3.title = t.value.trim() || sg3.title; save(); render(); } }
   else if (a === "pwait") { stopAll(); W = null; ui.player.wait = t.checked; render(); }
   else if (a === "palong") { ui.player.along = t.checked; render(); }
   else if (a === "pmetro") { ui.player.metro = t.checked; playerRestartIfPlaying(); }

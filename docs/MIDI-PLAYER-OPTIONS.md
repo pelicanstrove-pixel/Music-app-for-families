@@ -25,6 +25,13 @@ optionally send the notes to the family's digital piano over USB (Web MIDI).
   nothing is recorded or sent) or the on-screen keys. *Check my
   playing* grades every note in time (green right, red wrong, grey missed) while the app plays the other hand;
   *Wait for me* marks right-first-time notes and gives a summary.
+- **Compose** (side menu → Compose; "Make a song" in Beginner reader mode): records the digital piano (with exact
+  note lengths from key releases and loudness), the on-screen keys, or the microphone (single notes reliable; chords
+  are a best guess, since nothing is expected). Count-in and metronome at a chosen tempo; plays back *as played*
+  (the child's own timing) or *as written*. The app snaps the performance to the beat (quarter, eighth or sixteenth
+  notes), splits right hand / left hand at middle C, writes rests and ties across barlines, spells accidentals for
+  the chosen key, and draws a grand staff with VexFlow. Print it (black and white), or download MusicXML (for
+  MuseScore and other programs) and MIDI. Songs are saved per child and included in backups.
 - **Game** (Pieces → Game): falling notes onto a keyboard (rhythm-game style) or the sheet music scrolling past a
   line; *Play in time* (perfect/good/miss timing, combo, score, 1–3 stars) or *Wait for me*; hands, speed, note
   names. Best score and stars are saved per child and piece. Works for every piece the license gate lets the
