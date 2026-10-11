@@ -11,14 +11,15 @@ Inlines into app/src/family-piano.template.html:
   - app/vendor/vexflow-bravura-4.2.2.js (in place of the jsDelivr script tag, so drills need no internet)
 
   - app/vendor/piano/ (MIT piano samples for the built-in player)
-  - notes for the built-in player, made from approved simplified scores in scores/derived/ that pass the
+  - notes and the drawn score (Verovio SVG + note timings, for highlighting) for the built-in player, made from approved simplified scores in scores/derived/ that pass the
     license gate in playable_reason() (needs music21: pip install -r scores/requirements.txt)
   - every third-party license, in full, in a comment at the top of the file
 
 Usage: python3 app/build.py
        python3 app/build.py --include-test-fixtures --out /tmp/test.html   (testing only: never publish this)
 """
-import argparse, base64, csv, hashlib, html, json, pathlib, re
+import argparse, base64, csv, gzip, hashlib, html, json, pathlib, re
+import xml.etree.ElementTree as ET
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 TEMPLATE = ROOT / "app" / "src" / "family-piano.template.html"
@@ -157,6 +158,36 @@ def score_notes(xml_path):
     return {"bpm": bpm, "beat": beat, "beatsPerBar": beats, "bars": bars, "end": round(float(sc.highestTime), 4), "events": events}
 
 
+def score_view(xml_path):
+    """The score drawn by Verovio (gzipped SVG pages) plus each note's start, end and hand, for highlighting."""
+    import verovio  # in scores/requirements.txt
+    tk = verovio.toolkit()
+    tk.setOptions({"pageWidth": 2100, "pageHeight": 60000, "adjustPageHeight": True, "scale": 40, "breaks": "auto",
+                   "header": "none", "footer": "none", "svgViewBox": True, "svgRemoveXlink": True, "xmlIdSeed": 1})
+    tk.loadFile(str(xml_path))
+    pages = [re.sub(r">\s+<", "><", tk.renderToSVG(i + 1)) for i in range(tk.getPageCount())]
+    hand = {}
+    ns = "{http://www.w3.org/2000/svg}"
+    for page in pages:
+        for meas in ET.fromstring(page).iter(ns + "g"):
+            if meas.get("class") != "measure":
+                continue
+            staffs = [g for g in meas if g.get("class") == "staff"]
+            for i, st in enumerate(staffs[:2]):
+                for g in st.iter(ns + "g"):
+                    if g.get("class") == "note":
+                        hand[g.get("id")] = i
+    notes = {}
+    for e in tk.renderToTimemap({}):
+        for nid in e.get("on", []):
+            notes.setdefault(nid, [e["qstamp"], None, hand.get(nid, 0)])
+        for nid in e.get("off", []):
+            if nid in notes:
+                notes[nid][1] = e["qstamp"]
+    blob = gzip.compress("\u0000".join(pages).encode("utf-8"), 9, mtime=0)
+    return {"svg": base64.b64encode(blob).decode("ascii"), "notes": notes}
+
+
 def piano_samples():
     info = json.loads((PIANO / "piano.json").read_text(encoding="utf-8"))
     samples = [{"root": x["root"], "cents": x["cents"],
@@ -202,7 +233,8 @@ def main():
                 if hashlib.sha256(xml.read_bytes()).hexdigest() != meta.get("musicxml_sha256"):
                     why = "simplified score changed after it was approved"
             if why is None:
-                a["play"] = score_notes(meta_path.parent / meta["outputs"]["musicxml"])
+                a["play"] = score_notes(xml)
+                a["score"] = score_view(xml)
             else:
                 print(f"  player off for {r['asset_id']}: {why}")
             assets.append(a)

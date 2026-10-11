@@ -161,6 +161,23 @@
 #fp-app .fp-player .fp-chips{margin:0}
 #fp-app #pd-drills .pd-cell button.fp-dplay{position:absolute;right:0;top:0;width:44px;height:44px;min-height:44px;padding:0;border-radius:50%;border:2px solid var(--blue);background:#fff;color:var(--blue);font-size:18px;line-height:1;z-index:1}
 
+/* score with note highlighting, and "wait for me" keyboard */
+#fp-app .fp-score{background:#fff;border:1px solid var(--line);border-radius:12px;padding:8px;max-height:440px;overflow:auto}
+#fp-app .fp-score svg{width:100%;height:auto;display:block;color:#000}
+#fp-app .fp-score g.note{cursor:pointer}
+#fp-app .fp-score g.fp-on,#fp-app .fp-score g.fp-on *{fill:var(--blue);color:var(--blue)}
+#fp-app .fp-score g.fp-next,#fp-app .fp-score g.fp-next *{fill:#b85c00;color:#b85c00}
+#fp-app .fp-wstatus{font-weight:800;font-size:18px}
+#fp-app .fp-kbdwrap{overflow-x:auto;padding-bottom:6px}
+#fp-app .fp-kbd{position:relative;height:150px;touch-action:manipulation;user-select:none;-webkit-user-select:none}
+#fp-app .fp-kbd button{position:absolute;top:0;padding:0;margin:0;border:1px solid #333;cursor:pointer;font-size:12px;font-weight:700;display:flex;align-items:flex-end;justify-content:center;padding-bottom:6px}
+#fp-app .fp-kbd .fp-wk{width:44px;height:150px;background:#fff;color:#555;border-radius:0 0 8px 8px;z-index:1}
+#fp-app .fp-kbd .fp-bk{width:30px;height:92px;background:#222;color:#ddd;border-radius:0 0 6px 6px;z-index:2}
+#fp-app .fp-kbd .fp-tgt.fp-wk{background:var(--yellow)}
+#fp-app .fp-kbd .fp-tgt.fp-bk{background:#c99a1f}
+#fp-app .fp-kbd .fp-bad{background:#f4b4b4 !important}
+#fp-app .fp-kbd .fp-down{filter:brightness(.85)}
+
 /* help */
 #fp-app details{background:#fff;border:1px solid var(--line);border-radius:10px;padding:0 14px}
 #fp-app summary{min-height:44px;display:flex;align-items:center;font-weight:800;cursor:pointer}
@@ -276,7 +293,14 @@ var TEXT = {
   noMidi: "This browser can\u2019t play through a digital piano (Safari, iPhone and iPad can\u2019t). Chrome, Edge or Firefox can.",
   midiDenied: "The browser did not allow access to MIDI devices.",
   midiNone: "No digital piano found. Plug it in (USB or Bluetooth MIDI), then press the button again.",
-  credits: "Credits"
+  credits: "Credits",
+  waitMode: "Wait for me", along: "Other hand plays along", start: "Start",
+  wPlay: "Play the orange note on your piano or on the keys below.",
+  wPlayChord: "Play all the orange notes together.",
+  wAgain: "Not that one \u2013 try again.", wDone: "Well done! You played it all.",
+  wCount: function(i, n){ return "Note " + i + " of " + n; },
+  scoreLoading: "Loading the music\u2026", scoreNone: "This browser can\u2019t show the music here, but the player still works.",
+  noteNames: ["C","C\u266F","D","D\u266F","E","F","F\u266F","G","G\u266F","A","A\u266F","B"]
 };
 
 /* ---------- state ---------- */
@@ -727,7 +751,8 @@ function audioReady(){
 function findMidi(quiet){
   if (!navigator.requestMIDIAccess) { ui.msg = TEXT.noMidi; render(); return; }
   navigator.requestMIDIAccess({ sysex:false }).then(function(acc){
-    AU.midi = acc; acc.onstatechange = function(){ if (ui.screen === "family") render(); };
+    AU.midi = acc; attachMidiInputs();
+    acc.onstatechange = function(){ attachMidiInputs(); if (ui.screen === "family") render(); };
     if (!quiet) { ui.msg = acc.outputs.size ? "" : TEXT.midiNone; render(); }
   }, function(){ if (!quiet) { ui.msg = TEXT.midiDenied; render(); } });
 }
@@ -820,7 +845,7 @@ window.fpDrillPlay = function(cell, drill, it, n){
 
 /* ----- piece player ----- */
 function assetById(id){ return CONTENT.assets.filter(function(a){ return a.asset_id === id; })[0]; }
-function newPlayer(a){ return { id:a.asset_id, pos:0, playing:false, speed:80, hands:"both", loop:false, from:1, to:a.play.bars.length, countIn:true, metro:false }; }
+function newPlayer(a){ return { id:a.asset_id, pos:0, playing:false, speed:80, hands:"both", loop:false, from:1, to:a.play.bars.length, countIn:true, metro:false, wait:false, along:true }; }
 function range(P, d){ return [d.bars[P.from - 1], P.to < d.bars.length ? d.bars[P.to] : d.end]; }
 function curPos(P){ return P.playing ? Math.min(P.startPos + Math.max(0, AU.ctx.currentTime - P.startAt) / P.spq, P.end) : P.pos; }
 function playerStart(noCount){
@@ -847,8 +872,8 @@ function playerStart(noCount){
   }, function(){});
 }
 function playerPause(){ var P = ui.player; P.pos = curPos(P); stopAll(); render(); }
-function playerStop(){ var P = ui.player, a = assetById(P.id); stopAll(); P.pos = range(P, a.play)[0]; render(); }
-function playerRestartIfPlaying(){ var P = ui.player; if (P.playing) { P.pos = curPos(P); playerStart(true); } else render(); }
+function playerStop(){ var P = ui.player, a = assetById(P.id); stopAll(); P.pos = range(P, a.play)[0]; if (W) W = null; render(); }
+function playerRestartIfPlaying(){ var P = ui.player; if (W && W.active) { waitStart(); return; } if (P.playing) { P.pos = curPos(P); playerStart(true); } else render(); }
 function fmtTime(sec){ sec = Math.max(0, Math.round(sec)); return Math.floor(sec / 60) + ":" + ("0" + sec % 60).slice(-2); }
 function tickPlayer(){
   var P = ui.player; if (!P || !P.playing) return;
@@ -856,6 +881,7 @@ function tickPlayer(){
   var bar = document.getElementById("fp-prog"), tm = document.getElementById("fp-ptime");
   if (bar) bar.value = pos;
   if (tm) tm.textContent = fmtTime(pos * spq) + " / " + fmtTime(d.end * spq);
+  markScore();
   requestAnimationFrame(tickPlayer);
 }
 function playerHtml(a){
@@ -865,7 +891,8 @@ function playerHtml(a){
     return '<option value="' + n + '"' + (n === val ? " selected" : "") + ">" + n + "</option>"; }).join("") + "</select>"; }
   function chk(act, on, label){ return '<label class="fp-check"><input type="checkbox" data-act="' + act + '"' + (on ? " checked" : "") + "> " + esc(label) + "</label>"; }
   return '<div class="fp-player" role="group" aria-label="' + esc(TEXT.play + ": " + a.title) + '">' +
-    '<div class="fp-row">' + (P.playing ? '<button type="button" class="fp-btn fp-primary" data-act="ppause">\u275A\u275A ' + esc(TEXT.pause) + "</button>"
+    '<div class="fp-row">' + (P.wait ? (W && W.active ? "" : '<button type="button" class="fp-btn fp-primary" data-act="pwaitgo">\u25B6 ' + esc(TEXT.start) + "</button>") :
+                              P.playing ? '<button type="button" class="fp-btn fp-primary" data-act="ppause">\u275A\u275A ' + esc(TEXT.pause) + "</button>"
                                         : '<button type="button" class="fp-btn fp-primary" data-act="pplay">\u25B6 ' + esc(TEXT.play) + "</button>") +
     '<button type="button" class="fp-btn" data-act="pstop">\u25A0 ' + esc(TEXT.stop) + "</button>" +
     '<progress id="fp-prog" max="' + d.end + '" value="' + P.pos + '"></progress><span id="fp-ptime">' + fmtTime(P.pos * spq) + " / " + fmtTime(d.end * spq) + "</span></div>" +
@@ -873,7 +900,134 @@ function playerHtml(a){
     '<div class="fp-row"><b>' + esc(TEXT.hands) + '</b><div class="fp-chips" role="group" aria-label="' + esc(TEXT.hands) + '">' + TEXT.handNames.map(function(h){
       return '<button type="button" data-act="phands" data-v="' + h[0] + '" aria-pressed="' + (P.hands === h[0]) + '">' + esc(h[1]) + "</button>"; }).join("") + "</div></div>" +
     '<div class="fp-row"><b>' + esc(TEXT.bars) + "</b>" + sel("pfrom", P.from) + esc(TEXT.barsTo) + sel("pto", P.to) +
-      chk("ploop", P.loop, TEXT.loop) + chk("pcount", P.countIn, TEXT.countIn) + chk("pmetro", P.metro, TEXT.metronome) + "</div></div>";
+      chk("ploop", P.loop, TEXT.loop) + (P.wait ? "" : chk("pcount", P.countIn, TEXT.countIn) + chk("pmetro", P.metro, TEXT.metronome)) + "</div>" +
+    '<div class="fp-row">' + chk("pwait", P.wait, TEXT.waitMode) + (P.wait && P.hands !== "both" ? chk("palong", P.along, TEXT.along) : "") + "</div>" +
+    (P.wait ? '<p class="fp-wstatus" id="fp-wstatus" role="status"></p>' + keyboardHtml(a) : "") +
+    (a.score ? '<div class="fp-score" id="fp-score" aria-label="' + esc(a.title) + '"></div>' : "") + "</div>";
+}
+
+/* ----- score display and note highlighting ----- */
+var SCORES = {};   // asset_id -> SVG pages (decoded once)
+function loadScore(a){
+  if (SCORES[a.asset_id] || !a.score) return Promise.resolve(SCORES[a.asset_id]);
+  if (!window.DecompressionStream) return Promise.reject(new Error("no DecompressionStream"));
+  var stream = new Blob([b64buf(a.score.svg)]).stream().pipeThrough(new DecompressionStream("gzip"));
+  return new Response(stream).text().then(function(t){ return (SCORES[a.asset_id] = t.split("\u0000").join("")); });
+}
+function fillScore(a){
+  var box = document.getElementById("fp-score"); if (!box || !a.score) return;
+  if (SCORES[a.asset_id]) { box.innerHTML = SCORES[a.asset_id]; markScore(); return; }
+  box.textContent = TEXT.scoreLoading;
+  loadScore(a).then(function(){ fillScore(a); }, function(){ box.textContent = TEXT.scoreNone; });
+}
+var marked = { on:[], next:[] };
+function setMarks(kind, ids){
+  marked[kind].forEach(function(el){ el.classList.remove(kind === "on" ? "fp-on" : "fp-next"); });
+  marked[kind] = [];
+  ids.forEach(function(id){ var el = document.getElementById(id); if (el && el.closest("#fp-score")) { el.classList.add(kind === "on" ? "fp-on" : "fp-next"); marked[kind].push(el); } });
+}
+function handOk(P, h){ return P.hands === "both" || (P.hands === "right" ? h === 0 : h === 1); }
+/* Re-apply highlights after a redraw, and keep the marked note in view. */
+function markScore(){
+  var P = ui.player; if (!P) return;
+  var a = assetById(P.id); if (!a.score) return;
+  var pos = curPos(P), on = [];
+  if (P.playing && !P.wait) Object.keys(a.score.notes).forEach(function(id){
+    var n = a.score.notes[id]; if (n[0] <= pos + 1e-6 && pos < n[1] - 1e-6 && handOk(P, n[2])) on.push(id); });
+  setMarks("on", on);
+  setMarks("next", W && W.active ? W.groups[W.i].ids : []);
+  var el = (marked.next[0] || marked.on[0]), box = document.getElementById("fp-score");
+  if (el && box) {
+    var r = el.getBoundingClientRect(), b = box.getBoundingClientRect();
+    if (r.top < b.top + 20 || r.bottom > b.bottom - 20) box.scrollTop += r.top - b.top - b.height / 3;
+  }
+}
+
+/* ----- "wait for me": the app waits until the child plays the right note(s) ----- */
+var W = null;
+function waitGroups(a, P){
+  var d = a.play, r = range(P, d), from = r[0], to = r[1], groups = [], along = [];
+  d.events.forEach(function(e){
+    if (e[0] < from - 1e-6 || e[0] >= to - 1e-6) return;
+    if (!handOk(P, e[3])) { along.push(e); return; }
+    var g = groups.length && Math.abs(groups[groups.length - 1].t - e[0]) < 1e-4 ? groups[groups.length - 1] : null;
+    if (!g) { g = { t:e[0], need:[], ids:[] }; groups.push(g); }
+    if (g.need.indexOf(e[2]) < 0) g.need.push(e[2]);
+  });
+  if (a.score) Object.keys(a.score.notes).forEach(function(id){
+    var n = a.score.notes[id]; if (!handOk(P, n[2])) return;
+    groups.forEach(function(g){ if (Math.abs(g.t - n[0]) < 1e-4) g.ids.push(id); });
+  });
+  return { groups:groups, along:along, from:from, to:to };
+}
+function waitStart(){
+  var P = ui.player, a = assetById(P.id); stopAll();
+  var wg = waitGroups(a, P);
+  var startI = 0; wg.groups.some(function(g, i){ if (g.t >= P.pos - 1e-6) { startI = i; return true; } return false; });
+  W = { active:true, groups:wg.groups, along:wg.along, i:startI, got:[], msg:"" };
+  if (!W.groups.length) { W = null; return; }
+  if (navigator.requestMIDIAccess && !AU.midi) findMidi(true);
+  audioReady().then(function(){}, function(){});
+  P.playing = false; render();
+}
+function waitStop(){ W = null; render(); }
+function waitKey(m){
+  if (!W || !W.active) return;
+  var g = W.groups[W.i];
+  if (g.need.indexOf(m) < 0) { W.msg = TEXT.wAgain; flashKey(m, "fp-bad"); updateWait(); return; }
+  if (W.got.indexOf(m) < 0) W.got.push(m);
+  if (g.need.every(function(x){ return W.got.indexOf(x) >= 0; })) waitAdvance();
+  else updateWait();
+}
+function waitAdvance(){
+  var P = ui.player, a = assetById(P.id), g = W.groups[W.i], next = W.groups[W.i + 1];
+  if (P.along && P.hands !== "both" && AU.ctx) {
+    var spq = 60 / (a.play.bpm * P.speed / 100), now = AU.ctx.currentTime + 0.02, end = next ? next.t : Infinity;
+    W.along.forEach(function(e){ if (e[0] >= g.t - 1e-6 && e[0] < end - 1e-6) noteAt(e[2], now + (e[0] - g.t) * spq, e[1] * spq * 0.95, 0.55); });
+  }
+  W.got = []; W.msg = ""; W.i++;
+  if (W.i >= W.groups.length) {
+    if (P.loop) W.i = 0;
+    else { W.active = false; W.msg = TEXT.wDone; P.pos = range(P, a.play)[0]; chime(); render(); return; }
+  }
+  P.pos = W.groups[W.i].t;
+  updateWait();
+}
+function updateWait(){
+  var st = document.getElementById("fp-wstatus"), prog = document.getElementById("fp-prog"), tm = document.getElementById("fp-ptime");
+  if (!W) return;
+  if (st) st.textContent = W.msg || (W.active ? (W.groups[W.i].need.length > 1 ? TEXT.wPlayChord : TEXT.wPlay) : "");
+  if (prog) { prog.max = W.groups.length; prog.value = W.i; }
+  if (tm) tm.textContent = TEXT.wCount(Math.min(W.i + 1, W.groups.length), W.groups.length);
+  var need = W.active ? W.groups[W.i].need : [];
+  document.querySelectorAll("#fp-app .fp-kbd button").forEach(function(k){ k.classList.toggle("fp-tgt", need.indexOf(Number(k.dataset.key)) >= 0); });
+  markScore();
+}
+function flashKey(m, cls){
+  var k = document.querySelector('#fp-app .fp-kbd button[data-key="' + m + '"]'); if (!k) return;
+  k.classList.add(cls); setTimeout(function(){ k.classList.remove(cls); }, 350);
+}
+function attachMidiInputs(){
+  if (!AU.midi) return;
+  AU.midi.inputs.forEach(function(inp){
+    inp.onmidimessage = function(ev){
+      var st = ev.data[0] & 0xF0;
+      if (st === 0x90 && ev.data[2] > 0) { flashKey(ev.data[1], "fp-down"); waitKey(ev.data[1]); }
+    };
+  });
+}
+function keyboardHtml(a){
+  var lo = 127, hi = 0;
+  waitGroups(a, ui.player).groups.forEach(function(g){ g.need.forEach(function(m){ lo = Math.min(lo, m); hi = Math.max(hi, m); }); });
+  lo = Math.min(lo, 60); hi = Math.max(hi, 71);
+  lo -= lo % 12; hi += 11 - hi % 12;                       // whole octaves, C to B
+  var whites = 0, keys = "";
+  for (var m = lo; m <= hi; m++) {
+    var pc = m % 12, black = [1, 3, 6, 8, 10].indexOf(pc) >= 0, name = TEXT.noteNames[pc] + (Math.floor(m / 12) - 1);
+    if (black) keys += '<button type="button" class="fp-bk" data-key="' + m + '" aria-label="' + esc(name) + '" style="left:' + (whites * 44 - 15) + 'px"></button>';
+    else { keys += '<button type="button" class="fp-wk" data-key="' + m + '" aria-label="' + esc(name) + '" style="left:' + (whites * 44) + 'px">' + (pc === 0 ? esc(name) : "") + "</button>"; whites++; }
+  }
+  return '<div class="fp-kbdwrap"><div class="fp-kbd" role="group" aria-label="Piano keys" style="width:' + (whites * 44) + 'px">' + keys + "</div></div>";
 }
 
 /* ---------- render ---------- */
@@ -896,11 +1050,12 @@ function render(focusHead){
   sideEl.innerHTML = sidebar(c);
   viewEl.innerHTML = (ui.screen !== "family" ? memoryWarning() : "") + body;
   drillHost.hidden = !(c && ui.screen === "print" && ui.sheet === "drill");
+  if (ui.player && ui.screen === "pieces") { fillScore(assetById(ui.player.id)); if (W) updateWait(); }
   if (!drillHost.hidden) syncDrills(c);
   if (focusHead) { var h = document.getElementById("fp-h1"); if (h) h.focus(); }
 }
 
-function go(screen){ if (ui.player) { stopAll(); ui.player = null; } ui.screen = screen; ui.msg = ""; ui.grown = false; ui.viewWeek = null; ui.editing = null; render(true); }
+function go(screen){ if (ui.player) { stopAll(); ui.player = null; W = null; } ui.screen = screen; ui.msg = ""; ui.grown = false; ui.viewWeek = null; ui.editing = null; render(true); }
 
 /* Printing: copy the paper to a direct child of <body> and hide the rest of the page
    (works inside a Squarespace page as well as on its own). */
@@ -964,10 +1119,12 @@ root.addEventListener("click", function(e){
     case "backweek": ui.viewWeek = null; render(true); break;
     case "nextlevel": var nx = nextLevelOf(c); if (nx) { c.level = nx.id; c.week = 1; c.complete = false; save(); go("week"); } break;
     case "listen":
+      W = null;
       if (ui.player && ui.player.id === t.dataset.id) { stopAll(); ui.player = null; }
       else { stopAll(); ui.player = newPlayer(assetById(t.dataset.id)); }
       render(); break;
     case "pplay": playerStart(false); break;
+    case "pwaitgo": waitStart(); break;
     case "ppause": playerPause(); break;
     case "pstop": playerStop(); break;
     case "phands": ui.player.hands = t.dataset.v; playerRestartIfPlaying(); break;
@@ -999,6 +1156,32 @@ root.addEventListener("click", function(e){
     case "reset": if (confirm(TEXT.startOverConfirm)) { S = blank(); save(); ui.adding = false; go("family"); } break;
   }
 });
+root.addEventListener("pointerdown", function(e){
+  var k = e.target.closest(".fp-kbd button[data-key]"); if (!k) return;
+  e.preventDefault();
+  var m = Number(k.dataset.key);
+  audioReady().then(function(){ noteAt(m, AU.ctx.currentTime + 0.01, 0.6, 0.8); }, function(){});
+  flashKey(m, "fp-down"); waitKey(m);
+});
+root.addEventListener("keydown", function(e){   // keyboard users: Enter/Space on a focused key
+  var k = e.target.closest && e.target.closest(".fp-kbd button[data-key]");
+  if (k && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); var m = Number(k.dataset.key);
+    audioReady().then(function(){ noteAt(m, AU.ctx.currentTime + 0.01, 0.6, 0.8); }, function(){}); waitKey(m); }
+});
+root.addEventListener("click", function(e){     // tap a note in the score to start from there
+  if (!ui.player || !e.target.closest || !e.target.closest("#fp-score")) return;
+  // Noteheads are tiny and drawn with <use>, so pick the nearest one within a finger's width.
+  var best = null, bestD = 30 * 30;
+  document.querySelectorAll("#fp-score g.note").forEach(function(g){
+    var r = (g.querySelector(".notehead") || g).getBoundingClientRect();
+    var dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.top + r.height / 2), d = dx * dx + dy * dy;
+    if (d < bestD) { bestD = d; best = g; }
+  });
+  if (!best) return;
+  var a = assetById(ui.player.id), info = a.score && a.score.notes[best.id]; if (!info) return;
+  var P = ui.player; P.pos = info[0];
+  if (W && W.active) waitStart(); else if (P.playing) playerStart(true); else render();
+});
 root.addEventListener("change", function(e){
   var t = e.target, c = active(), a = t.dataset.act;
   if (a === "tick") { c.done[t.dataset.id] = t.checked; save(); render(); if (t.checked && c.mode === "reader") chime(); }
@@ -1013,6 +1196,8 @@ root.addEventListener("change", function(e){
   }
   else if (a === "ploop") { ui.player.loop = t.checked; playerRestartIfPlaying(); }
   else if (a === "pcount") { ui.player.countIn = t.checked; render(); }
+  else if (a === "pwait") { stopAll(); W = null; ui.player.wait = t.checked; render(); }
+  else if (a === "palong") { ui.player.along = t.checked; render(); }
   else if (a === "pmetro") { ui.player.metro = t.checked; playerRestartIfPlaying(); }
   else if (a === "learned") { c.learned[t.dataset.id] = t.checked; save(); render(); }
   else if (a === "who") { S.activeId = t.value; save(); go("week"); }
