@@ -898,7 +898,8 @@ window.define = window.__pdDefine;
      (works inside a Squarespace page as well as on its own). */
   var placeholder = null;
   function beforePrint() {
-    if (placeholder) return;
+    // Inside the Family Piano app the maker sits in a hidden panel until "Drill sheet" is picked.
+    if (placeholder || ROOT.closest('[hidden]')) return;
     placeholder = document.createComment('pd-drills');
     ROOT.parentNode.insertBefore(placeholder, ROOT);
     document.body.appendChild(ROOT);

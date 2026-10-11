@@ -36,9 +36,10 @@ app/                              ← Phase 1.5 Part B + main app
   DRILL-RULES.md                  ← every drill rule in plain English
   family-piano.html               ← main app (built file); paste into a Squarespace Code block
   src/family-piano.template.html  ← main app source; edit this, then run `python3 app/build.py`
-  build.py                        ← inlines content/ + licenses/assets.csv into family-piano.html
+  build.py                        ← inlines content/, licenses/assets.csv and drills.html into family-piano.html
 docs/
   UI-CONTEXT.md, UI-SPEC.md       ← UI design context and the approved UI spec
+  UI-SPEC-REVIEW.md               ← where the two differ (owner decisions needed) + progress/backup format
 ```
 
 **assets.csv new columns:** `derivatives_allowed` = `yes`, `no`, or `share-alike` (may we make a simplified version?). `source_format` = `musicxml`, `mxl`, or `xml` for files in `scores/source/` (use `n/a` for linked-only items).

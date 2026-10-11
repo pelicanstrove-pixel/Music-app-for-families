@@ -22,6 +22,11 @@
 #fp-app :focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
 #fp-app .fp-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 
+#fp-app > #fp-side{display:flex;flex:0 0 220px}
+#fp-app > #fp-side > .fp-side{flex:1}
+:is(#fp-app,#fp-printout) .fp-paper blockquote{margin:0 0 .6em;padding-left:.6em;border-left:2px solid #000}
+:is(#fp-app,#fp-printout) .fp-paper hr{border:0;border-top:1px solid #000;margin:.8em 0}
+
 /* sidebar */
 #fp-app .fp-side{width:220px;flex:0 0 220px;background:var(--navy);color:#fff;padding:18px 14px;display:flex;flex-direction:column;gap:16px}
 #fp-app .fp-logo{font-weight:800;font-size:20px;display:flex;align-items:center;gap:8px}
@@ -98,17 +103,17 @@
 #fp-app .fp-printwrap{display:grid;grid-template-columns:260px minmax(0,1fr);gap:18px;align-items:start}
 #fp-app fieldset{border:1px solid var(--line);border-radius:12px;padding:12px;margin:0 0 12px;background:#fff}
 #fp-app legend{font-weight:800;padding:0 4px}
-#fp-app .fp-paper{background:#fff;color:#000;width:100%;max-width:8.5in;aspect-ratio:8.5/11;padding:.5in;box-shadow:0 2px 10px rgba(0,0,0,.15);font-family:Arial,Helvetica,sans-serif;font-size:13px;overflow:hidden}
-#fp-app .fp-paper.fp-lg{font-size:18px}
-#fp-app .fp-paper h2{font-size:1.6em;margin-bottom:.4em;font-family:Arial,Helvetica,sans-serif}
-#fp-app .fp-paper h3{font-size:1.15em;margin:.8em 0 .3em;font-family:Arial,Helvetica,sans-serif}
-#fp-app .fp-paper .fp-nameline{display:flex;gap:2em;margin-bottom:1em}
-#fp-app .fp-paper .fp-nameline span{flex:1;border-bottom:1px solid #000;padding-bottom:2px}
-#fp-app .fp-paper table{border-collapse:collapse;width:100%}
-#fp-app .fp-paper td,#fp-app .fp-paper th{border:1px solid #000;padding:.35em;text-align:left;vertical-align:top}
-#fp-app .fp-paper .fp-box{display:inline-block;width:1em;height:1em;border:1px solid #000;vertical-align:middle;margin-right:.4em}
-#fp-app .fp-paper .fp-pagebreak{border-top:1px dashed #000;margin:1.2em 0 .6em;padding-top:.4em;font-weight:bold}
-#fp-app .fp-paper .fp-foot{margin-top:1.5em;font-size:.8em}
+:is(#fp-app,#fp-printout) .fp-paper{background:#fff;color:#000;width:100%;max-width:8.5in;aspect-ratio:8.5/11;padding:.5in;box-shadow:0 2px 10px rgba(0,0,0,.15);font-family:Arial,Helvetica,sans-serif;font-size:13px;overflow:hidden}
+:is(#fp-app,#fp-printout) .fp-paper.fp-lg{font-size:18px}
+:is(#fp-app,#fp-printout) .fp-paper h2{font-size:1.6em;margin-bottom:.4em;font-family:Arial,Helvetica,sans-serif}
+:is(#fp-app,#fp-printout) .fp-paper h3{font-size:1.15em;margin:.8em 0 .3em;font-family:Arial,Helvetica,sans-serif}
+:is(#fp-app,#fp-printout) .fp-paper .fp-nameline{display:flex;gap:2em;margin-bottom:1em}
+:is(#fp-app,#fp-printout) .fp-paper .fp-nameline span{flex:1;border-bottom:1px solid #000;padding-bottom:2px}
+:is(#fp-app,#fp-printout) .fp-paper table{border-collapse:collapse;width:100%}
+:is(#fp-app,#fp-printout) .fp-paper td,:is(#fp-app,#fp-printout) .fp-paper th{border:1px solid #000;padding:.35em;text-align:left;vertical-align:top}
+:is(#fp-app,#fp-printout) .fp-paper .fp-box{display:inline-block;width:1em;height:1em;border:1px solid #000;vertical-align:middle;margin-right:.4em}
+:is(#fp-app,#fp-printout) .fp-paper .fp-pagebreak{border-top:1px dashed #000;margin:1.2em 0 .6em;padding-top:.4em;font-weight:bold}
+:is(#fp-app,#fp-printout) .fp-paper .fp-foot{margin-top:1.5em;font-size:.8em}
 
 /* pieces */
 #fp-app .fp-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
@@ -125,6 +130,15 @@
 #fp-app .fp-form label{font-weight:700;font-size:14px;display:flex;flex-direction:column;gap:4px}
 #fp-app .fp-form input,#fp-app .fp-form select{min-height:44px;border:1px solid #9fb3c4;border-radius:8px;padding:0 10px;background:#fff}
 
+/* drill sheet maker (app/drills.html) inside the Print screen: restyle its controls only */
+#fp-app #fp-drillhost{overflow-x:auto;margin-top:14px}
+#fp-app #pd-drills .pd-controls{background:#fff;border:1px solid var(--line);border-radius:12px;max-width:none;font-family:Nunito,system-ui,Arial,sans-serif;color:var(--text)}
+#fp-app #pd-drills .pd-controls input[type=text],#fp-app #pd-drills .pd-controls input[type=number],#fp-app #pd-drills .pd-controls select{min-height:44px;border-radius:8px;border-color:#9fb3c4}
+#fp-app #pd-drills .pd-controls label.pd-check{min-height:44px}
+#fp-app #pd-drills .pd-controls input[type=checkbox]{width:24px;height:24px;accent-color:var(--blue)}
+#fp-app #pd-drills .pd-controls button{min-height:44px;border-radius:10px;border:2px solid var(--blue);color:var(--blue);font-weight:800;font-family:inherit;background:#fff}
+#fp-app #pd-drills .pd-controls button.pd-primary{background:var(--blue);color:#fff}
+
 /* help */
 #fp-app details{background:#fff;border:1px solid var(--line);border-radius:10px;padding:0 14px}
 #fp-app summary{min-height:44px;display:flex;align-items:center;font-weight:800;cursor:pointer}
@@ -133,6 +147,7 @@
 /* phone / small tablet */
 @media (max-width:760px){
   #fp-app{flex-direction:column}
+  #fp-app > #fp-side{flex-basis:auto}
   #fp-app .fp-side{width:100%;flex-basis:auto}
   #fp-app .fp-nav{flex-direction:row;flex-wrap:wrap}
   #fp-app .fp-nav li{flex:1 1 40%}
@@ -142,17 +157,22 @@
   #fp-app .fp-reader{font-size:22px}
 }
 
-/* print: only the paper, black and white, US Letter */
+/* print: the app copies the chosen sheet into #fp-printout (a direct child of <body>) and hides everything else */
+#fp-printout{display:none}
 @media print{
   @page{size:letter;margin:.5in}
-  body *{visibility:hidden !important}
-  #fp-app .fp-paper,#fp-app .fp-paper *{visibility:visible !important;color:#000 !important;background:#fff !important}
-  #fp-app .fp-paper{position:absolute;left:0;top:0;width:100%;max-width:none;aspect-ratio:auto;padding:0;box-shadow:none;overflow:visible}
-  #fp-app .fp-paper .fp-pagebreak{break-before:page;border-top:0}
+  html.fp-printing body > *:not(#fp-printout){display:none !important}
+  html.fp-printing,html.fp-printing body{margin:0 !important;padding:0 !important;background:#fff !important}
+  html.fp-printing #fp-printout{display:block !important}
+  #fp-printout .fp-paper,#fp-printout .fp-paper *{color:#000 !important;background:#fff !important}
+  #fp-printout .fp-paper{width:100%;max-width:none;aspect-ratio:auto;padding:0;box-shadow:none;overflow:visible}
+  #fp-printout .fp-paper .fp-pagebreak{break-before:page;page-break-before:always;border-top:0}
 }
 </style>
 
-<div id="fp-app" aria-live="polite"></div>
+<div id="fp-app"><div id="fp-side"></div><main class="fp-main"><div id="fp-view"></div><div id="fp-drillhost" hidden>
+<!--__FP_DRILLS__-->
+</div></main></div>
 
 <script>
 (function(){
@@ -186,7 +206,8 @@ var TEXT = {
   help: "Help & placement",
   noKids: "Add your first child to start.",
   storeBlocked: "This browser is not saving data (private mode or blocked storage). Progress will be lost when you close the page.",
-  sheets: [["plan","This week's plan"],["chart","Practice chart"],["overview","12-week overview"]],
+  sheets: [["plan","This week's plan"],["chart","Practice chart"],["overview","12-week overview"],["drill","Drill sheet"],
+           ["quiz","Placement quiz (readers)"],["checklist","Pre-reader checklist"]],
   printOpts: { large:"Large print", key:"Answer key", nameline:"Name/date line" },
   savePdf: "Save as PDF",
   savePdfHint: "In the print window, choose “Save as PDF” as the printer.",
@@ -198,7 +219,13 @@ var TEXT = {
   exportBtn: "Save backup file", importBtn: "Restore from file",
   importOk: "Backup restored.", importBad: "That file is not a Family Piano backup.",
   remove: "Remove", removeConfirm: function(n){ return "Remove " + n + " and their progress?"; },
-  myStars: "My stars"
+  myStars: "My stars",
+  welcome: "Welcome! Family Piano gives each child a 12-week plan, printable sheets and a place to tick off practice. Everything stays in this browser.",
+  viewing: function(n){ return "You are looking at week " + n + "."; },
+  backToWeek: "Back to this week", openWeek: "Open",
+  nextLevel: function(name){ return "Start " + name; },
+  edit: "Edit", saveChild: "Save", drillHint: "Pick the drill below, press Make sheet, then Print.",
+  placementKey: "ANSWER KEY (for the parent)"
 };
 
 /* ---------- state ---------- */
@@ -211,7 +238,7 @@ function load(){
 }
 function save(){ try { localStorage.setItem(STORE_KEY, JSON.stringify(S)); } catch(e){ memoryOnly = true; } }
 var S = load();
-var ui = { screen:"week", grown:false, sheet:"plan", opts:{large:false,key:false,nameline:true}, filter:"all", adding:false, msg:"" };
+var ui = { screen:"week", grown:false, sheet:"plan", opts:{large:false,key:false,nameline:true}, filter:"all", adding:false, editing:null, viewWeek:null, msg:"" };
 
 /* ---------- content helpers ---------- */
 function levelById(id){ return CONTENT.levels.levels.filter(function(l){ return l.id === id; })[0]; }
@@ -228,6 +255,13 @@ function daysSince(iso){ if (!iso) return null; return Math.floor((Date.now() - 
 function draftChip(show){ return show ? '<span class="fp-draft">' + esc(TEXT.draft) + "</span>" : ""; }
 function uid(){ return "c" + Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
 function weeksDoneCount(c){ return c.complete ? 12 : c.week - 1; }
+function nextLevelOf(c){ var lv = levelById(c.level); return CONTENT.levels.levels.filter(function(l){ return l.order === lv.order + 1; })[0] || null; }
+function completeView(c){
+  var nx = nextLevelOf(c);
+  return head(TEXT.allDone, false) + '<div class="fp-card fp-stack"><p class="fp-stars" aria-hidden="true">⭐⭐⭐</p><p>' + txt("", "Next-level advice") + "</p>" +
+    '<div class="fp-row">' + (nx ? '<button type="button" class="fp-btn fp-primary" data-act="nextlevel">' + esc(TEXT.nextLevel(nx.name)) + "</button>" : "") +
+    (c.mode === "standard" ? '<button type="button" class="fp-btn" data-go="weeks">' + esc(TEXT.nav.standard[1][1]) + "</button>" : "") + "</div></div>";
+}
 
 /* ---------- sidebar ---------- */
 function sidebar(c){
@@ -266,8 +300,9 @@ function memoryWarning(){ return memoryOnly ? '<div class="fp-banner" role="aler
 function screenWeek(c){
   if (c.mode === "reader") return weekReader(c);
   if (c.mode === "toddler") return weekToddler(c);
-  var lv = levelById(c.level), w = weekOf(c, c.week);
-  if (c.complete) return head(TEXT.allDone, false) + '<div class="fp-card"><p>' + txt("", "Next-level advice") + "</p></div>";
+  if (c.complete && !ui.viewWeek) return completeView(c);
+  var n = ui.viewWeek || c.week, past = n !== c.week || c.complete;
+  var lv = levelById(c.level), w = weekOf(c, n);
   var cards = lv.strands.map(function(s, i){
     var items = (w.strand_items[s] || []).map(function(it){
       return '<li><label class="fp-check"><input type="checkbox" data-act="tick" data-id="' + esc(it.id) + '"' + (c.done[it.id] ? " checked" : "") + "> " +
@@ -281,13 +316,14 @@ function screenWeek(c){
     var st = n < c.week ? TEXT.stateDone : n === c.week ? TEXT.stateNow : TEXT.stateSoon;
     return '<li class="' + cls + '" title="' + esc(TEXT.week + " " + n + ": " + st) + '"><span aria-hidden="true">' + n + '</span><span class="fp-sr">' + esc(TEXT.week + " " + n + ": " + st) + "</span></li>";
   }).join("") + "</ol>";
-  return head(TEXT.week + " " + c.week + " " + TEXT.of12, isDraft(w), "<b>Focus:</b> " + txt(w.focus, "Week focus")) +
-    '<div class="fp-stack"><div class="fp-grid4">' + cards + "</div>" +
+  var back = past ? '<div class="fp-banner"><span>' + esc(TEXT.viewing(n)) + '</span><button type="button" class="fp-btn fp-primary" data-act="backweek">' + esc(TEXT.backToWeek) + "</button></div>" : "";
+  return head(TEXT.week + " " + n + " " + TEXT.of12, isDraft(w), "<b>Focus:</b> " + txt(w.focus, "Week focus")) +
+    '<div class="fp-stack">' + back + '<div class="fp-grid4">' + cards + "</div>" +
     '<div class="fp-card"><h3>Parent notes</h3><p>' + txt(w.parent_notes, "Parent notes") + "</p></div>" +
     '<div class="fp-card">' + dots + "</div>" +
     '<div class="fp-row"><button type="button" class="fp-btn" data-print="plan">' + esc(TEXT.print) + "</button>" +
     '<button type="button" class="fp-btn" data-print="chart">' + esc(TEXT.practiceChart) + "</button>" +
-    '<button type="button" class="fp-btn fp-primary" data-act="weekdone">' + esc(TEXT.weekDone) + "</button></div></div>";
+    (past ? "" : '<button type="button" class="fp-btn fp-primary" data-act="weekdone">' + esc(TEXT.weekDone) + "</button>") + "</div></div>";
 }
 
 function range12(){ var a = []; for (var i = 1; i <= 12; i++) a.push(i); return a; }
@@ -297,7 +333,7 @@ function readerSteps(c){
   return lv.strands.map(function(s){ var it = (w.strand_items[s] || [])[0]; return {strand:s, item:it}; }).filter(function(x){ return x.item; });
 }
 function weekReader(c){
-  if (c.complete) return head(TEXT.allDone, false) + '<p class="fp-stars" aria-hidden="true">⭐⭐⭐</p>';
+  if (c.complete) return completeView(c);
   var w = weekOf(c, c.week), steps = readerSteps(c), got = 0;
   var lis = steps.map(function(x, i){
     var done = !!c.done[x.item.id]; if (done) got++;
@@ -313,6 +349,7 @@ function weekReader(c){
 }
 
 function weekToddler(c){
+  if (c.complete) return completeView(c);
   var lv = levelById(c.level), w = weekOf(c, c.week);
   if (ui.grown) {
     return head(TEXT.grownUp, isDraft(w)) + '<div class="fp-stack">' +
@@ -340,7 +377,8 @@ function screenWeeks(c){
     var w = weekOf(c, n);
     var st = (c.complete || n < c.week) ? ["fp-done", TEXT.stateDone] : n === c.week ? ["fp-now", TEXT.stateNow] : ["fp-soon", TEXT.stateSoon];
     var inner = "<b>" + esc(TEXT.week) + " " + n + '</b><span class="fp-state">' + esc(st[1]) + "</span><p>" + txt(w && w.focus, "Week focus") + "</p>";
-    var open = st[0] === "fp-now" && !c.complete ? '<button type="button" data-go="week" class="fp-btn" style="margin-top:6px">' + esc(TEXT.nav.standard[0][1]) + "</button>" : "";
+    var open = st[0] === "fp-now" ? '<button type="button" data-go="week" class="fp-btn" style="margin-top:6px">' + esc(TEXT.nav.standard[0][1]) + "</button>" :
+      st[0] === "fp-done" ? '<button type="button" data-act="viewweek" data-n="' + n + '" class="fp-btn" style="margin-top:6px" aria-label="' + esc(TEXT.openWeek + " " + TEXT.week + " " + n) + '">' + esc(TEXT.openWeek) + "</button>" : "";
     return '<li class="fp-week ' + st[0] + '"' + (st[0] === "fp-now" ? ' aria-current="step"' : "") + ">" + inner + open + "</li>";
   }).join("");
   return head(TEXT.nav.standard[1][1], isDraft(p)) + '<ol class="fp-weeks">' + cells + "</ol>";
@@ -365,6 +403,10 @@ function paperHtml(c){
       rows.map(function(r){ return "<tr><td style=\"height:3em\">" + esc(typeof r === "string" ? r : (r.label || r.id || "")) + "</td>" + days.map(function(){ return "<td></td>"; }).join("") + "</tr>"; }).join("") +
       "</tbody></table>";
     if (o.key) body += '<div class="fp-pagebreak">PARENT NOTES (for the parent)</div><p>' + esc(plain(w.parent_notes, "Parent notes")) + "</p>";
+  } else if (ui.sheet === "quiz" || ui.sheet === "checklist") {
+    var pl = CONTENT.placement[ui.sheet];
+    body = pl.main + (o.key && pl.key ? '<div class="fp-pagebreak">' + esc(TEXT.placementKey) + "</div>" + pl.key : "");
+    return '<div class="fp-paper' + (o.large ? " fp-lg" : "") + '" aria-label="Paper preview">' + body + "</div>";
   } else {
     body = "<h2>" + esc(lv.name) + " – 12-week overview</h2>" + nameline + "<table><thead><tr><th>Week</th><th>Focus</th><th>Done</th></tr></thead><tbody>" +
       range12().map(function(n){ var ww = weekOf(c, n); return "<tr><td>" + n + "</td><td>" + esc(plain(ww && ww.focus, "Week focus")) + '</td><td><span class="fp-box"></span></td></tr>'; }).join("") +
@@ -380,6 +422,8 @@ function screenPrint(c){
     return '<label class="fp-check"><input type="radio" name="fp-sheet" value="' + s[0] + '" data-act="sheet"' + (ui.sheet === s[0] ? " checked" : "") + "> " + esc(s[1]) + "</label>"; }).join("");
   var opts = Object.keys(TEXT.printOpts).map(function(k){
     return '<label class="fp-check"><input type="checkbox" data-act="opt" data-opt="' + k + '"' + (ui.opts[k] ? " checked" : "") + "> " + esc(TEXT.printOpts[k]) + "</label>"; }).join("");
+  if (ui.sheet === "drill") return head(TEXT.nav.standard[2][1], true, "Prints in black and white on US Letter paper.") +
+    "<fieldset><legend>Sheet</legend>" + radios + "</fieldset><p>" + esc(TEXT.drillHint) + "</p>";
   return head(TEXT.nav.standard[2][1], isDraft(weekOf(c, c.week)), "Prints in black and white on US Letter paper.") +
     '<div class="fp-printwrap"><div><fieldset><legend>Sheet</legend>' + radios + "</fieldset><fieldset><legend>Options</legend>" + opts + "</fieldset>" +
     '<div class="fp-row"><button type="button" class="fp-btn fp-primary" data-act="doprint">' + esc(TEXT.print) + "</button>" +
@@ -423,17 +467,19 @@ function screenStars(c){
 }
 
 /* ----- family ----- */
-function childForm(){
+function childForm(k){
   var opts = CONTENT.levels.levels.slice().sort(function(a,b){ return a.order - b.order; }).map(function(l){
-    return '<option value="' + esc(l.id) + '">' + esc(l.name + " (ages " + l.age_guide.min + "–" + l.age_guide.max + ")") + "</option>"; }).join("");
-  var modes = '<option value="">Pick for me</option>' + Object.keys(TEXT.modes).map(function(m){ return '<option value="' + m + '">' + esc(TEXT.modes[m]) + "</option>"; }).join("");
-  return '<form class="fp-card" data-form="child"><h2 style="margin-bottom:10px">' + esc(TEXT.addChild) + '</h2><div class="fp-form">' +
-    '<label>Name<input name="name" required maxlength="40" autocomplete="off"></label>' +
-    '<label>Age<input name="age" type="number" min="2" max="18" inputmode="numeric"></label>' +
+    return '<option value="' + esc(l.id) + '"' + (k && k.level === l.id ? " selected" : "") + ">" + esc(l.name + " (ages " + l.age_guide.min + "–" + l.age_guide.max + ")") + "</option>"; }).join("");
+  var modes = (k ? "" : '<option value="">Pick for me</option>') + Object.keys(TEXT.modes).map(function(m){
+    return '<option value="' + m + '"' + (k && k.mode === m ? " selected" : "") + ">" + esc(TEXT.modes[m]) + "</option>"; }).join("");
+  var title = k ? TEXT.edit + " " + k.name : TEXT.addChild;
+  return '<form class="fp-card" data-form="child"' + (k ? ' data-id="' + esc(k.id) + '"' : "") + '><h2 style="margin-bottom:10px">' + esc(title) + '</h2><div class="fp-form">' +
+    '<label>Name<input name="name" required maxlength="40" autocomplete="off" value="' + esc(k ? k.name : "") + '"></label>' +
+    '<label>Age<input name="age" type="number" min="2" max="18" inputmode="numeric" value="' + esc(k && k.age ? k.age : "") + '"></label>' +
     '<label>Level<select name="level">' + opts + "</select></label>" +
     '<label>Mode<select name="mode">' + modes + "</select></label>" +
-    '<label>Start at week<input name="week" type="number" min="1" max="12" value="1"></label></div>' +
-    '<div class="fp-row" style="margin-top:12px"><button type="submit" class="fp-btn fp-primary">' + esc(TEXT.addChild) + "</button>" +
+    '<label>' + (k ? "Current week" : "Start at week") + '<input name="week" type="number" min="1" max="12" value="' + (k ? k.week : 1) + '"></label></div>' +
+    '<div class="fp-row" style="margin-top:12px"><button type="submit" class="fp-btn fp-primary">' + esc(k ? TEXT.saveChild : TEXT.addChild) + "</button>" +
     (S.children.length ? '<button type="button" class="fp-btn" data-act="cancel">Cancel</button>' : "") + "</div></form>";
 }
 function backupBanner(){
@@ -449,12 +495,15 @@ function screenFamily(){
       "<p>" + (k.complete ? esc(TEXT.allDone) : esc(TEXT.week) + " " + k.week + " " + esc(TEXT.of12)) + "</p>" +
       '<div class="fp-bar" role="img" aria-label="' + pct + '% done"><i style="width:' + pct + '%"></i></div>' +
       '<div class="fp-row"><button type="button" class="fp-btn" data-act="pick" data-id="' + esc(k.id) + '">Open</button>' +
+      '<button type="button" class="fp-btn" data-act="edit" data-id="' + esc(k.id) + '">' + esc(TEXT.edit) + "</button>" +
       '<button type="button" class="fp-btn fp-danger" data-act="remove" data-id="' + esc(k.id) + '">' + esc(TEXT.remove) + "</button></div></section>";
   }).join("");
   var adding = ui.adding || !S.children.length;
-  return head(TEXT.nav.standard[4][1], false, S.children.length ? "" : esc(TEXT.noKids)) + memoryWarning() +
+  var editing = S.children.filter(function(k){ return k.id === ui.editing; })[0];
+  var form = editing ? childForm(editing) : adding ? childForm() : '<div><button type="button" class="fp-btn fp-primary" data-act="add">+ ' + esc(TEXT.addChild) + "</button></div>";
+  return head(TEXT.nav.standard[4][1], false, S.children.length ? "" : esc(TEXT.welcome) + " " + esc(TEXT.noKids)) + memoryWarning() +
     '<div class="fp-stack">' + backupBanner() + (cards ? '<div class="fp-kids">' + cards + "</div>" : "") +
-    (adding ? childForm() : '<div><button type="button" class="fp-btn fp-primary" data-act="add">+ ' + esc(TEXT.addChild) + "</button></div>") +
+    form +
     '<section class="fp-card"><h2 style="margin-bottom:6px">' + esc(TEXT.backup) + "</h2>" +
     "<p>Progress is saved only in this browser. A backup file is the only way to move it to another device or get it back.</p>" +
     '<div class="fp-row" style="margin-top:10px"><button type="button" class="fp-btn fp-primary" data-act="export">' + esc(TEXT.exportBtn) + "</button>" +
@@ -480,7 +529,15 @@ function screenHelp(){
 }
 
 /* ---------- render ---------- */
-var root = document.getElementById("fp-app");
+var root = document.getElementById("fp-app"), sideEl = document.getElementById("fp-side"),
+    viewEl = document.getElementById("fp-view"), drillHost = document.getElementById("fp-drillhost");
+var drillSynced = null;
+function syncDrills(c){
+  var key = c.id + "|" + c.level, n = document.getElementById("pd-name"), l = document.getElementById("pd-level");
+  if (drillSynced === key || !n || !l) return;
+  drillSynced = key; n.value = c.name; l.value = c.level;
+  l.dispatchEvent(new Event("change"));
+}
 function render(focusHead){
   var c = active();
   if (c && !TEXT.nav[c.mode].some(function(n){ return n[0] === ui.screen; }) && ["help","family"].indexOf(ui.screen) < 0) ui.screen = "week";
@@ -488,11 +545,29 @@ function render(focusHead){
   var body;
   if (!c) body = ui.screen === "help" ? screenHelp() : screenFamily();
   else body = ({week:screenWeek, weeks:screenWeeks, print:screenPrint, pieces:screenPieces, stars:screenStars, family:screenFamily, help:screenHelp}[ui.screen] || screenWeek)(c);
-  root.innerHTML = sidebar(c) + '<main class="fp-main">' + (ui.screen !== "family" ? memoryWarning() : "") + body + "</main>";
+  sideEl.innerHTML = sidebar(c);
+  viewEl.innerHTML = (ui.screen !== "family" ? memoryWarning() : "") + body;
+  drillHost.hidden = !(c && ui.screen === "print" && ui.sheet === "drill");
+  if (!drillHost.hidden) syncDrills(c);
   if (focusHead) { var h = document.getElementById("fp-h1"); if (h) h.focus(); }
 }
 
-function go(screen){ ui.screen = screen; ui.msg = ""; ui.grown = false; render(true); }
+function go(screen){ ui.screen = screen; ui.msg = ""; ui.grown = false; ui.viewWeek = null; ui.editing = null; render(true); }
+
+/* Printing: copy the paper to a direct child of <body> and hide the rest of the page
+   (works inside a Squarespace page as well as on its own). */
+function makePrintout(){
+  var paper = viewEl.querySelector(".fp-paper"); if (!paper) return false;
+  removePrintout();
+  var out = document.createElement("div"); out.id = "fp-printout"; out.innerHTML = paper.outerHTML;
+  document.body.appendChild(out); document.documentElement.classList.add("fp-printing"); return true;
+}
+function removePrintout(){
+  var out = document.getElementById("fp-printout"); if (out) out.remove();
+  document.documentElement.classList.remove("fp-printing");
+}
+window.addEventListener("beforeprint", function(){ if (ui.screen === "print" && ui.sheet !== "drill" && !document.getElementById("fp-printout")) makePrintout(); });
+window.addEventListener("afterprint", removePrintout);
 
 function exportBackup(){
   S.lastBackup = new Date().toISOString(); save();
@@ -536,10 +611,14 @@ root.addEventListener("click", function(e){
     case "tile": c.done[t.dataset.id] = !c.done[t.dataset.id]; save(); render(); break;
     case "grown": ui.grown = !ui.grown; render(true); break;
     case "readme": readAloud(c); break;
-    case "doprint": ui.msg = t.dataset.pdf ? TEXT.savePdfHint : ""; render(); window.print(); break;
+    case "doprint": ui.msg = t.dataset.pdf ? TEXT.savePdfHint : ""; render(); if (makePrintout()) { window.print(); setTimeout(removePrintout, 1000); } break;
+    case "viewweek": ui.viewWeek = parseInt(t.dataset.n, 10); ui.screen = "week"; render(true); break;
+    case "backweek": ui.viewWeek = null; render(true); break;
+    case "nextlevel": var nx = nextLevelOf(c); if (nx) { c.level = nx.id; c.week = 1; c.complete = false; save(); go("week"); } break;
+    case "edit": ui.editing = t.dataset.id; ui.adding = false; render(); break;
     case "filter": ui.filter = t.dataset.f; render(); break;
     case "add": ui.adding = true; render(); break;
-    case "cancel": ui.adding = false; render(); break;
+    case "cancel": ui.adding = false; ui.editing = null; render(); break;
     case "pick": S.activeId = t.dataset.id; save(); go("week"); break;
     case "remove":
       var k = S.children.filter(function(x){ return x.id === t.dataset.id; })[0];
@@ -565,6 +644,12 @@ root.addEventListener("submit", function(e){
   var level = el.namedItem("level").value, mode = el.namedItem("mode").value || (level === "pre-reader" ? "toddler" : "standard");
   var week = Math.max(1, Math.min(12, parseInt(el.namedItem("week").value, 10) || 1));
   var age = el.namedItem("age").value;
+  var old = S.children.filter(function(x){ return x.id === f.dataset.id; })[0];
+  if (old) {
+    old.name = name; old.age = age ? parseInt(age, 10) : null; old.mode = mode;
+    if (old.level !== level || old.week !== week) old.complete = false;
+    old.level = level; old.week = week; save(); ui.editing = null; render(); return;
+  }
   var k = { id:uid(), name:name, age:age ? parseInt(age, 10) : null, level:level, mode:mode, week:week, complete:false, done:{}, learned:{} };
   S.children.push(k); S.activeId = k.id; save(); ui.adding = false; go("week");
 });
