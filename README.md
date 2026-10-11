@@ -37,8 +37,9 @@ app/                              ← Phase 1.5 Part B + main app
   DRILL-RULES.md                  ← every drill rule in plain English
   family-piano.html               ← main app (built file); paste into a Squarespace Code block
   src/family-piano.template.html  ← main app source; edit this, then run `python3 app/build.py`
-  build.py                        ← inlines content/, licenses/assets.csv, drills.html and the font into family-piano.html
+  build.py                        ← inlines content/, licenses/assets.csv, drills.html, the font and VexFlow into family-piano.html
   fonts/                          ← Nunito (SIL Open Font License), embedded so no font server is used
+  vendor/                         ← VexFlow 4.2.2 + Bravura (draws drill sheets), embedded so the app needs no outside files
 docs/
   UI-CONTEXT.md, UI-SPEC.md       ← UI design context and the approved UI spec
   UI-SPEC-REVIEW.md               ← where the two differ (owner decisions needed) + progress/backup format

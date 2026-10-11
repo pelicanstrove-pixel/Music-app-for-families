@@ -8,6 +8,7 @@ Inlines into app/src/family-piano.template.html:
   - content/placement/placement-rules.json (how results turn into a suggested level)
   - app/drills.html (the drill sheet maker, shown on the Print screen)
   - app/fonts/nunito-latin-wght-normal.woff2 (as base64, so no font server is contacted)
+  - app/vendor/vexflow-bravura-4.2.2.js (in place of the jsDelivr script tag, so drills need no internet)
 
 Usage: python3 app/build.py
 """
@@ -20,6 +21,8 @@ MARK = "/*__FP_CONTENT__*/null"
 DRILLS_MARK = "<!--__FP_DRILLS__-->"
 FONT_MARK = "/*__FP_FONT__*/"
 FONT = ROOT / "app" / "fonts" / "nunito-latin-wght-normal.woff2"
+VEXFLOW = ROOT / "app" / "vendor" / "vexflow-bravura-4.2.2.js"
+VEXFLOW_TAG = '<script src="https://cdn.jsdelivr.net/npm/vexflow@4.2.2/build/cjs/vexflow.js"></script>'
 # Where repo files (like scores/...) are reachable on the web. Change this if the files are hosted elsewhere.
 SCORE_BASE_URL = "https://github.com/pelicanstrove-pixel/Music-app-for-families/blob/main/"
 
@@ -118,6 +121,10 @@ def main():
     drills = (ROOT / "app" / "drills.html").read_text(encoding="utf-8")
     start = drills.index('<div id="pd-drills">')  # drop the stand-alone page header (doctype, title)
     drills = drills[start:]
+    vexflow = VEXFLOW.read_text(encoding="utf-8")
+    assert "</script" not in vexflow.lower(), "vexflow text would close the script tag"
+    assert drills.count(VEXFLOW_TAG) == 1, "VexFlow script tag in app/drills.html changed; update VEXFLOW_TAG"
+    drills = drills.replace(VEXFLOW_TAG, "<script>/* VexFlow 4.2.2 (MIT) + Bravura font (OFL): see app/vendor/README.md */\n" + vexflow + "\n</script>")
 
     page = TEMPLATE.read_text(encoding="utf-8")
     assert MARK in page and DRILLS_MARK in page and FONT_MARK in page, "placeholder missing in template"
