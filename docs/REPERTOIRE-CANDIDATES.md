@@ -30,81 +30,81 @@ piece belongs to is the educator's call, so it is left blank.
 
 ### Bach: Notebook for Anna Magdalena Bach
 
-| Piece | Key | Meter | Bars (as played) | Mutopia | File |
+| Piece | Key signature | Meter | Bars (as played) | Mutopia | File |
 |---|---|---|---|---|---|
-| Menuet (BWV Anh. 113) | F major | 3/4 | 32 | [74](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=74) | `bach-bwv-anh-113-menuet.mxl` |
-| Menuet (BWV Anh. 114) | G major | 3/4 | 32 | [75](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=75) | `bach-bwv-anh-114-menuet.mxl` |
-| Menuet (BWV Anh. 115) | B- major | 3/4 | 32 | [76](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=76) | `bach-bwv-anh-115-menuet.mxl` |
-| Menuet (BWV Anh. 116) | G major | 3/4 | 40 | [77](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=77) | `bach-bwv-anh-116-menuet.mxl` |
-| Polonaise in F major (BWV Anh. 117b) | F major | 3/4 | 16 | [1015](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=1015) | `bach-bwv-anh-117b-polonaise-in-f-major.mxl` |
-| Minuet in B-flat major (BWV Anh. 118) | B- major | 3/4 | 26 | [1014](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=1014) | `bach-bwv-anh-118-minuet-in-b-flat-major.mxl` |
-| Polonaise in G minor (BWV Anh. 119) | B- major | 3/4 | 16 | [1016](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=1016) | `bach-bwv-anh-119-polonaise-in-g-minor.mxl` |
-| Minuet in A minor (BWV Anh. 120) |  | 3/4 | 29 | [1612](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=1612) | `bach-bwv-anh-120-minuet-in-a-minor.mxl` |
-| Minuet in C minor (BWV Anh. 121) | E- major | 3/4 | 24 | [1613](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=1613) | `bach-bwv-anh-121-minuet-in-c-minor.mxl` |
-| Musette (BWV Anh. 126) | D major | 2/4 | 20 | [79](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=79) | `bach-bwv-anh-126-musette.mxl` |
-| March in E-flat major (BWV Anh. 127) | E- major | 2/2 | 29 | [1614](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=1614) | `bach-bwv-anh-127-march-in-e-flat-major.mxl` |
-| Polonaise in D minor (BWV Anh. 128) | F major | 3/4 | 18 | [1615](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=1615) | `bach-bwv-anh-128-polonaise-in-d-minor.mxl` |
+| Menuet (BWV Anh. 113) | 1 flat | 3/4 | 32 | [74](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=74) | `bach-bwv-anh-113-menuet.mxl` |
+| Menuet (BWV Anh. 114) | 1 sharp | 3/4 | 32 | [75](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=75) | `bach-bwv-anh-114-menuet.mxl` |
+| Menuet (BWV Anh. 115) | 2 flats | 3/4 | 32 | [76](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=76) | `bach-bwv-anh-115-menuet.mxl` |
+| Menuet (BWV Anh. 116) | 1 sharp | 3/4 | 40 | [77](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=77) | `bach-bwv-anh-116-menuet.mxl` |
+| Polonaise in F major (BWV Anh. 117b) | 1 flat | 3/4 | 16 | [1015](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=1015) | `bach-bwv-anh-117b-polonaise-in-f-major.mxl` |
+| Minuet in B-flat major (BWV Anh. 118) | 2 flats | 3/4 | 26 | [1014](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=1014) | `bach-bwv-anh-118-minuet-in-b-flat-major.mxl` |
+| Polonaise in G minor (BWV Anh. 119) | 2 flats | 3/4 | 16 | [1016](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=1016) | `bach-bwv-anh-119-polonaise-in-g-minor.mxl` |
+| Minuet in A minor (BWV Anh. 120) | none | 3/4 | 29 | [1612](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=1612) | `bach-bwv-anh-120-minuet-in-a-minor.mxl` |
+| Minuet in C minor (BWV Anh. 121) | 3 flats | 3/4 | 24 | [1613](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=1613) | `bach-bwv-anh-121-minuet-in-c-minor.mxl` |
+| Musette (BWV Anh. 126) | 2 sharps | 2/4 | 20 | [79](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=79) | `bach-bwv-anh-126-musette.mxl` |
+| March in E-flat major (BWV Anh. 127) | 3 flats | 2/2 | 29 | [1614](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=1614) | `bach-bwv-anh-127-march-in-e-flat-major.mxl` |
+| Polonaise in D minor (BWV Anh. 128) | 1 flat | 3/4 | 18 | [1615](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=1615) | `bach-bwv-anh-128-polonaise-in-d-minor.mxl` |
 ### Mozart (written at age 5–6)
 
-| Piece | Key | Meter | Bars (as played) | Mutopia | File |
+| Piece | Key signature | Meter | Bars (as played) | Mutopia | File |
 |---|---|---|---|---|---|
-| Menuett N°2 fûr das Pianoforte Kôch Verz N°2 (KV 2) | F major | 3/4 | 24 | [1770](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=1770) | `mozart-kv-2-menuett-n2-fur-das-pianoforte-koch-verz.mxl` |
+| Menuett N°2 fûr das Pianoforte Kôch Verz N°2 (KV 2) | 1 flat | 3/4 | 24 | [1770](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=1770) | `mozart-kv-2-menuett-n2-fur-das-pianoforte-koch-verz.mxl` |
 ### Czerny: short exercises (Op. 821)
 
-| Piece | Key | Meter | Bars (as played) | Mutopia | File |
+| Piece | Key signature | Meter | Bars (as played) | Mutopia | File |
 |---|---|---|---|---|---|
-| 160 Eight-Measure Exercises, No. 1 (Op. 821, No. 1) | C major | 4/4 | 8 | [2060](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=2060) | `czerny-op-821-no-1-160-eight-measure-exercises-no-1.mxl` |
-| 160 Eight-Measure Exercises, No. 2 (Op. 821, No. 2) | C major | 3/4 | 8 | [2061](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=2061) | `czerny-op-821-no-2-160-eight-measure-exercises-no-2.mxl` |
-| 160 Eight-Measure Exercises, No. 3 (Op. 821, No. 3) | C major | 4/4 | 8 | [2062](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=2062) | `czerny-op-821-no-3-160-eight-measure-exercises-no-3.mxl` |
-| 160 Eight-Measure Exercises, No. 4 (Op. 821, No. 4) | C major | 6/8 | 8 | [2063](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=2063) | `czerny-op-821-no-4-160-eight-measure-exercises-no-4.mxl` |
-| 160 Eight-Measure Exercises, No. 7 (Op. 821, No. 7) | F major | 4/4 | 8 | [2068](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=2068) | `czerny-op-821-no-7-160-eight-measure-exercises-no-7.mxl` |
-| 160 Eight-Measure Exercises, No. 8 (Op. 821, No. 8) | F major | 4/4 | 8 | [2069](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=2069) | `czerny-op-821-no-8-160-eight-measure-exercises-no-8.mxl` |
-| 160 Eight-Measure Exercises, No. 9 (Op. 821, No. 9) | F major | 6/8 | 8 | [2072](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=2072) | `czerny-op-821-no-9-160-eight-measure-exercises-no-9.mxl` |
-| 160 Eight-Measure Exercises, No. 10 (Op. 821, No. 10) | F major | 2/4 | 8 | [2073](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=2073) | `czerny-op-821-no-10-160-eight-measure-exercises-no-10.mxl` |
-| 160 Eight-Measure Exercises, No. 11 (Op. 821, No. 11) | B- major | 4/4 | 8 | [2076](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=2076) | `czerny-op-821-no-11-160-eight-measure-exercises-no-11.mxl` |
-| 160 Eight-Measure Exercises, No. 12 (Op. 821, No. 12) | B- major | 4/4 | 8 | [2077](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=2077) | `czerny-op-821-no-12-160-eight-measure-exercises-no-12.mxl` |
-| 160 Eight-Measure Exercises, No. 13 (Op. 821, No. 13) | B- major | 4/4 | 8 | [2078](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=2078) | `czerny-op-821-no-13-160-eight-measure-exercises-no-13.mxl` |
-| 160 Eight-Measure Exercises, No. 14 (Op. 821, No. 14) | B- major | 3/8 | 16 | [2079](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=2079) | `czerny-op-821-no-14-160-eight-measure-exercises-no-14.mxl` |
-| 160 Eight-Measure Exercises, No. 15 (Op. 821, No. 15) | G major | 2/4 | 8 | [2081](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=2081) | `czerny-op-821-no-15-160-eight-measure-exercises-no-15.mxl` |
-| 160 Eight-Measure Exercises, No. 16 (Op. 821, No. 16) | G major | 2/4 | 8 | [2082](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=2082) | `czerny-op-821-no-16-160-eight-measure-exercises-no-16.mxl` |
-| 160 Eight-Measure Exercises, No. 17 (Op. 821, No. 17) | G major | 4/4 | 8 | [2083](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=2083) | `czerny-op-821-no-17-160-eight-measure-exercises-no-17.mxl` |
-| 160 Eight-Measure Exercises, No. 18 (Op. 821, No. 18) | G major | 3/8 | 8 | [2084](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=2084) | `czerny-op-821-no-18-160-eight-measure-exercises-no-18.mxl` |
+| 160 Eight-Measure Exercises, No. 1 (Op. 821, No. 1) | none | 4/4 | 8 | [2060](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=2060) | `czerny-op-821-no-1-160-eight-measure-exercises-no-1.mxl` |
+| 160 Eight-Measure Exercises, No. 2 (Op. 821, No. 2) | none | 3/4 | 8 | [2061](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=2061) | `czerny-op-821-no-2-160-eight-measure-exercises-no-2.mxl` |
+| 160 Eight-Measure Exercises, No. 3 (Op. 821, No. 3) | none | 4/4 | 8 | [2062](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=2062) | `czerny-op-821-no-3-160-eight-measure-exercises-no-3.mxl` |
+| 160 Eight-Measure Exercises, No. 4 (Op. 821, No. 4) | none | 6/8 | 8 | [2063](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=2063) | `czerny-op-821-no-4-160-eight-measure-exercises-no-4.mxl` |
+| 160 Eight-Measure Exercises, No. 7 (Op. 821, No. 7) | 1 flat | 4/4 | 8 | [2068](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=2068) | `czerny-op-821-no-7-160-eight-measure-exercises-no-7.mxl` |
+| 160 Eight-Measure Exercises, No. 8 (Op. 821, No. 8) | 1 flat | 4/4 | 8 | [2069](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=2069) | `czerny-op-821-no-8-160-eight-measure-exercises-no-8.mxl` |
+| 160 Eight-Measure Exercises, No. 9 (Op. 821, No. 9) | 1 flat | 6/8 | 8 | [2072](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=2072) | `czerny-op-821-no-9-160-eight-measure-exercises-no-9.mxl` |
+| 160 Eight-Measure Exercises, No. 10 (Op. 821, No. 10) | 1 flat | 2/4 | 8 | [2073](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=2073) | `czerny-op-821-no-10-160-eight-measure-exercises-no-10.mxl` |
+| 160 Eight-Measure Exercises, No. 11 (Op. 821, No. 11) | 2 flats | 4/4 | 8 | [2076](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=2076) | `czerny-op-821-no-11-160-eight-measure-exercises-no-11.mxl` |
+| 160 Eight-Measure Exercises, No. 12 (Op. 821, No. 12) | 2 flats | 4/4 | 8 | [2077](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=2077) | `czerny-op-821-no-12-160-eight-measure-exercises-no-12.mxl` |
+| 160 Eight-Measure Exercises, No. 13 (Op. 821, No. 13) | 2 flats | 4/4 | 8 | [2078](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=2078) | `czerny-op-821-no-13-160-eight-measure-exercises-no-13.mxl` |
+| 160 Eight-Measure Exercises, No. 14 (Op. 821, No. 14) | 2 flats | 3/8 | 16 | [2079](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=2079) | `czerny-op-821-no-14-160-eight-measure-exercises-no-14.mxl` |
+| 160 Eight-Measure Exercises, No. 15 (Op. 821, No. 15) | 1 sharp | 2/4 | 8 | [2081](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=2081) | `czerny-op-821-no-15-160-eight-measure-exercises-no-15.mxl` |
+| 160 Eight-Measure Exercises, No. 16 (Op. 821, No. 16) | 1 sharp | 2/4 | 8 | [2082](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=2082) | `czerny-op-821-no-16-160-eight-measure-exercises-no-16.mxl` |
+| 160 Eight-Measure Exercises, No. 17 (Op. 821, No. 17) | 1 sharp | 4/4 | 8 | [2083](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=2083) | `czerny-op-821-no-17-160-eight-measure-exercises-no-17.mxl` |
+| 160 Eight-Measure Exercises, No. 18 (Op. 821, No. 18) | 1 sharp | 3/8 | 8 | [2084](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=2084) | `czerny-op-821-no-18-160-eight-measure-exercises-no-18.mxl` |
 ### Tchaikovsky: Album for the Young, Op. 39
 
-| Piece | Key | Meter | Bars (as played) | Mutopia | File |
+| Piece | Key signature | Meter | Bars (as played) | Mutopia | File |
 |---|---|---|---|---|---|
-| Morning Prayer (Op. 39, No. 1) | G major | 3/4 | 24 | [2032](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=2032) | `tchaikovsky-op-39-no-1-morning-prayer.mxl` |
-| March of the Wooden Soldiers (Op. 39, No. 5) | D major | 2/4 | 48 | [1806](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=1806) | `tchaikovsky-op-39-no-5-march-of-the-wooden-soldiers.mxl` |
+| Morning Prayer (Op. 39, No. 1) | 1 sharp | 3/4 | 24 | [2032](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=2032) | `tchaikovsky-op-39-no-1-morning-prayer.mxl` |
+| March of the Wooden Soldiers (Op. 39, No. 5) | 2 sharps | 2/4 | 48 | [1806](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=1806) | `tchaikovsky-op-39-no-5-march-of-the-wooden-soldiers.mxl` |
 ### Burgmüller: 25 Easy and Progressive Studies, Op. 100
 
-| Piece | Key | Meter | Bars (as played) | Mutopia | File |
+| Piece | Key signature | Meter | Bars (as played) | Mutopia | File |
 |---|---|---|---|---|---|
-| l'Arabesque (Opus 100.) | C major | 2/4 | 33 | [203](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=203) | `burgmuller-opus-100-l-arabesque.mxl` |
-| La Pastorale (Opus 100.) | G major | 6/8 | 29 | [218](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=218) | `burgmuller-opus-100-la-pastorale.mxl` |
-| La Petite Réunion (Opus 100.) | C major | 4/4 | 30 | [219](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=219) | `burgmuller-opus-100-la-petite-reunion.mxl` |
-| Innocence (Opus 100.) | F major | 3/4 | 17 | [214](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=214) | `burgmuller-opus-100-innocence.mxl` |
-| Progrès (Opus 100.) | C major | 4/4 | 16 | [215](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=215) | `burgmuller-opus-100-progres.mxl` |
-| Le Courant Limpide (Opus 100.) | G major | 4/4 | 16 | [216](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=216) | `burgmuller-opus-100-le-courant-limpide.mxl` |
-| La Gracieuse (Opus 100.) | F major | 3/4 | 16 | [217](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=217) | `burgmuller-opus-100-la-gracieuse.mxl` |
-| Tendre Fleur (Opus 100.) | D major | 4/4 | 24 | [221](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=221) | `burgmuller-opus-100-tendre-fleur.mxl` |
-| La Bergeronnette (Opus 100.) | C major | 2/4 | 30 | [222](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=222) | `burgmuller-opus-100-la-bergeronnette.mxl` |
-| L'Adieu (Opus 100.) | C major | 4/4 | 41 | [223](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=223) | `burgmuller-opus-100-l-adieu.mxl` |
-| Consolation (Opus 100.) | C major | 4/4 | 27 | [224](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=224) | `burgmuller-opus-100-consolation.mxl` |
-| Ballade (Opus 100.) | E- major | 3/8 | 96 | [227](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=227) | `burgmuller-opus-100-ballade.mxl` |
-| Douce Plainte (Opus 100.) | B- major | 4/4 | 18 | [228](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=228) | `burgmuller-opus-100-douce-plainte.mxl` |
-| La Babillarde (Opus 100.) | F major | 3/8 | 35 | [229](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=229) | `burgmuller-opus-100-la-babillarde.mxl` |
+| l'Arabesque (Opus 100.) | none | 2/4 | 33 | [203](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=203) | `burgmuller-opus-100-l-arabesque.mxl` |
+| La Pastorale (Opus 100.) | 1 sharp | 6/8 | 29 | [218](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=218) | `burgmuller-opus-100-la-pastorale.mxl` |
+| La Petite Réunion (Opus 100.) | none | 4/4 | 30 | [219](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=219) | `burgmuller-opus-100-la-petite-reunion.mxl` |
+| Innocence (Opus 100.) | 1 flat | 3/4 | 17 | [214](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=214) | `burgmuller-opus-100-innocence.mxl` |
+| Progrès (Opus 100.) | none | 4/4 | 16 | [215](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=215) | `burgmuller-opus-100-progres.mxl` |
+| Le Courant Limpide (Opus 100.) | 1 sharp | 4/4 | 16 | [216](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=216) | `burgmuller-opus-100-le-courant-limpide.mxl` |
+| La Gracieuse (Opus 100.) | 1 flat | 3/4 | 16 | [217](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=217) | `burgmuller-opus-100-la-gracieuse.mxl` |
+| Tendre Fleur (Opus 100.) | 2 sharps | 4/4 | 24 | [221](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=221) | `burgmuller-opus-100-tendre-fleur.mxl` |
+| La Bergeronnette (Opus 100.) | none | 2/4 | 30 | [222](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=222) | `burgmuller-opus-100-la-bergeronnette.mxl` |
+| L'Adieu (Opus 100.) | none | 4/4 | 41 | [223](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=223) | `burgmuller-opus-100-l-adieu.mxl` |
+| Consolation (Opus 100.) | none | 4/4 | 27 | [224](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=224) | `burgmuller-opus-100-consolation.mxl` |
+| Ballade (Opus 100.) | 3 flats | 3/8 | 96 | [227](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=227) | `burgmuller-opus-100-ballade.mxl` |
+| Douce Plainte (Opus 100.) | 2 flats | 4/4 | 18 | [228](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=228) | `burgmuller-opus-100-douce-plainte.mxl` |
+| La Babillarde (Opus 100.) | 1 flat | 3/8 | 35 | [229](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=229) | `burgmuller-opus-100-la-babillarde.mxl` |
 ### Sonatinas and other pieces
 
-| Piece | Key | Meter | Bars (as played) | Mutopia | File |
+| Piece | Key signature | Meter | Bars (as played) | Mutopia | File |
 |---|---|---|---|---|---|
-| Prelude: Op. 28, No. 20 | E- major | 4/4 | 13 | [472](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=472) | `chopin-op-28-prelude-op-28-no-20.mxl` |
-| Prelude: Op. 28, No. 4 ('Suffocation') | G major | 2/2 | 26 | [468](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=468) | `chopin-op-28-prelude-op-28-no-4-suffocation.mxl` |
-| Sonate I, II - Menuetto (Hob. XVI:27) | G major | 3/4 | 66 | [186](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=186) | `haydn-hob-xvi-27-sonate-i-ii-menuetto.mxl` |
-| Sonatine I - Allegro (O 20, No. 1: 1) | C major | 4/4 | 80 | [232](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=232) | `kuhlau-o-20-no-1-1-sonatine-i-allegro.mxl` |
-| Sonatine I - Rondo (O 20, No. 1: 3) | C major | 2/4 | 157 | [234](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=234) | `kuhlau-o-20-no-1-3-sonatine-i-rondo.mxl` |
-| Rondo | C major | 3/4 | 32 | [191](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=191) | `pleyel-rondo.mxl` |
-| Gymnopédie No. 1 | D major | 3/4 | 47 | [37](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=37) | `satie-gymnopedie-no-1.mxl` |
-| Rondo (Opus 42, No. 1) | C major | 2/4 | 56 | [192](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=192) | `wanhal-opus-42-no-1-rondo.mxl` |
+| Prelude: Op. 28, No. 20 | 3 flats | 4/4 | 13 | [472](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=472) | `chopin-op-28-prelude-op-28-no-20.mxl` |
+| Prelude: Op. 28, No. 4 ('Suffocation') | 1 sharp | 2/2 | 26 | [468](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=468) | `chopin-op-28-prelude-op-28-no-4-suffocation.mxl` |
+| Sonate I, II - Menuetto (Hob. XVI:27) | 1 sharp | 3/4 | 66 | [186](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=186) | `haydn-hob-xvi-27-sonate-i-ii-menuetto.mxl` |
+| Sonatine I - Allegro (O 20, No. 1: 1) | none | 4/4 | 80 | [232](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=232) | `kuhlau-o-20-no-1-1-sonatine-i-allegro.mxl` |
+| Sonatine I - Rondo (O 20, No. 1: 3) | none | 2/4 | 157 | [234](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=234) | `kuhlau-o-20-no-1-3-sonatine-i-rondo.mxl` |
+| Rondo | none | 3/4 | 32 | [191](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=191) | `pleyel-rondo.mxl` |
+| Gymnopédie No. 1 | 2 sharps | 3/4 | 47 | [37](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=37) | `satie-gymnopedie-no-1.mxl` |
+| Rondo (Opus 42, No. 1) | none | 2/4 | 56 | [192](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=192) | `wanhal-opus-42-no-1-rondo.mxl` |
 
 
 **Extra check needed** (also in the `note` column):
