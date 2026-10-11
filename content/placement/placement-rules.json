@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "status": "DRAFT – needs educator review",
+  "reviewed_by": "",
+  "how_it_works": "The app turns the results a parent types in into a suggested starting level. Rules are checked from top to bottom; the first rule whose conditions are all true is the suggestion. A condition that is null has not been written yet: while any rule still has a null condition, the app makes no suggestion and the parent picks a level. Set \"always\": true on a last rule to make it the fallback. The parent can always override the suggestion.",
+  "conditions": {
+    "reader_quiz": {
+      "min_total": "points in sections A-D added together are at least this",
+      "min_section": "points in the named section are at least this, e.g. {\"B\": 4}",
+      "min_playing_yes": "number of 'Yes' answers in section E (playing check) is at least this"
+    },
+    "prereader_checklist": {
+      "min_usually": "number of 'Usually' answers is at least this",
+      "min_usually_in": "number of 'Usually' answers in the named section is at least this, e.g. {\"S\": 2}",
+      "max_not_yet": "number of 'Not yet' answers is at most this"
+    }
+  },
+  "reader_quiz": {
+    "points_per_item_max": null,
+    "rules": [
+      { "suggest": "level-4", "min_total": null, "min_section": { "D": null }, "min_playing_yes": null },
+      { "suggest": "level-3", "min_total": null, "min_section": { "C": null }, "min_playing_yes": null },
+      { "suggest": "level-2", "min_total": null, "min_section": { "B": null }, "min_playing_yes": null },
+      { "suggest": "level-1", "min_total": null }
+    ]
+  },
+  "prereader_checklist": {
+    "rules": [
+      { "suggest": "reader-quiz", "min_usually": null, "max_not_yet": null },
+      { "suggest": "pre-reader", "start_week": null, "min_usually": null },
+      { "suggest": "pre-reader", "start_week": 1, "max_not_yet": null }
+    ]
+  }
+}

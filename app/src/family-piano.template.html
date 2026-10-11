@@ -1,0 +1,2241 @@
+<!--
+  Family Piano – main app (UI-SPEC draft v1, side-menu layout).
+  This is the SOURCE template. Do not paste this file; run `python3 app/build.py`
+  and paste app/family-piano.html into a Squarespace Code block.
+  All CSS is scoped under #fp-app. All on-screen wording is in the TEXT table below
+  so an educator can rewrite it. Progress lives in this browser only (localStorage).
+-->
+<style>
+/* Nunito, SIL Open Font License 1.1 (app/fonts/OFL.txt). Embedded by app/build.py: no font server is contacted. */
+@font-face{font-family:"FP Nunito";font-style:normal;font-weight:200 1000;font-display:swap;src:url(data:font/woff2;base64,/*__FP_FONT__*/) format("woff2")}
+#fp-app{--navy:#1d3b5c;--blue:#1b6a8c;--yellow:#ffc83d;--text:#1d2b3a;--bg:#f2f7fb;--line:#d5e2ec;
+  --t-blue:#cfe8f5;--t-amber:#ffe3a3;--t-green:#d9f0dd;--t-pink:#f3d6ee;
+  font-family:"FP Nunito",system-ui,-apple-system,"Segoe UI",Arial,sans-serif;font-size:16px;line-height:1.45;color:var(--text);
+  display:flex;min-height:640px;background:var(--bg);border-radius:12px;overflow:hidden;text-align:left;box-sizing:border-box}
+#fp-app *,#fp-app *::before,#fp-app *::after{box-sizing:border-box}
+#fp-app h1,#fp-app h2,#fp-app h3,#fp-app p{margin:0;font-family:inherit;color:inherit;letter-spacing:normal;text-transform:none}
+#fp-app h1{font-size:28px;font-weight:800;line-height:1.2}
+#fp-app h2{font-size:20px;font-weight:800}
+#fp-app h3{font-size:17px;font-weight:800}
+#fp-app button,#fp-app input,#fp-app select{font-family:inherit;font-size:16px;color:inherit}
+#fp-app a{color:var(--blue)}
+#fp-app :focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
+#fp-app .fp-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+#fp-app > #fp-side{display:flex;flex:0 0 220px}
+#fp-app > #fp-side > .fp-side{flex:1}
+:is(#fp-app,#fp-printout) .fp-paper blockquote{margin:0 0 .6em;padding-left:.6em;border-left:2px solid #000}
+:is(#fp-app,#fp-printout) .fp-paper hr{border:0;border-top:1px solid #000;margin:.8em 0}
+
+/* sidebar */
+#fp-app .fp-side{width:220px;flex:0 0 220px;background:var(--navy);color:#fff;padding:18px 14px;display:flex;flex-direction:column;gap:16px}
+#fp-app .fp-logo{font-weight:800;font-size:20px;display:flex;align-items:center;gap:8px}
+#fp-app .fp-logo span{background:var(--yellow);color:var(--navy);border-radius:8px;width:34px;height:34px;display:inline-flex;align-items:center;justify-content:center}
+#fp-app .fp-chip-child{background:rgba(255,255,255,.1);border-radius:10px;padding:10px}
+#fp-app .fp-chip-child b{display:block;font-size:17px}
+#fp-app .fp-chip-child small{opacity:.85;font-size:13px;display:block}
+#fp-app .fp-side label{font-size:13px;opacity:.9;display:block;margin-top:8px}
+#fp-app .fp-side select{width:100%;min-height:44px;border-radius:8px;border:0;padding:0 8px;margin-top:4px;background:#fff;color:var(--text)}
+#fp-app .fp-nav{display:flex;flex-direction:column;gap:4px;list-style:none;margin:0;padding:0}
+#fp-app .fp-nav button{width:100%;min-height:44px;text-align:left;background:transparent;border:0;color:#fff;border-radius:8px;padding:0 12px;font-weight:700;cursor:pointer}
+#fp-app .fp-nav button:hover{background:rgba(255,255,255,.1)}
+#fp-app .fp-nav button[aria-current="page"]{background:var(--yellow);color:var(--navy)}
+#fp-app .fp-side-foot{margin-top:auto;font-size:13px;display:flex;flex-direction:column;gap:8px}
+#fp-app .fp-side-foot .fp-backup-note{background:rgba(255,255,255,.1);border-radius:8px;padding:8px}
+#fp-app .fp-side-foot .fp-backup-note.fp-warn{background:var(--yellow);color:var(--navy)}
+#fp-app .fp-side-foot button.fp-link{background:none;border:0;color:#fff;text-decoration:underline;padding:0;min-height:44px;text-align:left;cursor:pointer;font-weight:700}
+
+/* main */
+#fp-app .fp-main{flex:1;min-width:0;padding:24px 28px}
+#fp-app .fp-head{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:18px}
+#fp-app .fp-head p{width:100%;color:#4a5a6a}
+#fp-app .fp-draft{background:var(--yellow);color:var(--navy);font-weight:800;font-size:13px;border-radius:999px;padding:3px 10px;white-space:nowrap}
+#fp-app .fp-ph{color:#6a7a8a;font-style:italic}
+#fp-app .fp-card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px}
+#fp-app .fp-grid4{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+#fp-app .fp-strand h3{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+#fp-app .fp-strand ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}
+#fp-app .fp-check{display:flex;align-items:center;gap:10px;min-height:44px;cursor:pointer}
+#fp-app .fp-check input{width:24px;height:24px;flex:0 0 24px;accent-color:var(--blue);margin:0}
+#fp-app .fp-btn{min-height:44px;border-radius:10px;border:2px solid var(--blue);background:#fff;color:var(--blue);font-weight:800;padding:0 16px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;text-decoration:none}
+#fp-app .fp-btn.fp-primary{background:var(--blue);color:#fff}
+#fp-app .fp-btn.fp-yellow{background:var(--yellow);border-color:var(--yellow);color:var(--navy)}
+#fp-app .fp-btn.fp-danger{border-color:#a33;color:#a33}
+#fp-app .fp-btn:disabled{opacity:.5;cursor:not-allowed}
+#fp-app .fp-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+#fp-app .fp-stack{display:flex;flex-direction:column;gap:14px}
+#fp-app .fp-dots{display:flex;flex-wrap:wrap;gap:8px;list-style:none;margin:0;padding:0}
+#fp-app .fp-dots li{width:30px;height:30px;border-radius:50%;border:2px solid var(--blue);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:var(--blue);background:#fff}
+#fp-app .fp-dots li.fp-done{background:var(--blue);color:#fff}
+#fp-app .fp-dots li.fp-now{background:var(--yellow);border-color:var(--yellow);color:var(--navy)}
+#fp-app .fp-banner{background:var(--t-amber);border-radius:12px;padding:12px 16px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+#fp-app .fp-banner.fp-ok{background:var(--t-green)}
+
+/* all 12 weeks */
+#fp-app .fp-weeks{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;list-style:none;margin:0;padding:0}
+#fp-app .fp-week{border-radius:12px;padding:12px;min-height:96px;border:2px solid var(--line);background:#fff}
+#fp-app .fp-week b{display:block;font-size:18px}
+#fp-app .fp-week .fp-state{font-size:13px;font-weight:800}
+#fp-app .fp-week.fp-done{background:var(--t-green);border-color:var(--t-green)}
+#fp-app .fp-week.fp-now{border-color:var(--yellow);background:#fff8e1}
+#fp-app .fp-week.fp-soon{opacity:.7}
+
+/* reader mode */
+#fp-app .fp-reader{font-size:26px;line-height:1.3}
+#fp-app .fp-reader ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px}
+#fp-app .fp-step{display:flex;align-items:center;gap:16px;background:#fff;border-radius:14px;padding:14px 18px;border:2px solid var(--line)}
+#fp-app .fp-step.fp-done{background:var(--t-green);border-color:var(--t-green)}
+#fp-app .fp-step .fp-num{width:48px;height:48px;flex:0 0 48px;border-radius:50%;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800}
+#fp-app .fp-step .fp-icon{font-size:36px}
+#fp-app .fp-step .fp-txt{flex:1}
+#fp-app .fp-step .fp-check{font-size:20px;font-weight:800}
+#fp-app .fp-step .fp-check input{width:32px;height:32px;flex-basis:32px}
+#fp-app .fp-stars{font-size:40px;letter-spacing:4px}
+
+/* toddler mode */
+#fp-app .fp-tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+#fp-app .fp-tile{aspect-ratio:1/1;border-radius:22px;border:4px solid transparent;font-size:72px;cursor:pointer;display:flex;align-items:center;justify-content:center;position:relative}
+#fp-app .fp-tile[aria-pressed="true"]{border-color:var(--navy)}
+#fp-app .fp-tile[aria-pressed="true"]::after{content:"\2714";position:absolute;right:12px;top:8px;font-size:40px;color:var(--navy)}
+#fp-app .fp-cue{background:var(--t-amber);border-radius:12px;padding:12px 16px;margin-bottom:16px}
+
+/* print screen */
+#fp-app .fp-printwrap{display:grid;grid-template-columns:260px minmax(0,1fr);gap:18px;align-items:start}
+#fp-app fieldset{border:1px solid var(--line);border-radius:12px;padding:12px;margin:0 0 12px;background:#fff}
+#fp-app legend{font-weight:800;padding:0 4px}
+:is(#fp-app,#fp-printout) .fp-paper{background:#fff;color:#000;width:100%;max-width:8.5in;aspect-ratio:8.5/11;padding:.5in;box-shadow:0 2px 10px rgba(0,0,0,.15);font-family:Arial,Helvetica,sans-serif;font-size:13px;overflow:hidden}
+:is(#fp-app,#fp-printout) .fp-paper.fp-lg{font-size:18px}
+:is(#fp-app,#fp-printout) .fp-paper h2{font-size:1.6em;margin-bottom:.4em;font-family:Arial,Helvetica,sans-serif}
+:is(#fp-app,#fp-printout) .fp-paper h3{font-size:1.15em;margin:.8em 0 .3em;font-family:Arial,Helvetica,sans-serif}
+:is(#fp-app,#fp-printout) .fp-paper .fp-nameline{display:flex;gap:2em;margin-bottom:1em}
+:is(#fp-app,#fp-printout) .fp-paper .fp-nameline span{flex:1;border-bottom:1px solid #000;padding-bottom:2px}
+:is(#fp-app,#fp-printout) .fp-paper table{border-collapse:collapse;width:100%}
+:is(#fp-app,#fp-printout) .fp-paper td,:is(#fp-app,#fp-printout) .fp-paper th{border:1px solid #000;padding:.35em;text-align:left;vertical-align:top}
+:is(#fp-app,#fp-printout) .fp-paper .fp-box{display:inline-block;width:1em;height:1em;border:1px solid #000;vertical-align:middle;margin-right:.4em}
+:is(#fp-app,#fp-printout) .fp-paper .fp-pagebreak{border-top:1px dashed #000;margin:1.2em 0 .6em;padding-top:.4em;font-weight:bold}
+:is(#fp-app,#fp-printout) .fp-paper .fp-foot{margin-top:1.5em;font-size:.8em}
+
+/* pieces */
+#fp-app .fp-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+#fp-app .fp-chips button{min-height:44px;border-radius:999px;border:2px solid var(--blue);background:#fff;color:var(--blue);padding:0 16px;font-weight:700;cursor:pointer}
+#fp-app .fp-chips button[aria-pressed="true"]{background:var(--blue);color:#fff}
+#fp-app .fp-piece{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center}
+#fp-app .fp-weekchip{background:var(--t-blue);border-radius:999px;padding:2px 10px;font-size:13px;font-weight:800}
+
+/* family */
+#fp-app .fp-kids{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
+#fp-app .fp-bar{height:10px;border-radius:5px;background:var(--line);overflow:hidden;margin:6px 0}
+#fp-app .fp-bar i{display:block;height:100%;background:var(--blue)}
+#fp-app .fp-form{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px}
+#fp-app .fp-form label{font-weight:700;font-size:14px;display:flex;flex-direction:column;gap:4px}
+#fp-app .fp-form input,#fp-app .fp-form select{min-height:44px;border:1px solid #9fb3c4;border-radius:8px;padding:0 10px;background:#fff}
+
+/* drill sheet maker (app/drills.html) inside the Print screen: restyle its controls only */
+#fp-app #fp-drillhost{overflow-x:auto;margin-top:14px}
+#fp-app #pd-drills .pd-controls{background:#fff;border:1px solid var(--line);border-radius:12px;max-width:none;font-family:"FP Nunito",system-ui,Arial,sans-serif;color:var(--text)}
+#fp-app #pd-drills .pd-controls input[type=text],#fp-app #pd-drills .pd-controls input[type=number],#fp-app #pd-drills .pd-controls select{min-height:44px;border-radius:8px;border-color:#9fb3c4}
+#fp-app #pd-drills .pd-controls label.pd-check{min-height:44px}
+#fp-app #pd-drills .pd-controls input[type=checkbox]{width:24px;height:24px;accent-color:var(--blue)}
+#fp-app #pd-drills .pd-controls button{min-height:44px;border-radius:10px;border:2px solid var(--blue);color:var(--blue);font-weight:800;font-family:inherit;background:#fff}
+#fp-app #pd-drills .pd-controls button.pd-primary{background:var(--blue);color:#fff}
+
+/* placement */
+#fp-app .fp-steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:14px}
+#fp-app .fp-steps > li > .fp-card > h2{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+#fp-app .fp-steps .fp-n{width:34px;height:34px;flex:0 0 34px;border-radius:50%;background:var(--navy);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:16px}
+#fp-app .fp-ptable{width:100%;border-collapse:collapse;margin-bottom:12px}
+#fp-app .fp-ptable caption{text-align:left;font-weight:800;padding:6px 0}
+#fp-app .fp-ptable th,#fp-app .fp-ptable td{border-bottom:1px solid var(--line);padding:4px 6px;text-align:left;vertical-align:middle}
+#fp-app .fp-ptable td.fp-c{text-align:center}
+#fp-app .fp-ptable input[type=number]{width:80px;min-height:44px;border:1px solid #9fb3c4;border-radius:8px;padding:0 8px}
+#fp-app .fp-ptable input[type=radio]{width:24px;height:24px;accent-color:var(--blue);margin:0}
+#fp-app .fp-ptable label.fp-rad{display:inline-flex;min-width:44px;min-height:44px;align-items:center;justify-content:center;cursor:pointer}
+#fp-app .fp-suggest{background:var(--t-green);border-radius:12px;padding:12px 16px;font-weight:800;font-size:18px}
+#fp-app .fp-suggest.fp-none{background:var(--t-amber);font-weight:700;font-size:16px}
+
+/* built-in player */
+#fp-app .fp-player{grid-column:1/-1;border-top:1px solid var(--line);padding-top:12px;margin-top:4px;display:flex;flex-direction:column;gap:10px}
+#fp-app .fp-player progress{flex:1;min-width:120px;height:12px;accent-color:var(--blue)}
+#fp-app .fp-player input[type=range],#fp-app .fp-range{accent-color:var(--blue);min-height:44px;width:180px;max-width:100%}
+#fp-app .fp-player select{min-height:44px;border:1px solid #9fb3c4;border-radius:8px;padding:0 8px;background:#fff}
+#fp-app .fp-player .fp-chips{margin:0}
+#fp-app #pd-drills .pd-cell button.fp-dplay{position:absolute;right:0;top:0;width:44px;height:44px;min-height:44px;padding:0;border-radius:50%;border:2px solid var(--blue);background:#fff;color:var(--blue);font-size:18px;line-height:1;z-index:1}
+
+/* score with note highlighting, and "wait for me" keyboard */
+#fp-app .fp-score{background:#fff;border:1px solid var(--line);border-radius:12px;padding:8px;max-height:440px;overflow:auto}
+#fp-app .fp-score svg{width:100%;height:auto;display:block;color:#000}
+#fp-app .fp-score g.note{cursor:pointer}
+#fp-app .fp-score g.fp-on,#fp-app .fp-score g.fp-on *{fill:var(--blue);color:var(--blue)}
+#fp-app .fp-score g.fp-next,#fp-app .fp-score g.fp-next *{fill:#b85c00;color:#b85c00}
+#fp-app .fp-wstatus{font-weight:800;font-size:18px}
+#fp-app .fp-kbdwrap{overflow-x:auto;padding-bottom:6px}
+#fp-app .fp-kbd{position:relative;height:150px;touch-action:manipulation;user-select:none;-webkit-user-select:none}
+#fp-app .fp-kbd button{position:absolute;top:0;padding:0;margin:0;border:1px solid #333;cursor:pointer;font-size:12px;font-weight:700;display:flex;align-items:flex-end;justify-content:center;padding-bottom:6px}
+#fp-app .fp-kbd .fp-wk{width:44px;height:150px;background:#fff;color:#555;border-radius:0 0 8px 8px;z-index:1}
+#fp-app .fp-kbd .fp-bk{width:30px;height:92px;background:#222;color:#ddd;border-radius:0 0 6px 6px;z-index:2}
+#fp-app .fp-kbd .fp-tgt.fp-wk{background:var(--yellow)}
+#fp-app .fp-kbd .fp-tgt.fp-bk{background:#c99a1f}
+#fp-app .fp-kbd .fp-bad{background:#f4b4b4 !important}
+#fp-app .fp-kbd .fp-down{filter:brightness(.85)}
+
+/* checking marks on the score */
+#fp-app .fp-score g.fp-ok,#fp-app .fp-score g.fp-ok *{fill:#1e8a3c;color:#1e8a3c}
+#fp-app .fp-score g.fp-bad,#fp-app .fp-score g.fp-bad *{fill:#c0392b;color:#c0392b}
+#fp-app .fp-score g.fp-miss,#fp-app .fp-score g.fp-miss *{fill:#9aa5b1;color:#9aa5b1}
+#fp-app .fp-result{background:var(--t-green);border-radius:12px;padding:10px 14px;font-weight:700}
+#fp-app .fp-range-note{font-size:13px;color:#4a5a6a}
+#fp-app .fp-range-note.fp-warn{color:#8a4b00;font-weight:700}
+
+/* game */
+#fp-app .fp-game{background:#0f2236;border-radius:14px;padding:10px;color:#fff;position:relative;user-select:none;-webkit-user-select:none}
+#fp-app .fp-game canvas{display:block;width:100%;height:440px;border-radius:10px;touch-action:none;background:#14304d}
+#fp-app .fp-hud{display:flex;flex-wrap:wrap;gap:14px;align-items:center;padding:4px 4px 10px;font-weight:800}
+#fp-app .fp-hud .fp-big{font-size:22px}
+#fp-app .fp-hud .fp-feedback{min-width:90px;color:var(--yellow)}
+#fp-app .fp-sheetlane{position:relative;height:230px;overflow:hidden;background:#fff;border-radius:10px}
+#fp-app .fp-sheetlane .fp-strip{position:absolute;left:0;top:10px;height:210px;will-change:transform}
+#fp-app .fp-sheetlane .fp-strip svg{height:210px;width:auto;display:block;color:#000}
+#fp-app .fp-sheetlane .fp-hitline{position:absolute;top:0;bottom:0;width:4px;background:var(--yellow);left:30%;z-index:2;opacity:.85}
+#fp-app .fp-sheetlane g.fp-ok,#fp-app .fp-sheetlane g.fp-ok *{fill:#1e8a3c;color:#1e8a3c}
+#fp-app .fp-sheetlane g.fp-bad,#fp-app .fp-sheetlane g.fp-bad *{fill:#c0392b;color:#c0392b}
+#fp-app .fp-sheetlane g.fp-miss,#fp-app .fp-sheetlane g.fp-miss *{fill:#9aa5b1;color:#9aa5b1}
+#fp-app .fp-sheetlane g.fp-next,#fp-app .fp-sheetlane g.fp-next *{fill:#b85c00;color:#b85c00}
+#fp-app .fp-results{background:#fff;color:var(--text);border-radius:12px;padding:16px;margin-top:10px}
+#fp-app .fp-results .fp-stars{font-size:44px}
+@media (max-width:760px){ #fp-app .fp-game canvas{height:380px} }
+
+/* metronome */
+#fp-app .fp-metro{display:flex;flex-direction:column;gap:16px;align-items:stretch}
+#fp-app .fp-mbpm{font-size:64px;font-weight:800;line-height:1;text-align:center}
+#fp-app .fp-mbpm small{font-size:18px;font-weight:700;display:block;color:#4a5a6a}
+#fp-app .fp-mdots{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;list-style:none;margin:0;padding:0}
+#fp-app .fp-mdots li{width:44px;height:44px;border-radius:50%;background:var(--line);transition:transform .05s}
+#fp-app .fp-mdots li.fp-acc{border:4px solid var(--navy)}
+#fp-app .fp-mdots li.fp-now{background:var(--yellow);transform:scale(1.15)}
+#fp-app .fp-mdots li.fp-acc.fp-now{background:var(--blue)}
+#fp-app .fp-mrange{width:100%;accent-color:var(--blue);min-height:44px}
+#fp-app .fp-side .fp-metrobtn{width:100%;min-height:44px;border-radius:8px;border:2px solid rgba(255,255,255,.6);background:transparent;color:#fff;font-weight:800;cursor:pointer;text-align:left;padding:0 10px}
+#fp-app .fp-side .fp-metrobtn.fp-on{background:var(--yellow);color:var(--navy);border-color:var(--yellow)}
+
+/* help */
+#fp-app details{background:#fff;border:1px solid var(--line);border-radius:10px;padding:0 14px}
+#fp-app summary{min-height:44px;display:flex;align-items:center;font-weight:800;cursor:pointer}
+#fp-app details p{padding-bottom:12px}
+
+/* phone / small tablet */
+@media (max-width:760px){
+  #fp-app{flex-direction:column}
+  #fp-app > #fp-side{flex-basis:auto}
+  #fp-app .fp-side{width:100%;flex-basis:auto}
+  #fp-app .fp-nav{flex-direction:row;flex-wrap:wrap}
+  #fp-app .fp-nav li{flex:1 1 40%}
+  #fp-app .fp-main{padding:16px}
+  #fp-app .fp-grid4,#fp-app .fp-printwrap{grid-template-columns:1fr}
+  #fp-app .fp-weeks{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #fp-app .fp-reader{font-size:22px}
+  #fp-app .fp-ptable th:nth-child(2),#fp-app .fp-ptable td:nth-child(2){display:none}
+}
+
+/* print: the app copies the chosen sheet into #fp-printout (a direct child of <body>) and hides everything else */
+#fp-printout{display:none}
+@media print{
+  @page{size:letter;margin:.5in}
+  html.fp-printing body > *:not(#fp-printout){display:none !important}
+  html.fp-printing,html.fp-printing body{margin:0 !important;padding:0 !important;background:#fff !important}
+  html.fp-printing #fp-printout{display:block !important}
+  #fp-printout .fp-paper,#fp-printout .fp-paper *{color:#000 !important;background:#fff !important}
+  #fp-printout .fp-paper{width:100%;max-width:none;aspect-ratio:auto;padding:0;box-shadow:none;overflow:visible}
+  #fp-printout .fp-paper .fp-pagebreak{break-before:page;page-break-before:always;border-top:0}
+  #fp-printout .fp-paper svg{max-width:100%;height:auto}
+}
+</style>
+
+<div id="fp-app"><div id="fp-side"></div><main class="fp-main"><div id="fp-view"></div><div id="fp-drillhost" hidden>
+<!--__FP_DRILLS__-->
+</div></main></div>
+
+<script>
+(function(){
+"use strict";
+var CONTENT = /*__FP_CONTENT__*/null;
+var STORE_KEY = "familyPiano.v1";
+
+/* All on-screen wording. Draft wording – for educator review. */
+var TEXT = {
+  appName: "Family Piano",
+  draft: "Draft content",
+  ph: function(what){ return "[" + what + " – educator to write]"; },
+  nav: {
+    standard: [["week","This week"],["weeks","All 12 weeks"],["print","Print"],["pieces","Pieces"],["compose","Compose"],["family","Family"]],
+    reader:   [["week","Today"],["pieces","Songs"],["compose","Make a song"],["stars","My stars"]],
+    toddler:  [["week","Play"]]
+  },
+  modes: { standard: "Standard", reader: "Beginner reader", toddler: "Toddler" },
+  strands: { technique:"Technique", theory:"Theory", repertoire:"Repertoire", ear_training:"Ear training",
+             singing:"Singing", rhythm:"Rhythm", solfege:"Solfege", pre_staff:"Pre-staff" },
+  icons: { technique:"✋", theory:"📖", repertoire:"🎵", ear_training:"👂",
+           singing:"🎤", rhythm:"🥁", solfege:"🙌", pre_staff:"✏️" },
+  week: "Week", of12: "of 12",
+  weekDone: "Week done", practiceChart: "Practice chart", print: "Print",
+  allDone: "All 12 weeks done!",
+  stateDone: "Done", stateNow: "This week", stateSoon: "Coming up",
+  readToMe: "Read to me", done: "Done", grownUp: "Grown-up", backToPlay: "Back to play",
+  backupNever: "No backup yet. Progress lives only in this browser.",
+  backupDays: function(n){ return n === 0 ? "Backed up today." : "Last backup: " + n + (n === 1 ? " day" : " days") + " ago."; },
+  backupNow: "Back up now",
+  help: "Help & placement",
+  noKids: "Add your first child to start.",
+  storeBlocked: "This browser is not saving data (private mode or blocked storage). Progress will be lost when you close the page.",
+  sheets: [["plan","This week's plan"],["chart","Practice chart"],["overview","12-week overview"],["drill","Drill sheet"],
+           ["quiz","Placement quiz (readers)"],["checklist","Pre-reader checklist"]],
+  printOpts: { large:"Large print", key:"Answer key", nameline:"Name/date line" },
+  savePdf: "Save as PDF",
+  savePdfHint: "In the print window, choose “Save as PDF” as the printer.",
+  piecesEmpty: "No pieces are approved yet. They will show up here when the educator adds them.",
+  filters: [["all","All"],["level","This level"],["todo","Not learned"],["learned","Learned"]],
+  learned: "Learned", openScore: "Open score",
+  addChild: "Add a child", backup: "Backup & restore", startOver: "Start over",
+  startOverConfirm: "Delete all children and progress from this browser? This cannot be undone. Make a backup first if you may want it back.",
+  exportBtn: "Save backup file", importBtn: "Restore from file",
+  importOk: "Backup restored.", importBad: "That file is not a Family Piano backup.",
+  remove: "Remove", removeConfirm: function(n){ return "Remove " + n + " and their progress?"; },
+  myStars: "My stars",
+  welcome: "Welcome! Family Piano gives each child a 12-week plan, printable sheets and a place to tick off practice. Everything stays in this browser.",
+  viewing: function(n){ return "You are looking at week " + n + "."; },
+  backToWeek: "Back to this week", openWeek: "Open",
+  nextLevel: function(name){ return "Start " + name; },
+  edit: "Edit", saveChild: "Save", drillHint: "Pick the drill below, press Make sheet, then Print.",
+  placementKey: "ANSWER KEY (for the parent)",
+  placement: "Placement", placementFor: function(n){ return "Placement for " + n; },
+  pTypes: { quiz: "Reader quiz", checklist: "Pre-reader checklist" },
+  pTypeHelp: { quiz: "For children who can read. They answer on paper; you mark it.",
+               checklist: "For ages about 4\u20136. Your child does not read or write. You watch and mark what you see." },
+  pSteps: ["Choose the test", "Print it", "Enter the results", "Pick the starting level"],
+  pPrint: "Print the sheet", pShow: "Show the sheet",
+  pPoints: "Points", pYes: "Yes", pNotYet: "Not yet", pSometimes: "Sometimes", pUsually: "Usually",
+  pAnswered: function(a, t){ return a + " of " + t + " answered. Answer every item to see a suggestion."; },
+  pNoRules: "The educator has not written the scoring rules yet, so the app cannot suggest a level. Pick one yourself.",
+  pNoMatch: "No rule matched these results. Pick a level yourself.",
+  pSuggest: "Suggested start:",
+  pTryQuiz: "Try the reader quiz", pTryQuizLong: "These results suggest your child is ready for the reader quiz.",
+  pUse: function(n){ return "Use this for " + n; },
+  pConfirm: function(n){ return "Change " + n + "'s level and week? Ticked items stay saved."; },
+  pDone: function(n, l, w){ return n + " now starts at " + l + ", week " + w + "."; },
+  pLast: function(d, l, w){ return "Last placement: " + d + " \u2013 started " + l + ", week " + w + "."; },
+  pClear: "Clear results", pNotSure: "Not sure \u2013 do placement first",
+  pStart: function(n){ return "Start placement for " + n; },
+  play: "Play", pause: "Pause", stop: "Stop", listen: "Listen", speed: "Speed", hands: "Hands",
+  handNames: [["both","Both"],["right","Right"],["left","Left"]],
+  bars: "Bars", barsTo: "to", loop: "Loop", countIn: "Count-in", metronome: "Metronome",
+  playItem: function(n){ return "Play item " + n; },
+  sound: "Sound", soundOn: "Sound and music player on", volume: "Volume", output: "Play through",
+  thisDevice: "This device", findPiano: "Find my digital piano", testSound: "Test sound",
+  noMidi: "This browser can\u2019t play through a digital piano (Safari, iPhone and iPad can\u2019t). Chrome, Edge or Firefox can.",
+  midiDenied: "The browser did not allow access to MIDI devices.",
+  midiNone: "No digital piano found. Plug it in (USB or Bluetooth MIDI), then press the button again.",
+  credits: "Credits",
+  waitMode: "Wait for me", along: "Other hand plays along", start: "Start",
+  wPlay: "Play the orange note on your piano or on the keys below.",
+  wPlayChord: "Play all the orange notes together.",
+  wAgain: "Not that one \u2013 try again.", wDone: "Well done! You played it all.",
+  wCount: function(i, n){ return "Note " + i + " of " + n; },
+  scoreLoading: "Loading the music\u2026", scoreNone: "This browser can\u2019t show the music here, but the player still works.",
+  noteNames: ["C","C\u266F","D","D\u266F","E","F","F\u266F","G","G\u266F","A","A\u266F","B"],
+  kbdCard: "Your keyboard and listening", kbdSize: "Keyboard size", kbdShift: "Octave buttons on your keyboard",
+  kbdSizes: [["1","1 octave (13 keys)"],["2","2 octaves (25 keys)"],["3","3 octaves (37 keys)"],["4","4 octaves (49 keys)"],
+             ["5","5 octaves (61 keys)"],["6","6 octaves (73 keys)"],["7","7 octaves (85 keys)"],["88","Full piano (88 keys)"]],
+  kbdShifts: [["-2","2 octaves down"],["-1","1 octave down"],["0","Not used"],["1","1 octave up"],["2","2 octaves up"]],
+  kbdRange: function(lo, hi){ return "Your keys: " + lo + " to " + hi + "."; },
+  kbdHelp: "Count the white keys, or pick the closest size. If your keyboard has octave buttons, tell the app which way you moved it.",
+  listenWith: "Listen with", listenOpts: [["midi","Digital piano (MIDI cable or Bluetooth)"],["mic","Microphone (acoustic piano)"],["screen","On-screen keys only"]],
+  anyOctave: "Count the right note in any octave (good for small keyboards)",
+  micPrivacy: "The microphone sound is checked inside this browser only. It is never recorded, saved or sent anywhere.",
+  micTest: "Test the microphone", micStop: "Stop the test", micHeard: function(n){ return "Best guess: " + n + " (when the app knows what to expect, it checks much more exactly)"; }, micNothing: "Play a note\u2026",
+  micDenied: "The browser did not allow the microphone.", micNone: "This browser has no microphone access.",
+  micTip: "Tip: with the microphone, use headphones or turn the app's sound down so the app only hears the piano.",
+  fits: function(r){ return "Range " + r + " \u00B7 fits your keyboard"; },
+  shifted: function(r, n){ return "Range " + r + " \u00B7 moved " + n + " to fit your keyboard"; },
+  folded: function(r){ return "Range " + r + " is wider than your keyboard \u00B7 some notes are moved by octaves"; },
+  checkMine: "Check my playing", checkSummary: function(ok, total, wrong){ return ok + " of " + total + " notes right on time \u00B7 " + wrong + " wrong " + (wrong === 1 ? "note" : "notes"); },
+  waitSummary: function(total, first, wrong){ return "You played all " + total + ". " + first + " right the first time \u00B7 " + wrong + " wrong " + (wrong === 1 ? "try" : "tries") + "."; },
+  game: "Game", gameTitle: function(t){ return "Game: " + t; },
+  gView: "View", gViews: [["fall","Falling notes"],["sheet","Sheet music"]],
+  gMode: "How to play", gModes: [["challenge","Play in time"],["practice","Wait for me"]],
+  gNames: "Show note names", gStart: "Start", gPause: "Pause", gResume: "Resume", gStop: "Stop", gAgain: "Play again", gBack: "Back to pieces",
+  gScore: "Score", gCombo: "Combo", gAcc: "Accuracy",
+  gPerfect: "Perfect!", gGood: "Good", gMiss: "Miss", gWrong: "Oops",
+  gBest: function(n){ return "Best: " + n; }, gNewBest: "New best!",
+  gResult: function(p, g, m, w){ return p + " perfect \u00B7 " + g + " good \u00B7 " + m + " missed \u00B7 " + w + " wrong"; },
+  gHowTo: "Notes fall toward the keys. Play each one as it reaches the yellow line.",
+  cTitleScreen: "Compose", cIntro: "Play anything. The app records it, plays it back and writes it as sheet music.",
+  cTempo: "Tempo (beats per minute)", cTime: "Time signature", cKey: "Key", cGrid: "Write notes to the nearest", cChange: "change in Family",
+  cMicNote: "With the microphone, single notes record well; chords are a best guess. A digital piano records exactly, including how long each key is held.",
+  recStart: "Record", recStop: "Stop recording", recOn: "Recording\u2026 play now", recCount: function(n){ return n + (n === 1 ? " note" : " notes"); },
+  cMySongs: "My songs", cNone: "No songs yet. Press Record and play.", cTitle: "Title",
+  cPlayAsPlayed: "Play as played", cPlayAsWritten: "Play as written", cXml: "Download sheet music (MusicXML)", cMidi: "Download MIDI", cDelete: "Delete",
+  cDeleteConfirm: function(t){ return "Delete \u201C" + t + "\u201D?"; },
+  cAbout: function(n, bpm, ts){ return n + " notes \u00B7 " + bpm + " beats per minute \u00B7 " + ts + ". Changing tempo, time, key or note detail above redraws this song."; },
+  cBy: function(name, date){ return "By " + name + " \u00B7 " + date; }, songDefault: function(n){ return "My song " + n; },
+  noNotation: "The music could not be drawn here.",
+  cPdf: "Save as PDF", cWav: "Download audio (WAV)", cWavWait: "Making the audio file\u2026", songSheet: function(t){ return "My song: " + t; },
+  metro: "Metronome", metroIntro: "A steady beat to practice with. It keeps going while you use the rest of the app.",
+  mStart: "Start", mStop: "Stop", mTap: "Tap tempo", mBeats: "Beats in a bar", mSub: "Clicks in each beat",
+  mSubs: [["1","One"],["2","Two (eighth notes)"],["3","Three (triplets)"],["4","Four (sixteenth notes)"]],
+  mAccent: "Louder first beat", mSound: "Sound", mSounds: [["click","Click"],["wood","Wood block"],["beep","Beep"]],
+  mBpm: "beats per minute", mSlower: "Slower", mFaster: "Faster", mRunning: function(b){ return "\u2669 " + b + " \u00B7 Stop"; },
+  mSide: "\u2669 Metronome", mGame: "Metronome", mStopped: "The metronome stopped so it does not clash with this beat."
+};
+
+/* ---------- state ---------- */
+var memoryOnly = false;
+function blank(){ return { version:1, children:[], activeId:null, lastBackup:null }; }
+function load(){
+  try { var raw = localStorage.getItem(STORE_KEY); if (raw) { var s = JSON.parse(raw); if (s && s.version === 1) return s; } }
+  catch(e){ memoryOnly = true; }
+  return blank();
+}
+function save(){ try { localStorage.setItem(STORE_KEY, JSON.stringify(S)); } catch(e){ memoryOnly = true; } }
+var S = load();
+if (!S.settings) S.settings = { sound:true, output:"device", volume:0.8 };
+["kbd:88", "kbdShift:0", "listen:midi", "anyOctave:"].forEach(function(kv){
+  var k = kv.split(":")[0], v = kv.split(":")[1];
+  if (!(k in S.settings)) S.settings[k] = k === "anyOctave" ? false : (k === "kbd" || k === "kbdShift" ? Number(v) : v);
+});
+var ui = { screen:"week", grown:false, sheet:"plan", opts:{large:false,key:false,nameline:true}, filter:"all", adding:false, editing:null, viewWeek:null, msg:"" };
+
+/* ---------- content helpers ---------- */
+function levelById(id){ return CONTENT.levels.levels.filter(function(l){ return l.id === id; })[0]; }
+function weekOf(child, n){ var p = CONTENT.paths[child.level]; return p && p.weeks.filter(function(w){ return w.week === n; })[0]; }
+function isDraft(o){ return !o || String(o.status || "").indexOf("DRAFT") === 0 || o.status === "draft"; }
+function active(){ return S.children.filter(function(c){ return c.id === S.activeId; })[0] || S.children[0] || null; }
+function esc(s){ return String(s == null ? "" : s).replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+function txt(value, what){ return value ? esc(value) : '<span class="fp-ph">' + esc(TEXT.ph(what)) + "</span>"; }
+function plain(value, what){ return value || TEXT.ph(what); }
+function tintFor(i){ return ["var(--t-blue)","var(--t-amber)","var(--t-green)","var(--t-pink)"][i % 4]; }
+function weekItems(w){ var out = []; if (!w) return out;
+  Object.keys(w.strand_items).forEach(function(k){ w.strand_items[k].forEach(function(it){ out.push({strand:k, item:it}); }); }); return out; }
+function daysSince(iso){ if (!iso) return null; return Math.floor((Date.now() - new Date(iso).getTime()) / 864e5); }
+function draftChip(show){ return show ? '<span class="fp-draft">' + esc(TEXT.draft) + "</span>" : ""; }
+function uid(){ return "c" + Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+function weeksDoneCount(c){ return c.complete ? 12 : c.week - 1; }
+function nextLevelOf(c){ var lv = levelById(c.level); return CONTENT.levels.levels.filter(function(l){ return l.order === lv.order + 1; })[0] || null; }
+function completeView(c){
+  var nx = nextLevelOf(c);
+  return head(TEXT.allDone, false) + '<div class="fp-card fp-stack"><p class="fp-stars" aria-hidden="true">⭐⭐⭐</p><p>' + txt("", "Next-level advice") + "</p>" +
+    '<div class="fp-row">' + (nx ? '<button type="button" class="fp-btn fp-primary" data-act="nextlevel">' + esc(TEXT.nextLevel(nx.name)) + "</button>" : "") +
+    (c.mode === "standard" ? '<button type="button" class="fp-btn" data-go="weeks">' + esc(TEXT.nav.standard[1][1]) + "</button>" : "") + "</div></div>";
+}
+
+/* ---------- sidebar ---------- */
+function sidebar(c){
+  var mode = c ? c.mode : "standard";
+  var nav = TEXT.nav[mode].map(function(n){
+    return '<li><button type="button" data-go="' + n[0] + '"' + (ui.screen === n[0] ? ' aria-current="page"' : "") + ">" + esc(n[1]) + "</button></li>";
+  }).join("");
+  var d = daysSince(S.lastBackup);
+  var note = d === null ? TEXT.backupNever : TEXT.backupDays(d);
+  var warn = d === null || d > 7;
+  var kids = "";
+  if (c) {
+    var lv = levelById(c.level);
+    kids = '<div class="fp-chip-child"><b>' + esc(c.name) + "</b><small>" + esc(lv ? lv.name : c.level) + " · " +
+      (c.complete ? esc(TEXT.allDone) : esc(TEXT.week) + " " + c.week + " " + esc(TEXT.of12)) + "</small>";
+    if (S.children.length > 1) {
+      kids += '<label for="fp-who">Child</label><select id="fp-who" data-act="who">' + S.children.map(function(k){
+        return '<option value="' + esc(k.id) + '"' + (k.id === c.id ? " selected" : "") + ">" + esc(k.name) + "</option>"; }).join("") + "</select>";
+    }
+    kids += '<label for="fp-mode">Mode</label><select id="fp-mode" data-act="mode">' + Object.keys(TEXT.modes).map(function(m){
+      return '<option value="' + m + '"' + (m === c.mode ? " selected" : "") + ">" + esc(TEXT.modes[m]) + "</option>"; }).join("") + "</select></div>";
+  }
+  return '<nav class="fp-side" aria-label="Main">' +
+    '<div class="fp-logo"><span aria-hidden="true">♪</span>' + esc(TEXT.appName) + "</div>" + kids +
+    (c ? '<ul class="fp-nav">' + nav + "</ul>" : "") +
+    '<div class="fp-side-foot">' + (c ? '<button type="button" class="fp-metrobtn' + (METRO.on ? " fp-on" : "") + '" data-act="' + (METRO.on ? "mtoggle" : "gometro") + '">' +
+      esc(METRO.on ? TEXT.mRunning(metroSettings().bpm) : TEXT.mSide) + "</button>" : "") +
+    '<div class="fp-backup-note' + (warn ? " fp-warn" : "") + '">' + esc(note) + "</div>" +
+    '<button type="button" class="fp-link" data-go="help">' + esc(TEXT.help) + "</button></div></nav>";
+}
+
+/* ---------- screens ---------- */
+function head(title, draft, sub){
+  return '<div class="fp-head"><h1 tabindex="-1" id="fp-h1">' + esc(title) + "</h1>" + draftChip(draft) + (sub ? "<p>" + sub + "</p>" : "") + "</div>";
+}
+function memoryWarning(){ return memoryOnly ? '<div class="fp-banner" role="alert" style="margin-bottom:14px">' + esc(TEXT.storeBlocked) + "</div>" : ""; }
+
+function screenWeek(c){
+  if (c.mode === "reader") return weekReader(c);
+  if (c.mode === "toddler") return weekToddler(c);
+  if (c.complete && !ui.viewWeek) return completeView(c);
+  var n = ui.viewWeek || c.week, past = n !== c.week || c.complete;
+  var lv = levelById(c.level), w = weekOf(c, n);
+  var cards = lv.strands.map(function(s, i){
+    var items = (w.strand_items[s] || []).map(function(it){
+      return '<li><label class="fp-check"><input type="checkbox" data-act="tick" data-id="' + esc(it.id) + '"' + (c.done[it.id] ? " checked" : "") + "> " +
+        txt(it.topic, "Topic") + "</label></li>";
+    }).join("");
+    return '<section class="fp-card fp-strand" style="background:' + tintFor(i) + '"><h3><span aria-hidden="true">' + TEXT.icons[s] + "</span>" +
+      esc(TEXT.strands[s] || s) + "</h3><ul>" + items + "</ul></section>";
+  }).join("");
+  var dots = '<ol class="fp-dots" aria-label="12-week progress">' + range12().map(function(n){
+    var cls = n < c.week ? "fp-done" : n === c.week ? "fp-now" : "";
+    var st = n < c.week ? TEXT.stateDone : n === c.week ? TEXT.stateNow : TEXT.stateSoon;
+    return '<li class="' + cls + '" title="' + esc(TEXT.week + " " + n + ": " + st) + '"><span aria-hidden="true">' + n + '</span><span class="fp-sr">' + esc(TEXT.week + " " + n + ": " + st) + "</span></li>";
+  }).join("") + "</ol>";
+  var back = past ? '<div class="fp-banner"><span>' + esc(TEXT.viewing(n)) + '</span><button type="button" class="fp-btn fp-primary" data-act="backweek">' + esc(TEXT.backToWeek) + "</button></div>" : "";
+  return head(TEXT.week + " " + n + " " + TEXT.of12, isDraft(w), "<b>Focus:</b> " + txt(w.focus, "Week focus")) +
+    '<div class="fp-stack">' + back + '<div class="fp-grid4">' + cards + "</div>" +
+    '<div class="fp-card"><h3>Parent notes</h3><p>' + txt(w.parent_notes, "Parent notes") + "</p></div>" +
+    '<div class="fp-card">' + dots + "</div>" +
+    '<div class="fp-row"><button type="button" class="fp-btn" data-print="plan">' + esc(TEXT.print) + "</button>" +
+    '<button type="button" class="fp-btn" data-print="chart">' + esc(TEXT.practiceChart) + "</button>" +
+    (past ? "" : '<button type="button" class="fp-btn fp-primary" data-act="weekdone">' + esc(TEXT.weekDone) + "</button>") + "</div></div>";
+}
+
+function range12(){ var a = []; for (var i = 1; i <= 12; i++) a.push(i); return a; }
+
+function readerSteps(c){
+  var lv = levelById(c.level), w = weekOf(c, c.week);
+  return lv.strands.map(function(s){ var it = (w.strand_items[s] || [])[0]; return {strand:s, item:it}; }).filter(function(x){ return x.item; });
+}
+function weekReader(c){
+  if (c.complete) return completeView(c);
+  var w = weekOf(c, c.week), steps = readerSteps(c), got = 0;
+  var lis = steps.map(function(x, i){
+    var done = !!c.done[x.item.id]; if (done) got++;
+    return '<li class="fp-step' + (done ? " fp-done" : "") + '"><span class="fp-num">' + (i + 1) + '</span><span class="fp-icon" aria-hidden="true">' +
+      TEXT.icons[x.strand] + '</span><span class="fp-txt">' + txt(x.item.topic, "Short line") + "</span>" +
+      '<label class="fp-check"><input type="checkbox" data-act="tick" data-id="' + esc(x.item.id) + '"' + (done ? " checked" : "") + "> " + esc(TEXT.done) + "</label></li>";
+  }).join("");
+  var stars = steps.map(function(_, i){ return i < got ? "⭐" : "☆"; }).join("");
+  return head(TEXT.nav.reader[0][1], isDraft(w)) +
+    '<div class="fp-reader"><ol>' + lis + '</ol><div class="fp-row" style="margin-top:16px">' +
+    '<button type="button" class="fp-btn fp-yellow" data-act="readme">🔊 ' + esc(TEXT.readToMe) + "</button>" +
+    '<span class="fp-stars" role="img" aria-label="' + got + " of " + steps.length + ' stars">' + stars + "</span></div></div>";
+}
+
+function weekToddler(c){
+  if (c.complete) return completeView(c);
+  var lv = levelById(c.level), w = weekOf(c, c.week);
+  if (ui.grown) {
+    return head(TEXT.grownUp, isDraft(w)) + '<div class="fp-stack">' +
+      '<div class="fp-card"><h3>' + esc(TEXT.week) + " " + c.week + " " + esc(TEXT.of12) + "</h3><p><b>Focus:</b> " + txt(w.focus, "Week focus") + "</p></div>" +
+      '<div class="fp-card"><h3>Parent notes</h3><p>' + txt(w.parent_notes, "Parent notes") + "</p></div>" +
+      '<div class="fp-row"><button type="button" class="fp-btn" data-print="plan">' + esc(TEXT.print) + "</button>" +
+      '<button type="button" class="fp-btn" data-go="family">' + esc(TEXT.nav.standard[4][1]) + "</button>" +
+      '<button type="button" class="fp-btn fp-primary" data-act="weekdone">' + esc(TEXT.weekDone) + "</button>" +
+      '<button type="button" class="fp-btn fp-yellow" data-act="grown">' + esc(TEXT.backToPlay) + "</button></div></div>";
+  }
+  var tiles = lv.strands.map(function(s, i){
+    var it = (w.strand_items[s] || [])[0]; if (!it) return "";
+    var done = !!c.done[it.id];
+    return '<button type="button" class="fp-tile" style="background:' + tintFor(i) + '" data-act="tile" data-id="' + esc(it.id) + '" aria-pressed="' + done + '" aria-label="' +
+      esc(TEXT.strands[s] + (done ? ", " + TEXT.done : "")) + '"><span aria-hidden="true">' + TEXT.icons[s] + "</span></button>";
+  }).join("");
+  return '<div class="fp-cue"><b>For the grown-up:</b> ' + txt(w.parent_notes, "Parent cue") + " " + draftChip(isDraft(w)) + "</div>" +
+    '<h1 class="fp-sr" tabindex="-1" id="fp-h1">' + esc(TEXT.nav.toddler[0][1]) + '</h1><div class="fp-tiles">' + tiles + "</div>" +
+    '<div class="fp-row" style="margin-top:16px;justify-content:flex-end"><button type="button" class="fp-btn" data-act="grown">' + esc(TEXT.grownUp) + "</button></div>";
+}
+
+function screenWeeks(c){
+  var p = CONTENT.paths[c.level];
+  var cells = range12().map(function(n){
+    var w = weekOf(c, n);
+    var st = (c.complete || n < c.week) ? ["fp-done", TEXT.stateDone] : n === c.week ? ["fp-now", TEXT.stateNow] : ["fp-soon", TEXT.stateSoon];
+    var inner = "<b>" + esc(TEXT.week) + " " + n + '</b><span class="fp-state">' + esc(st[1]) + "</span><p>" + txt(w && w.focus, "Week focus") + "</p>";
+    var open = st[0] === "fp-now" ? '<button type="button" data-go="week" class="fp-btn" style="margin-top:6px">' + esc(TEXT.nav.standard[0][1]) + "</button>" :
+      st[0] === "fp-done" ? '<button type="button" data-act="viewweek" data-n="' + n + '" class="fp-btn" style="margin-top:6px" aria-label="' + esc(TEXT.openWeek + " " + TEXT.week + " " + n) + '">' + esc(TEXT.openWeek) + "</button>" : "";
+    return '<li class="fp-week ' + st[0] + '"' + (st[0] === "fp-now" ? ' aria-current="step"' : "") + ">" + inner + open + "</li>";
+  }).join("");
+  return head(TEXT.nav.standard[1][1], isDraft(p)) + '<ol class="fp-weeks">' + cells + "</ol>";
+}
+
+/* ----- print ----- */
+function paperHtml(c){
+  var o = ui.opts, lv = levelById(c.level), w = weekOf(c, c.week), body = "";
+  var nameline = o.nameline ? '<div class="fp-nameline"><span>Name: ' + esc(c.name) + "</span><span>Date:</span></div>" : "";
+  if (ui.sheet === "plan") {
+    body = "<h2>" + esc(lv.name) + " – " + esc(TEXT.week) + " " + c.week + "</h2>" + nameline +
+      "<p><b>Focus:</b> " + esc(plain(w.focus, "Week focus")) + "</p>" +
+      lv.strands.map(function(s){ return "<h3>" + esc(TEXT.strands[s]) + "</h3>" + (w.strand_items[s] || []).map(function(it){
+        return '<p><span class="fp-box"></span>' + esc(plain(it.topic, "Topic")) + "</p>"; }).join(""); }).join("");
+    if (o.key) body += '<div class="fp-pagebreak">ANSWER KEY / PARENT NOTES (for the parent)</div><p>' + esc(plain(w.parent_notes, "Parent notes")) + "</p>";
+  } else if (ui.sheet === "chart") {
+    var pc = w.practice_chart || {}, days = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+    var rows = (pc.items && pc.items.length ? pc.items : [TEXT.ph("Practice item"), "", ""]);
+    body = "<h2>" + esc(TEXT.practiceChart) + " – " + esc(TEXT.week) + " " + c.week + "</h2>" + nameline +
+      "<p>Minutes per day: " + esc(pc.minutes_per_day || "____") + " · Days per week: " + esc(pc.days_per_week || "____") + "</p>" +
+      "<table><thead><tr><th>Practice</th>" + days.map(function(d){ return "<th>" + d + "</th>"; }).join("") + "</tr></thead><tbody>" +
+      rows.map(function(r){ return "<tr><td style=\"height:3em\">" + esc(typeof r === "string" ? r : (r.label || r.id || "")) + "</td>" + days.map(function(){ return "<td></td>"; }).join("") + "</tr>"; }).join("") +
+      "</tbody></table>";
+    if (o.key) body += '<div class="fp-pagebreak">PARENT NOTES (for the parent)</div><p>' + esc(plain(w.parent_notes, "Parent notes")) + "</p>";
+  } else if (ui.sheet === "quiz" || ui.sheet === "checklist") {
+    return placementPaper(ui.sheet, o.key);
+  } else if (ui.sheet.indexOf("song:") === 0) {
+    var sg = songsOf(c).filter(function(x){ return "song:" + x.id === ui.sheet; })[0];
+    if (sg) return '<div class="fp-paper' + (o.large ? " fp-lg" : "") + '" style="aspect-ratio:auto" aria-label="Paper preview"><h2>' + esc(sg.title) + "</h2>" +
+      (o.nameline ? '<div class="fp-nameline"><span>Name: ' + esc(c.name) + "</span><span>Date:</span></div>" : '<p style="font-size:.9em">' + esc(TEXT.cBy(c.name, sg.date)) + "</p>") +
+      '<div id="fp-psheet"></div></div>';
+  } else {
+    body = "<h2>" + esc(lv.name) + " – 12-week overview</h2>" + nameline + "<table><thead><tr><th>Week</th><th>Focus</th><th>Done</th></tr></thead><tbody>" +
+      range12().map(function(n){ var ww = weekOf(c, n); return "<tr><td>" + n + "</td><td>" + esc(plain(ww && ww.focus, "Week focus")) + '</td><td><span class="fp-box"></span></td></tr>'; }).join("") +
+      "</tbody></table>";
+    if (o.key) body += '<div class="fp-pagebreak">LEVEL GOALS (for the parent)</div>' + lv.strands.map(function(s){
+      return "<h3>" + esc(TEXT.strands[s]) + "</h3>" + (lv.goals[s] || []).map(function(g){ return "<p>" + esc(g.topic) + ": " + esc(plain(g.description, "Goal description")) + "</p>"; }).join(""); }).join("");
+  }
+  return '<div class="fp-paper' + (o.large ? " fp-lg" : "") + '" aria-label="Paper preview">' + body +
+    '<p class="fp-foot">' + (isDraft(w) ? "DRAFT – needs educator review" : "") + "</p></div>";
+}
+function screenPrint(c){
+  var radios = TEXT.sheets.concat(songsOf(c).map(function(sg){ return ["song:" + sg.id, TEXT.songSheet(sg.title)]; })).map(function(s){
+    return '<label class="fp-check"><input type="radio" name="fp-sheet" value="' + s[0] + '" data-act="sheet"' + (ui.sheet === s[0] ? " checked" : "") + "> " + esc(s[1]) + "</label>"; }).join("");
+  var opts = Object.keys(TEXT.printOpts).map(function(k){
+    return '<label class="fp-check"><input type="checkbox" data-act="opt" data-opt="' + k + '"' + (ui.opts[k] ? " checked" : "") + "> " + esc(TEXT.printOpts[k]) + "</label>"; }).join("");
+  if (ui.sheet === "drill") return head(TEXT.nav.standard[2][1], true, "Prints in black and white on US Letter paper.") +
+    "<fieldset><legend>Sheet</legend>" + radios + "</fieldset><p>" + esc(TEXT.drillHint) + "</p>";
+  return head(TEXT.nav.standard[2][1], isDraft(weekOf(c, c.week)), "Prints in black and white on US Letter paper.") +
+    '<div class="fp-printwrap"><div><fieldset><legend>Sheet</legend>' + radios + "</fieldset><fieldset><legend>Options</legend>" + opts + "</fieldset>" +
+    '<div class="fp-row"><button type="button" class="fp-btn fp-primary" data-act="doprint">' + esc(TEXT.print) + "</button>" +
+    '<button type="button" class="fp-btn" data-act="doprint" data-pdf="1">' + esc(TEXT.savePdf) + "</button></div>" +
+    (ui.msg ? '<p role="status" style="margin-top:8px">' + esc(ui.msg) + "</p>" : "") + "</div>" + paperHtml(c) + "</div>";
+}
+
+/* ----- pieces ----- */
+function pieceWeeks(level){
+  var map = {}, p = CONTENT.paths[level];
+  if (p) p.weeks.forEach(function(w){ (w.repertoire_ids || []).forEach(function(id){ map[id] = map[id] || w.week; }); });
+  return map;
+}
+function screenPieces(c){
+  var weeks = pieceWeeks(c.level);
+  var chips = '<div class="fp-chips" role="group" aria-label="Filter">' + TEXT.filters.map(function(f){
+    return '<button type="button" data-act="filter" data-f="' + f[0] + '" aria-pressed="' + (ui.filter === f[0]) + '">' + esc(f[1]) + "</button>"; }).join("") + "</div>";
+  var list = CONTENT.assets.filter(function(a){
+    if (ui.filter === "level") return a.asset_id in weeks;
+    if (ui.filter === "learned") return !!c.learned[a.asset_id];
+    if (ui.filter === "todo") return !c.learned[a.asset_id];
+    return true;
+  });
+  var rows = list.length ? '<div class="fp-stack">' + list.map(function(a){
+    var wk = weeks[a.asset_id];
+    return '<div class="fp-card fp-piece"><label class="fp-check"><input type="checkbox" data-act="learned" data-id="' + esc(a.asset_id) + '"' + (c.learned[a.asset_id] ? " checked" : "") +
+      '><span class="fp-sr">' + esc(TEXT.learned + ": " + a.title) + "</span></label>" +
+      "<div><b>" + esc(a.title) + "</b> – " + esc(a.composer) + "<br><small>" + txt(a.attribution_text, "License credit") + "</small></div>" +
+      '<div class="fp-row">' + (wk ? '<span class="fp-weekchip">' + esc(TEXT.week) + " " + wk + "</span>" : "") +
+      (a.play && soundOn() ? '<button type="button" class="fp-btn fp-yellow" data-act="listen" data-id="' + esc(a.asset_id) + '" aria-expanded="' + !!(ui.player && ui.player.id === a.asset_id) + '">\u266B ' + esc(TEXT.listen) + "</button>" : "") +
+      (a.play ? '<button type="button" class="fp-btn" data-act="game" data-id="' + esc(a.asset_id) + '">\uD83C\uDFAE ' + esc(TEXT.game) + "</button>" : "") +
+      (a.url ? '<a class="fp-btn" href="' + esc(a.url) + '" target="_blank" rel="noopener">' + esc(TEXT.openScore) + "</a>" : "") + "</div>" +
+      (a.play && soundOn() && ui.player && ui.player.id === a.asset_id ? playerHtml(a) : "") + "</div>";
+  }).join("") + "</div>" : '<div class="fp-card"><p>' + esc(TEXT.piecesEmpty) + "</p></div>";
+  var title = c.mode === "reader" ? TEXT.nav.reader[1][1] : TEXT.nav.standard[3][1];
+  return head(title, true) + chips + rows;
+}
+
+/* ----- stars (reader) ----- */
+function screenStars(c){
+  var n = Object.keys(c.done).filter(function(k){ return c.done[k]; }).length;
+  return head(TEXT.myStars, false) + '<div class="fp-card fp-reader"><p class="fp-stars" role="img" aria-label="' + n + ' stars">' +
+    (n ? new Array(Math.min(n, 48) + 1).join("⭐") : "☆") + '</p><p>' + n + " ⭐</p></div>";
+}
+
+/* ----- family ----- */
+function childForm(k){
+  var opts = CONTENT.levels.levels.slice().sort(function(a,b){ return a.order - b.order; }).map(function(l){
+    return '<option value="' + esc(l.id) + '"' + (k && k.level === l.id ? " selected" : "") + ">" + esc(l.name + " (ages " + l.age_guide.min + "–" + l.age_guide.max + ")") + "</option>"; }).join("");
+  var modes = (k ? "" : '<option value="">Pick for me</option>') + Object.keys(TEXT.modes).map(function(m){
+    return '<option value="' + m + '"' + (k && k.mode === m ? " selected" : "") + ">" + esc(TEXT.modes[m]) + "</option>"; }).join("");
+  var title = k ? TEXT.edit + " " + k.name : TEXT.addChild;
+  return '<form class="fp-card" data-form="child"' + (k ? ' data-id="' + esc(k.id) + '"' : "") + '><h2 style="margin-bottom:10px">' + esc(title) + '</h2><div class="fp-form">' +
+    '<label>Name<input name="name" required maxlength="40" autocomplete="off" value="' + esc(k ? k.name : "") + '"></label>' +
+    '<label>Age<input name="age" type="number" min="2" max="18" inputmode="numeric" value="' + esc(k && k.age ? k.age : "") + '"></label>' +
+    '<label>Level<select name="level">' + opts + (k ? "" : '<option value="__place">' + esc(TEXT.pNotSure) + "</option>") + "</select></label>" +
+    '<label>Mode<select name="mode">' + modes + "</select></label>" +
+    '<label>' + (k ? "Current week" : "Start at week") + '<input name="week" type="number" min="1" max="12" value="' + (k ? k.week : 1) + '"></label></div>' +
+    '<div class="fp-row" style="margin-top:12px"><button type="submit" class="fp-btn fp-primary">' + esc(k ? TEXT.saveChild : TEXT.addChild) + "</button>" +
+    (S.children.length ? '<button type="button" class="fp-btn" data-act="cancel">Cancel</button>' : "") + "</div></form>";
+}
+function backupBanner(){
+  var d = daysSince(S.lastBackup);
+  var ok = d !== null && d <= 7;
+  return '<div class="fp-banner' + (ok ? " fp-ok" : "") + '"><span>' + esc(d === null ? TEXT.backupNever : TEXT.backupDays(d)) + "</span>" +
+    '<button type="button" class="fp-btn fp-primary" data-act="export">' + esc(TEXT.backupNow) + "</button></div>";
+}
+function soundCard(){
+  var st = S.settings, outs = '<option value="device">' + esc(TEXT.thisDevice) + "</option>";
+  if (AU.midi) AU.midi.outputs.forEach(function(o){ outs += '<option value="' + esc(o.id) + '"' + (o.id === st.output ? " selected" : "") + ">" + esc(o.name || o.id) + "</option>"; });
+  else if (st.output !== "device") outs += '<option value="' + esc(st.output) + '" selected>' + esc(TEXT.findPiano) + "\u2026</option>";
+  return '<section class="fp-card"><h2 style="margin-bottom:6px">' + esc(TEXT.sound) + "</h2>" +
+    '<label class="fp-check"><input type="checkbox" data-act="sound"' + (soundOn() ? " checked" : "") + "> " + esc(TEXT.soundOn) + "</label>" +
+    (soundOn() ? '<div class="fp-row"><label for="fp-vol"><b>' + esc(TEXT.volume) + '</b></label><input id="fp-vol" class="fp-range" type="range" min="0" max="1" step="0.05" value="' + st.volume + '" data-act="vol"></div>' +
+      '<div class="fp-form" style="margin-top:8px"><label>' + esc(TEXT.output) + '<select data-act="output">' + outs + "</select></label></div>" +
+      '<div class="fp-row" style="margin-top:10px">' + (navigator.requestMIDIAccess ? '<button type="button" class="fp-btn" data-act="findmidi">' + esc(TEXT.findPiano) + "</button>" : "<p>" + esc(TEXT.noMidi) + "</p>") +
+      '<button type="button" class="fp-btn" data-act="testsound">\u266B ' + esc(TEXT.testSound) + "</button></div>" : "") + "</section>";
+}
+function keyboardCard(){
+  var st = S.settings, kr = kbdRange();
+  function sel(act, list, val){ return '<select data-act="' + act + '">' + list.map(function(o){ return '<option value="' + o[0] + '"' + (String(val) === o[0] ? " selected" : "") + ">" + esc(o[1]) + "</option>"; }).join("") + "</select>"; }
+  return '<section class="fp-card"><h2 style="margin-bottom:6px">' + esc(TEXT.kbdCard) + "</h2><p>" + esc(TEXT.kbdHelp) + "</p>" +
+    '<div class="fp-form" style="margin-top:8px"><label>' + esc(TEXT.kbdSize) + sel("kbd", TEXT.kbdSizes, st.kbd) + "</label>" +
+    (st.kbd !== 88 ? "<label>" + esc(TEXT.kbdShift) + sel("kbdshift", TEXT.kbdShifts, st.kbdShift) + "</label>" : "") +
+    "<label>" + esc(TEXT.listenWith) + sel("listen", TEXT.listenOpts, st.listen) + "</label></div>" +
+    '<p class="fp-range-note" style="margin-top:6px">' + esc(TEXT.kbdRange(noteName(kr[0]), noteName(kr[1]))) + "</p>" +
+    '<label class="fp-check"><input type="checkbox" data-act="anyoct"' + (st.anyOctave ? " checked" : "") + "> " + esc(TEXT.anyOctave) + "</label>" +
+    (st.listen === "mic" ? "<p>" + esc(TEXT.micPrivacy) + "</p>" +
+      '<div class="fp-row" style="margin-top:8px"><button type="button" class="fp-btn" data-act="mictest">' + esc(LISTEN.micTest ? TEXT.micStop : TEXT.micTest) + "</button>" +
+      '<span id="fp-mictest" role="status">' + (LISTEN.micTest ? esc(TEXT.micNothing) : "") + "</span></div>" : "") + "</section>";
+}
+function screenFamily(){
+  var cards = S.children.map(function(k){
+    var lv = levelById(k.level), pct = Math.round(weeksDoneCount(k) / 12 * 100);
+    return '<section class="fp-card"><h3>' + esc(k.name) + "</h3><p>" + (k.age ? "Age " + esc(k.age) + " · " : "") + esc(lv ? lv.name : k.level) + " · " + esc(TEXT.modes[k.mode]) + "</p>" +
+      "<p>" + (k.complete ? esc(TEXT.allDone) : esc(TEXT.week) + " " + k.week + " " + esc(TEXT.of12)) + "</p>" +
+      '<div class="fp-bar" role="img" aria-label="' + pct + '% done"><i style="width:' + pct + '%"></i></div>' +
+      '<div class="fp-row"><button type="button" class="fp-btn" data-act="pick" data-id="' + esc(k.id) + '">Open</button>' +
+      '<button type="button" class="fp-btn" data-act="edit" data-id="' + esc(k.id) + '">' + esc(TEXT.edit) + "</button>" +
+      '<button type="button" class="fp-btn" data-act="place" data-id="' + esc(k.id) + '">' + esc(TEXT.placement) + "</button>" +
+      '<button type="button" class="fp-btn fp-danger" data-act="remove" data-id="' + esc(k.id) + '">' + esc(TEXT.remove) + "</button></div></section>";
+  }).join("");
+  var adding = ui.adding || !S.children.length;
+  var editing = S.children.filter(function(k){ return k.id === ui.editing; })[0];
+  var form = editing ? childForm(editing) : adding ? childForm() : '<div><button type="button" class="fp-btn fp-primary" data-act="add">+ ' + esc(TEXT.addChild) + "</button></div>";
+  return head(TEXT.nav.standard[4][1], false, S.children.length ? "" : esc(TEXT.welcome) + " " + esc(TEXT.noKids)) + memoryWarning() +
+    '<div class="fp-stack">' + backupBanner() + (cards ? '<div class="fp-kids">' + cards + "</div>" : "") +
+    form +
+    '<section class="fp-card"><h2 style="margin-bottom:6px">' + esc(TEXT.backup) + "</h2>" +
+    "<p>Progress is saved only in this browser. A backup file is the only way to move it to another device or get it back.</p>" +
+    '<div class="fp-row" style="margin-top:10px"><button type="button" class="fp-btn fp-primary" data-act="export">' + esc(TEXT.exportBtn) + "</button>" +
+    '<label class="fp-btn" for="fp-import">' + esc(TEXT.importBtn) + '</label><input id="fp-import" type="file" accept=".json,application/json" class="fp-sr" data-act="import"></div>' +
+    (ui.msg ? '<p role="status" style="margin-top:8px">' + esc(ui.msg) + "</p>" : "") + "</section>" +
+    soundCard() + keyboardCard() +
+    '<section class="fp-card"><h2 style="margin-bottom:6px">' + esc(TEXT.startOver) + "</h2><p>Removes every child and all progress from this browser.</p>" +
+    '<button type="button" class="fp-btn fp-danger" style="margin-top:10px" data-act="reset">' + esc(TEXT.startOver) + "</button></section></div>";
+}
+
+/* ----- placement ----- */
+function pState(c){
+  if (!c.placement) c.placement = { type: (c.level === "pre-reader" || (c.age && c.age <= 6)) ? "checklist" : "quiz", answers: { quiz:{}, checklist:{} } };
+  return c.placement;
+}
+function pItems(type){ var out = []; CONTENT.placement[type].sections.forEach(function(sec){ sec.items.forEach(function(it){ out.push({sec:sec, item:it}); }); }); return out; }
+function pMetrics(type, ans){
+  var m = { answered:0, total:0, sum:0, section:{}, yes:0, usually:0, notYet:0, usuallyIn:{} };
+  pItems(type).forEach(function(x){
+    var v = ans[x.item.id], sid = x.sec.id; m.total++;
+    if (v === undefined || v === "") return; m.answered++;
+    if (type === "quiz") {
+      if (x.sec.kind === "yesno") { if (v === "yes") m.yes++; }
+      else { var n = Number(v) || 0; m.sum += n; m.section[sid] = (m.section[sid] || 0) + n; }
+    } else {
+      if (v === "usually") { m.usually++; m.usuallyIn[sid] = (m.usuallyIn[sid] || 0) + 1; }
+      if (v === "not_yet") m.notYet++;
+    }
+  });
+  return m;
+}
+/* Returns {status:"incomplete"} while any rule still has an unwritten (null) condition,
+   {status:"ok", rule} for the first rule that matches, or {status:"none"}. */
+function pEvaluate(type, m){
+  var rules = CONTENT.placement.rules[type === "quiz" ? "reader_quiz" : "prereader_checklist"].rules;
+  var unwritten = false;
+  function conds(r){
+    var list = [];
+    function add(v, ok){ if (v === null) unwritten = true; else list.push(ok); }
+    if ("min_total" in r) add(r.min_total, function(){ return m.sum >= r.min_total; });
+    if ("min_playing_yes" in r) add(r.min_playing_yes, function(){ return m.yes >= r.min_playing_yes; });
+    if ("min_usually" in r) add(r.min_usually, function(){ return m.usually >= r.min_usually; });
+    if ("max_not_yet" in r) add(r.max_not_yet, function(){ return m.notYet <= r.max_not_yet; });
+    Object.keys(r.min_section || {}).forEach(function(k){ add(r.min_section[k], function(){ return (m.section[k] || 0) >= r.min_section[k]; }); });
+    Object.keys(r.min_usually_in || {}).forEach(function(k){ add(r.min_usually_in[k], function(){ return (m.usuallyIn[k] || 0) >= r.min_usually_in[k]; }); });
+    if (r.suggest === "pre-reader" && r.start_week === null) unwritten = true;
+    return list;
+  }
+  var checked = rules.map(function(r){ return { r:r, c:conds(r) }; });
+  if (unwritten) return { status:"incomplete" };
+  for (var i = 0; i < checked.length; i++) {
+    var x = checked[i];
+    if (x.r.always || (x.c.length && x.c.every(function(f){ return f(); }))) return { status:"ok", rule:x.r };
+  }
+  return { status:"none" };
+}
+function placementPaper(type, withKey){
+  var pl = CONTENT.placement[type];
+  return '<div class="fp-paper' + (ui.opts.large ? " fp-lg" : "") + '" aria-label="Paper preview">' + pl.main +
+    (withKey && pl.key ? '<div class="fp-pagebreak">' + esc(TEXT.placementKey) + "</div>" + pl.key : "") + "</div>";
+}
+function pResultHtml(c){
+  var st = pState(c), type = st.type, m = pMetrics(type, st.answers[type]);
+  var lvId = c.level, wk = 1, msg;
+  if (m.answered < m.total) msg = '<p class="fp-suggest fp-none">' + esc(TEXT.pAnswered(m.answered, m.total)) + "</p>";
+  else {
+    var ev = pEvaluate(type, m);
+    if (ev.status === "incomplete") msg = '<p class="fp-suggest fp-none">' + esc(TEXT.pNoRules) + "</p>";
+    else if (ev.status === "none") msg = '<p class="fp-suggest fp-none">' + esc(TEXT.pNoMatch) + "</p>";
+    else if (ev.rule.suggest === "reader-quiz") msg = '<p class="fp-suggest">' + esc(TEXT.pTryQuizLong) + '</p><p style="margin-top:8px"><button type="button" class="fp-btn fp-primary" data-act="ptype" data-v="quiz">' + esc(TEXT.pTryQuiz) + "</button></p>";
+    else {
+      lvId = ev.rule.suggest; wk = ev.rule.start_week || 1;
+      var sl = levelById(lvId);
+      msg = '<p class="fp-suggest">' + esc(TEXT.pSuggest) + " " + esc(sl ? sl.name : lvId) + ", " + esc(TEXT.week.toLowerCase()) + " " + wk + "</p>";
+    }
+  }
+  var opts = CONTENT.levels.levels.slice().sort(function(a,b){ return a.order - b.order; }).map(function(l){
+    return '<option value="' + esc(l.id) + '"' + (l.id === lvId ? " selected" : "") + ">" + esc(l.name) + "</option>"; }).join("");
+  var last = st.result ? "<p>" + esc(TEXT.pLast(st.result.date, (levelById(st.result.level) || {}).name || st.result.level, st.result.week)) + "</p>" : "";
+  return msg + '<div class="fp-form" style="margin-top:12px"><label>Level<select id="fp-plevel">' + opts + "</select></label>" +
+    '<label>' + esc(TEXT.week) + '<input id="fp-pweek" type="number" min="1" max="12" value="' + wk + '"></label></div>' +
+    '<div class="fp-row" style="margin-top:12px"><button type="button" class="fp-btn fp-primary" data-act="papply">' + esc(TEXT.pUse(c.name)) + "</button></div>" +
+    (ui.msg ? '<p role="status" style="margin-top:8px">' + esc(ui.msg) + "</p>" : "") + last;
+}
+function screenPlacement(c){
+  var st = pState(c), type = st.type, ans = st.answers[type];
+  var types = Object.keys(TEXT.pTypes).map(function(t){
+    return '<label class="fp-check"><input type="radio" name="fp-ptype" value="' + t + '" data-act="ptype"' + (t === type ? " checked" : "") + "> <span><b>" +
+      esc(TEXT.pTypes[t]) + "</b><br><small>" + esc(TEXT.pTypeHelp[t]) + "</small></span></label>"; }).join("");
+  var choices = type === "quiz" ? null : [["not_yet", TEXT.pNotYet], ["sometimes", TEXT.pSometimes], ["usually", TEXT.pUsually]];
+  var max = CONTENT.placement.rules.reader_quiz.points_per_item_max;
+  var tables = CONTENT.placement[type].sections.map(function(sec){
+    var cols = choices || (sec.kind === "yesno" ? [["yes", TEXT.pYes], ["no", TEXT.pNotYet]] : null);
+    var headCols = cols ? cols.map(function(o){ return '<th scope="col" class="fp-c">' + esc(o[1]) + "</th>"; }).join("") : '<th scope="col">' + esc(TEXT.pPoints) + "</th>";
+    var rows = sec.items.map(function(it){
+      var v = ans[it.id], cells;
+      if (cols) cells = cols.map(function(o){
+        return '<td class="fp-c"><label class="fp-rad"><input type="radio" name="fp-p-' + esc(it.id) + '" value="' + o[0] + '" data-act="pans" data-id="' + esc(it.id) + '"' + (v === o[0] ? " checked" : "") +
+          '><span class="fp-sr">' + esc(it.id + ": " + o[1]) + "</span></label></td>"; }).join("");
+      else cells = '<td><input type="number" min="0"' + (max ? ' max="' + max + '"' : "") + ' inputmode="numeric" data-act="pans" data-id="' + esc(it.id) + '" value="' + esc(v === undefined ? "" : v) + '" aria-label="' + esc(it.id + " " + TEXT.pPoints) + '"></td>';
+      return '<tr><th scope="row">' + esc(it.id) + "</th><td>" + esc(it.prompt) + "</td>" + cells + "</tr>";
+    }).join("");
+    return '<table class="fp-ptable"><caption>' + esc(sec.name) + '</caption><thead><tr><th scope="col">#</th><th scope="col">Prompt</th>' + headCols + "</tr></thead><tbody>" + rows + "</tbody></table>";
+  }).join("");
+  var step = function(i, body){ return '<li><section class="fp-card"><h2><span class="fp-n" aria-hidden="true">' + (i + 1) + "</span>" + esc(TEXT.pSteps[i]) + "</h2>" + body + "</section></li>"; };
+  return head(TEXT.placementFor(c.name), true) + '<ol class="fp-steps">' +
+    step(0, '<fieldset style="border:0;padding:0;margin:0"><legend class="fp-sr">' + esc(TEXT.pSteps[0]) + "</legend>" + types + "</fieldset>") +
+    step(1, '<div class="fp-row"><button type="button" class="fp-btn fp-primary" data-act="pprint">' + esc(TEXT.pPrint) + "</button>" +
+      '<label class="fp-check"><input type="checkbox" data-act="opt" data-opt="key"' + (ui.opts.key ? " checked" : "") + "> " + esc(TEXT.printOpts.key) + "</label>" +
+      '<label class="fp-check"><input type="checkbox" data-act="opt" data-opt="large"' + (ui.opts.large ? " checked" : "") + "> " + esc(TEXT.printOpts.large) + "</label></div>" +
+      '<details style="margin-top:10px"><summary>' + esc(TEXT.pShow) + "</summary>" + placementPaper(type, ui.opts.key) + "</details>") +
+    step(2, tables + '<button type="button" class="fp-btn fp-danger" data-act="pclear">' + esc(TEXT.pClear) + "</button>") +
+    step(3, '<div id="fp-presult">' + pResultHtml(c) + "</div>") + "</ol>";
+}
+
+/* ----- help ----- */
+function screenHelp(){
+  var modes = Object.keys(TEXT.modes).map(function(m){
+    return '<section class="fp-card"><h3>' + esc(TEXT.modes[m]) + "</h3><p>" + txt("", "Who this mode is for") + "</p></section>"; }).join("");
+  var levels = CONTENT.levels.levels.map(function(l){
+    return "<li><b>" + esc(l.name) + "</b> (ages " + l.age_guide.min + "–" + l.age_guide.max + "): " + txt(l.age_guide.note, "Placement description") + "</li>"; }).join("");
+  var faq = [["How do I print?", "Go to Print, pick one sheet, then press Print. To make a PDF, press Save as PDF and choose “Save as PDF” in the print window. Sheets always print in black and white."],
+             ["Where is my progress saved?", "Only in this browser on this device. Nothing is sent anywhere. Clearing your browser data deletes it, so save a backup file now and then (Family → Backup & restore)."],
+             ["Can I use another device?", "Yes. Save a backup file on this device, move the file to the other device, and use Restore from file there."],
+             ["How do I change a child's mode?", "Pick the child, then change Mode in the side menu. Their progress stays the same."],
+             ["Why is there no sound?", "Check that Sound is on (Family \u2192 Sound) and the volume is up. On iPhone and iPad, turn off the silent switch: it mutes the app."],
+             ["Can it play through our digital piano?", "Yes, in Chrome, Edge or Firefox (not Safari, iPhone or iPad). Connect the piano by USB or Bluetooth MIDI, go to Family \u2192 Sound, press Find my digital piano and pick it under Play through."],
+             ["Our keyboard is small. Does that matter?", "Tell the app its size in Family \u2192 Your keyboard and listening (1 to 7 octaves, or a full piano). The app moves pieces by octaves to fit, and the on-screen keys and the game show only your keys. If your keyboard has octave buttons, say which way you moved it."],
+             ["How does the app hear my child play?", "Three ways: a digital piano connected by USB or Bluetooth MIDI (Chrome, Edge or Firefox), the microphone for an acoustic piano (single notes and chords; it checks the notes it is waiting for, and for big chords one quiet note may be missing), or the on-screen keys. Pick one in Family \u2192 Your keyboard and listening. Microphone sound is checked in the browser only and never recorded or sent."],
+             ["What do the colors on the music mean?", "Blue: the note playing now. Orange: the note to play next. Green: played right. Red: a wrong note. Grey: a note that was missed."],
+             ["How does Compose work?", "Press Record and play on your digital piano, the on-screen keys or (one note at a time works best) an acoustic piano with the microphone. Stop, then play it back as played or as written, print the sheet music, or download it as MusicXML (opens in MuseScore and other music programs) or MIDI. Songs are saved with each child and in backups."],
+             ["Is there a metronome?", "Yes. Press Metronome in the side menu. Set the tempo (or tap it), beats in a bar, clicks per beat and the sound. It keeps going while you use other screens, and stops by itself when the player, the game or Compose starts its own beat. The player, the game (play in time) and Compose also have their own metronome switch."],
+             ["Why can some pieces not be played?", "The app only plays pieces whose music is in the public domain and whose edition\u2019s license lets us make a simplified version. Everything else is a link only."]];
+  var credits = "<ul><li>Piano sound: Fluid R3 SoundFont by Frank Wen, mono version (FluidR3Mono) by Michael Cowgill, MIT license.</li>" +
+    "<li>Music notation on drill sheets: VexFlow by Mohit Muthanna Cheppudira and contributors, MIT license; Bravura music font by Steinberg Media Technologies, SIL Open Font License.</li>" +
+    "<li>Nunito font by the Nunito Project Authors, SIL Open Font License.</li><li>The full license texts are at the top of this app\u2019s file.</li></ul>";
+  var starts = S.children.map(function(k){ return '<button type="button" class="fp-btn fp-primary" data-act="place" data-id="' + esc(k.id) + '">' + esc(TEXT.pStart(k.name)) + "</button>"; }).join("");
+  return head(TEXT.help, true) + '<div class="fp-stack"><h2>Modes</h2><div class="fp-kids">' + modes + "</div>" +
+    '<h2>Placement</h2><div class="fp-card"><ul>' + levels + "</ul>" + (starts ? '<div class="fp-row" style="margin-top:10px">' + starts + "</div>" : "") + "</div><h2>Questions</h2>" +
+    faq.map(function(f){ return "<details><summary>" + esc(f[0]) + "</summary><p>" + esc(f[1]) + "</p></details>"; }).join("") +
+    "<h2>" + esc(TEXT.credits) + '</h2><div class="fp-card">' + credits + "</div></div>";
+}
+
+/* ---------- sound: built-in piano (Fluid R3, MIT) or the family's digital piano (Web MIDI) ---------- */
+var AU = { ctx:null, master:null, buffers:null, loading:null, voices:[], timers:[], midi:null };
+function soundOn(){ return S.settings.sound !== false; }
+function b64buf(b64){ var bin = atob(b64), u = new Uint8Array(bin.length); for (var i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return u.buffer; }
+function audioReady(){
+  if (!AU.ctx) {
+    var AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return Promise.reject(new Error("no Web Audio"));
+    AU.ctx = new AC(); AU.master = AU.ctx.createGain(); AU.master.connect(AU.ctx.destination);
+    if (S.settings.output !== "device" && navigator.requestMIDIAccess && !AU.midi) findMidi(true);
+  }
+  AU.master.gain.value = S.settings.volume;
+  if (AU.ctx.state === "suspended") AU.ctx.resume();
+  if (!AU.loading) AU.loading = Promise.all(CONTENT.piano.samples.map(function(smp){
+    return new Promise(function(res, rej){ AU.ctx.decodeAudioData(b64buf(smp.b64), res, rej); });
+  })).then(function(b){ AU.buffers = b; });
+  return AU.loading;
+}
+function findMidi(quiet){
+  if (!navigator.requestMIDIAccess) { ui.msg = TEXT.noMidi; render(); return; }
+  navigator.requestMIDIAccess({ sysex:false }).then(function(acc){
+    AU.midi = acc; attachMidiInputs();
+    acc.onstatechange = function(){ attachMidiInputs(); if (ui.screen === "family") render(); };
+    if (!quiet) { ui.msg = acc.outputs.size ? "" : TEXT.midiNone; render(); }
+  }, function(){ if (!quiet) { ui.msg = TEXT.midiDenied; render(); } });
+}
+function midiOut(){
+  var id = S.settings.output, o = null;
+  if (id === "device" || !AU.midi) return null;
+  AU.midi.outputs.forEach(function(x){ if (x.id === id) o = x; });
+  return o;
+}
+function msAt(when){ return performance.now() + (when - AU.ctx.currentTime) * 1000; }
+/* Play one note. when = seconds on the audio clock, dur = seconds. */
+function noteAt(m, when, dur, vel){
+  vel = vel || 0.8; dur = Math.max(dur, 0.05);
+  var out = midiOut();
+  if (out) { out.send([0x90, m, Math.round(vel * 127)], msAt(when)); out.send([0x80, m, 0], msAt(when + dur)); return; }
+  var k = CONTENT.piano.keys[String(Math.max(24, Math.min(96, m)))], smp = CONTENT.piano.samples[k];
+  var src = AU.ctx.createBufferSource(), g = AU.ctx.createGain(), end = when + dur;
+  src.buffer = AU.buffers[k];
+  src.playbackRate.value = Math.pow(2, ((m - smp.root) * 100 + smp.cents) / 1200);
+  g.gain.setValueAtTime(vel, when); g.gain.setValueAtTime(vel, end); g.gain.exponentialRampToValueAtTime(0.001, end + 0.25);
+  src.connect(g); g.connect(AU.master); src.start(when); src.stop(end + 0.3);
+  AU.voices.push(src);
+}
+function clickAt(when, strong){
+  var out = midiOut();
+  if (out) { var n = strong ? 76 : 77; out.send([0x99, n, 100], msAt(when)); out.send([0x89, n, 0], msAt(when + 0.05)); return; }
+  var o = AU.ctx.createOscillator(), g = AU.ctx.createGain();
+  o.frequency.value = strong ? 1600 : 1100;
+  g.gain.setValueAtTime(0.35, when); g.gain.exponentialRampToValueAtTime(0.001, when + 0.05);
+  o.connect(g); g.connect(AU.master); o.start(when); o.stop(when + 0.06);
+  AU.voices.push(o);
+}
+function stopAll(){
+  AU.voices.forEach(function(v){ try { v.stop(); } catch(e){} }); AU.voices = [];
+  AU.timers.forEach(clearTimeout); AU.timers = [];
+  if (typeof LISTEN !== "undefined") LISTEN.recent = [];   // nothing the app was playing can come back through the microphone now
+  var out = midiOut();
+  if (out) { if (out.clear) out.clear(); out.send([0xB0, 123, 0]); out.send([0xB9, 123, 0]); }
+  if (ui.player) ui.player.playing = false;
+}
+/* Play a short list of [startBeat, beats, midi] once (drill items, kid-mode sounds). */
+function playOnce(notes, bpm, countIn){
+  if (!soundOn()) return;
+  stopAll();
+  audioReady().then(function(){
+    var spb = 60 / bpm, t = AU.ctx.currentTime + 0.05;
+    if (countIn) { for (var i = 0; i < countIn; i++) clickAt(t + i * spb, i === 0); t += countIn * spb; }
+    notes.forEach(function(n){ noteAt(n[2], t + n[0] * spb, n[1] * spb * 0.95, 0.8); });
+  }, function(){});
+}
+function chime(){ playOnce([[0, 0.5, 72], [0.25, 0.5, 76], [0.5, 1, 79]], 160); }
+
+/* Drill sheet items -> notes (only items whose answer is something you can hear). */
+var DUR = { w:4, hd:3, h:2, qd:1.5, q:1, "8":0.5, "16":0.25 };
+function drillNotes(drill, it){
+  var mid = window.__pdDrills && window.__pdDrills.toMidi;
+  if (!mid) return null;
+  if (drill === "note-naming") return { notes:[[0, 1.5, mid(it.p)]], bpm:80 };
+  if (drill === "intervals") {
+    var a = mid(it.lo), b = mid(it.hi);
+    if (it.pres === "harmonic") return { notes:[[0, 2, a], [0, 2, b]], bpm:80 };
+    if (it.dir === "down") { var x = a; a = b; b = x; }
+    return { notes:[[0, 1, a], [1, 1.5, b]], bpm:80 };
+  }
+  if (drill === "rhythm") {
+    var ts = it.time.split("/"), bar = parseInt(ts[0], 10) * 4 / parseInt(ts[1], 10), t = 0, out = [];
+    it.measures.forEach(function(groups, mi){
+      var t0 = t;
+      groups.forEach(function(g){ g.events.forEach(function(e){
+        var code = e.dur.replace("r", ""), len = e.dur === "wr" ? bar : DUR[code];
+        if (!e.rest) {
+          if (it.tie && mi === 1 && t === t0 && out.length) out[out.length - 1][1] += len; // tied into bar 2
+          else out.push([t, len, 67]);
+        }
+        t += len;
+      }); });
+      t = t0 + bar;
+    });
+    return { notes:out, bpm: ts[1] === "8" ? 120 : 80, countIn: Math.round(parseInt(ts[0], 10) / (ts[1] === "8" ? 3 : 1)) };
+  }
+  return null;
+}
+window.fpDrillPlay = function(cell, drill, it, n){
+  if (!soundOn()) return;
+  var d = drillNotes(drill, it); if (!d) return;
+  var b = document.createElement("button");
+  b.type = "button"; b.className = "pd-noprint fp-dplay"; b.textContent = "\u25B6"; b.setAttribute("aria-label", TEXT.playItem(n));
+  b.addEventListener("click", function(){ playOnce(d.notes, d.bpm, d.countIn); });
+  cell.appendChild(b);
+};
+
+/* ----- piece player ----- */
+function assetById(id){ return CONTENT.assets.filter(function(a){ return a.asset_id === id; })[0]; }
+function newPlayer(a){ return { id:a.asset_id, pos:0, playing:false, speed:80, hands:"both", loop:false, from:1, to:a.play.bars.length, countIn:true, metro:false, wait:false, along:true, check:false }; }
+function range(P, d){ return [d.bars[P.from - 1], P.to < d.bars.length ? d.bars[P.to] : d.end]; }
+function curPos(P){ return P.playing ? Math.min(P.startPos + Math.max(0, AU.ctx.currentTime - P.startAt) / P.spq, P.end) : P.pos; }
+function playerStart(noCount){
+  metroQuiet();
+  var P = ui.player, a = assetById(P.id), d = a.play;
+  stopAll();
+  audioReady().then(function(){
+    var r = range(P, d), from = r[0], to = r[1];
+    var spq = 60 / (d.bpm * P.speed / 100), t0 = AU.ctx.currentTime + 0.1;
+    if (P.pos < from || P.pos >= to - 1e-6) P.pos = from;
+    if (P.countIn && !noCount) { for (var i = 0; i < d.beatsPerBar; i++) clickAt(t0 + i * d.beat * spq, i === 0); t0 += d.beatsPerBar * d.beat * spq; }
+    var checking = P.check;
+    d.events.forEach(function(e){
+      if (e[0] < P.pos - 1e-6 || e[0] >= to - 1e-6) return;
+      var mine = handOk(P, e[3]);
+      if (checking ? (mine || !P.along || P.hands === "both") : !mine) return;   // when checking, the app leaves the child's notes to the child
+      noteAt(e[2], t0 + (e[0] - P.pos) * spq, Math.min(e[1], to - e[0]) * spq * 0.95, 0.7);
+      LISTEN.recent.push({ m:e[2], start:t0 + (e[0] - P.pos) * spq, end:t0 + (e[0] - P.pos + e[1]) * spq });
+    });
+    if (checking) {
+      var fit = fitPiece(a, P.hands), out = (AU.ctx.outputLatency || 0) + (AU.ctx.baseLatency || 0);
+      var cn = pieceNotes(a).filter(function(n){ return handOk(P, n.hand) && n.on >= P.pos - 1e-6 && n.on < to - 1e-6; })
+        .map(function(n){ markId(n.id, "fp-none"); return { id:n.id, want:fit.map(n.m), t:t0 + (n.on - P.pos) * spq + out, res:null }; });
+      P.judge = makeJudge(cn, function(n, cls){ if (n) markId(n.id, cls); });
+      LISTEN.fn = function(m, when){ if (P.judge) P.judge.hit(m, when); };
+      listenStart();
+    }
+    if (P.metro) for (var bt = from; bt < to - 1e-6; bt += d.beat) if (bt >= P.pos - 1e-6)
+      clickAt(t0 + (bt - P.pos) * spq, d.bars.some(function(x){ return Math.abs(x - bt) < 1e-6; }));
+    P.playing = true; P.startAt = t0; P.startPos = P.pos; P.spq = spq; P.end = to;
+    AU.timers.push(setTimeout(function(){
+      if (P.judge) { P.judge.tick(Infinity); var J = P.judge;
+        P.result = TEXT.checkSummary(J.p + J.g, J.notes.length, J.wrong); P.judge = null; listenStop(); }
+      if (P.loop) { P.pos = from; playerStart(true); }
+      else { P.playing = false; P.pos = from; render(); }
+    }, (t0 + (to - P.pos) * spq - AU.ctx.currentTime) * 1000 + 50));
+    render(); tickPlayer();
+  }, function(){});
+}
+function playerPause(){ var P = ui.player; P.pos = curPos(P); stopAll(); render(); }
+function playerStop(){ var P = ui.player, a = assetById(P.id); stopAll(); P.pos = range(P, a.play)[0]; if (W) W = null;
+  if (P.judge) { P.judge = null; listenStop(); } render(); }
+function playerRestartIfPlaying(){ var P = ui.player; if (W && W.active) { waitStart(); return; } if (P.playing) { P.pos = curPos(P); playerStart(true); } else render(); }
+function fmtTime(sec){ sec = Math.max(0, Math.round(sec)); return Math.floor(sec / 60) + ":" + ("0" + sec % 60).slice(-2); }
+function tickPlayer(){
+  var P = ui.player; if (!P || !P.playing) return;
+  var a = assetById(P.id), d = a.play, pos = curPos(P), spq = 60 / (d.bpm * P.speed / 100);
+  var bar = document.getElementById("fp-prog"), tm = document.getElementById("fp-ptime");
+  if (bar) bar.value = pos;
+  if (tm) tm.textContent = fmtTime(pos * spq) + " / " + fmtTime(d.end * spq);
+  if (P.judge) P.judge.tick(AU.ctx.currentTime);
+  markScore();
+  requestAnimationFrame(tickPlayer);
+}
+function playerHtml(a){
+  var P = ui.player, d = a.play, spq = 60 / (d.bpm * P.speed / 100);
+  var bars = d.bars.map(function(_, i){ return i + 1; });
+  function sel(act, val){ return '<select data-act="' + act + '" aria-label="' + esc(act === "pfrom" ? TEXT.bars : TEXT.barsTo) + '">' + bars.map(function(n){
+    return '<option value="' + n + '"' + (n === val ? " selected" : "") + ">" + n + "</option>"; }).join("") + "</select>"; }
+  function chk(act, on, label){ return '<label class="fp-check"><input type="checkbox" data-act="' + act + '"' + (on ? " checked" : "") + "> " + esc(label) + "</label>"; }
+  return '<div class="fp-player" role="group" aria-label="' + esc(TEXT.play + ": " + a.title) + '">' +
+    '<div class="fp-row">' + (P.wait ? (W && W.active ? "" : '<button type="button" class="fp-btn fp-primary" data-act="pwaitgo">\u25B6 ' + esc(TEXT.start) + "</button>") :
+                              P.playing ? '<button type="button" class="fp-btn fp-primary" data-act="ppause">\u275A\u275A ' + esc(TEXT.pause) + "</button>"
+                                        : '<button type="button" class="fp-btn fp-primary" data-act="pplay">\u25B6 ' + esc(TEXT.play) + "</button>") +
+    '<button type="button" class="fp-btn" data-act="pstop">\u25A0 ' + esc(TEXT.stop) + "</button>" +
+    '<progress id="fp-prog" max="' + d.end + '" value="' + P.pos + '"></progress><span id="fp-ptime">' + fmtTime(P.pos * spq) + " / " + fmtTime(d.end * spq) + "</span></div>" +
+    '<div class="fp-row"><label for="fp-speed"><b>' + esc(TEXT.speed) + '</b></label><input id="fp-speed" type="range" min="40" max="120" step="5" value="' + P.speed + '" data-act="pspeed"><span>' + P.speed + "%</span></div>" +
+    '<div class="fp-row"><b>' + esc(TEXT.hands) + '</b><div class="fp-chips" role="group" aria-label="' + esc(TEXT.hands) + '">' + TEXT.handNames.map(function(h){
+      return '<button type="button" data-act="phands" data-v="' + h[0] + '" aria-pressed="' + (P.hands === h[0]) + '">' + esc(h[1]) + "</button>"; }).join("") + "</div></div>" +
+    '<div class="fp-row"><b>' + esc(TEXT.bars) + "</b>" + sel("pfrom", P.from) + esc(TEXT.barsTo) + sel("pto", P.to) +
+      chk("ploop", P.loop, TEXT.loop) + (P.wait ? "" : chk("pcount", P.countIn, TEXT.countIn) + chk("pmetro", P.metro, TEXT.metronome)) + "</div>" +
+    '<div class="fp-row">' + chk("pwait", P.wait, TEXT.waitMode) + (P.wait ? "" : chk("pcheck", P.check, TEXT.checkMine)) +
+      ((P.wait || P.check) && P.hands !== "both" ? chk("palong", P.along, TEXT.along) : "") + rangeNote(a) + "</div>" +
+    (P.result ? '<p class="fp-result" role="status">' + esc(P.result) + "</p>" : "") +
+    (P.wait ? '<p class="fp-wstatus" id="fp-wstatus" role="status"></p>' + keyboardHtml(a) : "") +
+    (a.score ? '<div class="fp-score" id="fp-score" aria-label="' + esc(a.title) + '"></div>' : "") + "</div>";
+}
+
+/* ----- score display and note highlighting ----- */
+var SCORES = {};   // asset_id -> SVG pages (decoded once)
+function loadScore(a){
+  if (SCORES[a.asset_id] || !a.score) return Promise.resolve(SCORES[a.asset_id]);
+  if (!window.DecompressionStream) return Promise.reject(new Error("no DecompressionStream"));
+  var stream = new Blob([b64buf(a.score.svg)]).stream().pipeThrough(new DecompressionStream("gzip"));
+  return new Response(stream).text().then(function(t){ return (SCORES[a.asset_id] = t.split("\u0000").join("")); });
+}
+function fillScore(a){
+  var box = document.getElementById("fp-score"); if (!box || !a.score) return;
+  if (SCORES[a.asset_id]) { box.innerHTML = SCORES[a.asset_id]; reapplyMarks(); markScore(); return; }
+  box.textContent = TEXT.scoreLoading;
+  loadScore(a).then(function(){ fillScore(a); }, function(){ box.textContent = TEXT.scoreNone; });
+}
+var marked = { on:[], next:[] };
+function setMarks(kind, ids){
+  marked[kind].forEach(function(el){ el.classList.remove(kind === "on" ? "fp-on" : "fp-next"); });
+  marked[kind] = [];
+  ids.forEach(function(id){ var el = document.getElementById(id); if (el && el.closest("#fp-score")) { el.classList.add(kind === "on" ? "fp-on" : "fp-next"); marked[kind].push(el); } });
+}
+function handOk(P, h){ return P.hands === "both" || (P.hands === "right" ? h === 0 : h === 1); }
+/* Re-apply highlights after a redraw, and keep the marked note in view. */
+function markScore(){
+  var P = ui.player; if (!P) return;
+  var a = assetById(P.id); if (!a.score) return;
+  var pos = curPos(P), on = [];
+  if (P.playing && !P.wait) Object.keys(a.score.notes).forEach(function(id){
+    var n = a.score.notes[id]; if (n[0] <= pos + 1e-6 && pos < n[1] - 1e-6 && handOk(P, n[2])) on.push(id); });
+  setMarks("on", on);
+  setMarks("next", W && W.active ? W.groups[W.i].ids : []);
+  var el = (marked.next[0] || marked.on[0]), box = document.getElementById("fp-score");
+  if (el && box) {
+    var r = el.getBoundingClientRect(), b = box.getBoundingClientRect();
+    if (r.top < b.top + 20 || r.bottom > b.bottom - 20) box.scrollTop += r.top - b.top - b.height / 3;
+  }
+}
+
+/* ----- "wait for me": the app waits until the child plays the right note(s) ----- */
+var W = null;
+function waitGroups(a, P){
+  var d = a.play, r = range(P, d), from = r[0], to = r[1], groups = [], along = [], fit = fitPiece(a, P.hands);
+  d.events.forEach(function(e){
+    if (e[0] < from - 1e-6 || e[0] >= to - 1e-6) return;
+    if (!handOk(P, e[3])) { along.push(e); return; }
+    var g = groups.length && Math.abs(groups[groups.length - 1].t - e[0]) < 1e-4 ? groups[groups.length - 1] : null;
+    if (!g) { g = { t:e[0], need:[], ids:[] }; groups.push(g); }
+    var mm = fit.map(e[2]);
+    if (g.need.indexOf(mm) < 0) g.need.push(mm);
+  });
+  if (a.score) Object.keys(a.score.notes).forEach(function(id){
+    var n = a.score.notes[id]; if (!handOk(P, n[2])) return;
+    groups.forEach(function(g){ if (Math.abs(g.t - n[0]) < 1e-4) g.ids.push(id); });
+  });
+  return { groups:groups, along:along, from:from, to:to };
+}
+function waitStart(){
+  var P = ui.player, a = assetById(P.id); stopAll();
+  var wg = waitGroups(a, P);
+  var startI = 0; wg.groups.some(function(g, i){ if (g.t >= P.pos - 1e-6) { startI = i; return true; } return false; });
+  W = { active:true, groups:wg.groups, along:wg.along, i:startI, got:[], msg:"", wrong:0, first:0, hadWrong:false };
+  if (!W.groups.length) { W = null; return; }
+  W.groups.forEach(function(g){ g.ids.forEach(function(id){ markId(id, "fp-none"); }); });
+  LISTEN.fn = null; listenStart();
+  audioReady().then(function(){}, function(){});
+  P.playing = false; render();
+}
+function waitStop(){ W = null; render(); }
+function waitKey(m){
+  if (!W || !W.active) return;
+  var g = W.groups[W.i];
+  var want = g.need.filter(function(x){ return sameNote(m, x); })[0];
+  if (want === undefined) { W.msg = TEXT.wAgain; W.wrong++; W.hadWrong = true; flashKey(m, "fp-bad"); updateWait(); return; }
+  if (W.got.indexOf(want) < 0) W.got.push(want);
+  if (g.need.every(function(x){ return W.got.indexOf(x) >= 0; })) {
+    g.ids.forEach(function(id){ markId(id, W.hadWrong ? "fp-bad" : "fp-ok"); });
+    if (!W.hadWrong) W.first++;
+    W.hadWrong = false; waitAdvance();
+  }
+  else updateWait();
+}
+function waitAdvance(){
+  var P = ui.player, a = assetById(P.id), g = W.groups[W.i], next = W.groups[W.i + 1];
+  if (P.along && P.hands !== "both" && AU.ctx) {
+    var spq = 60 / (a.play.bpm * P.speed / 100), now = AU.ctx.currentTime + 0.02, end = next ? next.t : Infinity;
+    W.along.forEach(function(e){ if (e[0] >= g.t - 1e-6 && e[0] < end - 1e-6) { var st0 = now + (e[0] - g.t) * spq;
+      noteAt(e[2], st0, e[1] * spq * 0.95, 0.55); LISTEN.recent.push({ m:e[2], start:st0, end:st0 + e[1] * spq }); } });
+  }
+  W.got = []; W.msg = ""; W.i++;
+  if (W.i >= W.groups.length) {
+    if (P.loop) { W.i = 0; W.groups.forEach(function(gg){ gg.ids.forEach(function(id){ var el = document.getElementById(id); if (el) el.classList.remove("fp-ok", "fp-bad"); }); }); }
+    else { W.active = false; W.msg = TEXT.wDone + " " + TEXT.waitSummary(W.groups.length, W.first, W.wrong); P.pos = range(P, a.play)[0]; chime(); render(); return; }
+  }
+  P.pos = W.groups[W.i].t;
+  updateWait();
+}
+function updateWait(){
+  var st = document.getElementById("fp-wstatus"), prog = document.getElementById("fp-prog"), tm = document.getElementById("fp-ptime");
+  if (!W) return;
+  if (st) st.textContent = W.msg || (W.active ? (W.groups[W.i].need.length > 1 ? TEXT.wPlayChord : TEXT.wPlay) : "");
+  if (prog) { prog.max = W.groups.length; prog.value = W.i; }
+  if (tm) tm.textContent = TEXT.wCount(Math.min(W.i + 1, W.groups.length), W.groups.length);
+  var need = W.active ? W.groups[W.i].need : [];
+  document.querySelectorAll("#fp-app .fp-kbd button").forEach(function(k){ k.classList.toggle("fp-tgt", need.indexOf(Number(k.dataset.key)) >= 0); });
+  markScore();
+}
+function flashKey(m, cls){
+  var k = document.querySelector('#fp-app .fp-kbd button[data-key="' + m + '"]'); if (!k) return;
+  k.classList.add(cls); setTimeout(function(){ k.classList.remove(cls); }, 350);
+}
+function attachMidiInputs(){
+  if (!AU.midi) return;
+  AU.midi.inputs.forEach(function(inp){
+    inp.onmidimessage = function(ev){
+      var st = ev.data[0] & 0xF0;
+      var when = AU.ctx ? AU.ctx.currentTime - Math.max(0, (performance.now() - ev.timeStamp) / 1000) : 0;
+      if (S.settings.listen === "screen" || S.settings.listen === "mic") return;
+      if (st === 0x90 && ev.data[2] > 0) { REC.lastVel = ev.data[2] / 127; heard(ev.data[1], when, "midi"); }
+      else if (st === 0x80 || st === 0x90) recNoteOff(ev.data[1], when);
+    };
+  });
+}
+function keyboardHtml(a){
+  var lo = 127, hi = 0;
+  waitGroups(a, ui.player).groups.forEach(function(g){ g.need.forEach(function(m){ lo = Math.min(lo, m); hi = Math.max(hi, m); }); });
+  if (lo > hi) { lo = 60; hi = 71; }
+  lo -= lo % 12; hi += 11 - hi % 12;                       // whole octaves, C to B
+  var kr = kbdRange(); lo = Math.max(lo, kr[0]); hi = Math.min(hi, kr[1]);
+  var whites = 0, keys = "";
+  for (var m = lo; m <= hi; m++) {
+    var pc = m % 12, black = [1, 3, 6, 8, 10].indexOf(pc) >= 0, name = TEXT.noteNames[pc] + (Math.floor(m / 12) - 1);
+    if (black) keys += '<button type="button" class="fp-bk" data-key="' + m + '" aria-label="' + esc(name) + '" style="left:' + (whites * 44 - 15) + 'px"></button>';
+    else { keys += '<button type="button" class="fp-wk" data-key="' + m + '" aria-label="' + esc(name) + '" style="left:' + (whites * 44) + 'px">' + (pc === 0 ? esc(name) : "") + "</button>"; whites++; }
+  }
+  return '<div class="fp-kbdwrap"><div class="fp-kbd" role="group" aria-label="Piano keys" style="width:' + (whites * 44) + 'px">' + keys + "</div></div>";
+}
+
+/* ----- keyboard size: which keys the family's keyboard has, and fitting a piece onto it ----- */
+var KBD = { 1:[60,72], 2:[48,72], 3:[48,84], 4:[36,84], 5:[36,96], 6:[24,96], 7:[24,108], 88:[21,108] };
+function kbdRange(){ var r = KBD[S.settings.kbd] || KBD[88], sh = (S.settings.kbdShift || 0) * 12;
+  return [Math.max(21, r[0] + sh), Math.min(108, r[1] + sh)]; }
+function noteName(m){ return TEXT.noteNames[m % 12] + (Math.floor(m / 12) - 1); }
+function pieceNotes(a){   // [{on, off, hand, m, id}] for checking: from the drawn score when there is one
+  if (a.score) return Object.keys(a.score.notes).map(function(id){ var n = a.score.notes[id]; return { on:n[0], off:n[1], hand:n[2], m:n[3], id:id }; })
+    .filter(function(n){ return typeof n.m === "number"; }).sort(function(x, y){ return x.on - y.on || x.m - y.m; });
+  return a.play.events.map(function(e, i){ return { on:e[0], off:e[0] + e[1], hand:e[3], m:e[2], id:null }; });
+}
+/* Move a piece by octaves so the chosen hands fit the keyboard; fold single notes in when it is too wide. */
+function fitPiece(a, hands){
+  var kr = kbdRange(), lo = 127, hi = 0;
+  pieceNotes(a).forEach(function(n){ if (hands === "both" || (hands === "right" ? n.hand === 0 : n.hand === 1)) { lo = Math.min(lo, n.m); hi = Math.max(hi, n.m); } });
+  if (lo > hi) return { map:function(m){ return m; }, shift:0, folded:false, lo:lo, hi:hi };
+  var shift = 0;
+  if (lo < kr[0] || hi > kr[1]) {
+    var best = null;
+    for (var k = -48; k <= 48; k += 12) if (lo + k >= kr[0] && hi + k <= kr[1] && (best === null || Math.abs(k) < Math.abs(best))) best = k;
+    if (best !== null) shift = best;
+    else { var mid = (kr[0] + kr[1]) / 2 - (lo + hi) / 2; shift = Math.round(mid / 12) * 12; }
+  }
+  var folded = lo + shift < kr[0] || hi + shift > kr[1];
+  return { shift:shift, folded:folded, lo:lo, hi:hi, map:function(m){
+    m += shift; while (m < kr[0]) m += 12; while (m > kr[1]) m -= 12; return m; } };
+}
+function rangeNote(a){
+  var f = fitPiece(a, "both"), r = noteName(f.lo) + "\u2013" + noteName(f.hi);
+  if (f.folded) return '<span class="fp-range-note fp-warn">' + esc(TEXT.folded(r)) + "</span>";
+  if (f.shift) return '<span class="fp-range-note fp-warn">' + esc(TEXT.shifted(r, (Math.abs(f.shift) / 12) + " octave" + (Math.abs(f.shift) > 12 ? "s " : " ") + (f.shift > 0 ? "up" : "down"))) + "</span>";
+  return '<span class="fp-range-note">' + esc(TEXT.fits(r)) + "</span>";
+}
+function sameNote(m, want){ return m === want || (S.settings.anyOctave && (m - want) % 12 === 0); }
+
+/* ----- listening: every played note (digital piano, microphone, on-screen keys) goes to the active listener ----- */
+var LISTEN = { fn:null, mic:null, micTest:false, recent:[], expect:function(t){ return expectedNow(t); } };
+function expectedNow(t){   // the notes the child should be playing around audio time t (for the microphone's chord check)
+  if (G && G.running && G.notes) {
+    if (ui.game.mode === "practice") { var g = G.groups[G.gi]; return g ? g.notes.filter(function(n){ return !n.res; }).map(function(n){ return n.want; }) : null; }
+    return G.notes.filter(function(n){ return !n.res && Math.abs(n.t - t) < 0.3; }).map(function(n){ return n.want; });
+  }
+  var P = ui.player;
+  if (P && P.judge) return P.judge.notes.filter(function(n){ return !n.res && Math.abs(n.t - t) < 0.3; }).map(function(n){ return n.want; });
+  if (W && W.active) return W.groups[W.i].need.filter(function(m){ return W.got.indexOf(m) < 0; });
+  return null;
+}
+function heard(m, when, from){
+  flashKey(m, "fp-down");
+  if (from === "mic" && AU.ctx) {   // ignore the app's own backing notes coming back through the microphone
+    var now = AU.ctx.currentTime;
+    LISTEN.recent = LISTEN.recent.filter(function(r){ return r.end > now - 0.15; });
+    if (LISTEN.recent.some(function(r){ return r.start - 0.05 <= now && now <= r.end + 0.1 && (r.m - m) % 12 === 0; })) return;
+  }
+  if (LISTEN.fn) LISTEN.fn(m, when);
+  else waitKey(m);
+  if (LISTEN.micTest && from !== "mic") { var el = document.getElementById("fp-mictest"); if (el) el.textContent = TEXT.micHeard(noteName(m)); }
+}
+function nowT(){ return AU.ctx ? AU.ctx.currentTime : 0; }
+/* Microphone (acoustic piano), run in this browser only: nothing is recorded or sent.
+   On each new attack the app takes four looks (60-220 ms after it) at the sound that is new since just before.
+   When it knows which notes it is waiting for, it checks those (chords too) and whether a strong other note is
+   there; otherwise (the microphone test) it names the notes it can find. */
+var MIC = { looks:[0.06, 0.1, 0.15, 0.22], N:4096, NF:8192, opt:{ need:0.15, own:0.075, wrong:0.6, before:0.7, peakLow:0.7 } };
+function micStart(){
+  if (LISTEN.mic) return Promise.resolve();
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { ui.msg = TEXT.micNone; render(); return Promise.reject(); }
+  return audioReady().then(function(){
+    return navigator.mediaDevices.getUserMedia({ audio:{ echoCancellation:false, noiseSuppression:false, autoGainControl:false } });
+  }).then(function(stream){
+    var src = AU.ctx.createMediaStreamSource(stream), an = AU.ctx.createAnalyser();
+    an.fftSize = MIC.N; src.connect(an);
+    var buf = new Float32Array(MIC.N), binHz = AU.ctx.sampleRate / MIC.NF;
+    var st = { level:0, prev:null, hit:null, quietUntil:0 };
+    var timer = setInterval(function(){
+      an.getFloatTimeDomainData(buf);
+      var now = AU.ctx.currentTime, rms = 0, i, L = 1024;
+      for (i = MIC.N - L; i < MIC.N; i++) rms += buf[i] * buf[i];
+      rms = Math.sqrt(rms / L);
+      var spec = fftMag(buf, MIC.NF);
+      if (!st.hit && rms > 0.01 && rms > st.level * 1.6 + 0.004 && now > st.quietUntil) {
+        st.hit = { t:now - 0.02, before:st.prev, looks:[] };          // a new attack
+      }
+      if (st.hit) {
+        var age = now - st.hit.t;
+        if (st.hit.looks.length < MIC.looks.length && age >= MIC.looks[st.hit.looks.length]) st.hit.looks.push(spec);
+        if (st.hit.looks.length === MIC.looks.length) { micDecide(st.hit, binHz); st.quietUntil = now + 0.03; st.hit = null; }
+      }
+      st.level = st.level * 0.6 + rms * 0.4;
+      if (!st.hit) st.prev = spec;
+      if (REC.on && REC.src === "mic" && rms < 0.006) recAllOff(now - 0.05);
+    }, 20);
+    LISTEN.mic = { stream:stream, timer:timer };
+  }, function(e){ if (e) { ui.msg = TEXT.micDenied; render(); } throw e; });
+}
+function micDecide(hit, binHz){
+  var expected = LISTEN.expect ? LISTEN.expect(hit.t) : null;
+  if (expected && expected.length) {
+    var present = {}, wrongs = {};
+    hit.looks.forEach(function(sp){
+      var v = verifyNotes(sp, hit.before, binHz, expected, MIC.opt);
+      v.present.forEach(function(m){ present[m] = true; });
+      if (v.wrong !== null) wrongs[v.wrong] = (wrongs[v.wrong] || 0) + 1;
+    });
+    var got = expected.filter(function(m){ return present[m]; });
+    var wrong = Object.keys(wrongs).filter(function(k){ return wrongs[k] >= 2; }).map(Number)[0];
+    // a big chord heard through a microphone: one quiet note may hide, so all but one is enough (if nothing wrong was heard)
+    if (wrong === undefined && expected.length >= 3 && got.length >= expected.length - 1) got = expected.slice();
+    got.forEach(function(m){ heard(m, hit.t, "mic"); });
+    if (wrong !== undefined) heard(wrong, hit.t, "mic");
+  } else {
+    var votes = {};   // nothing expected (the microphone test): name the notes found in at least 3 of the 4 looks
+    hit.looks.forEach(function(sp){ polyNotes(sp, hit.before, binHz, { ratio:0.3, maxN:4, _guard:20 }).forEach(function(m){ votes[m] = (votes[m] || 0) + 1; }); });
+    var notes = Object.keys(votes).filter(function(k){ return votes[k] >= 3; }).map(Number).sort(function(x, y){ return x - y; });
+    notes = notes.filter(function(m){ return !notes.some(function(lo){ return [19, 24, 28, 31, 34, 36].indexOf(m - lo) >= 0; }); });   // an overtone of a lower note
+    notes.forEach(function(m){ heard(m, hit.t, "mic"); });
+    if (LISTEN.micTest) { var el = document.getElementById("fp-mictest"); if (el && notes.length) el.textContent = TEXT.micHeard(notes.map(noteName).join(" ")); }
+  }
+}
+function micStop(){ if (!LISTEN.mic) return; clearInterval(LISTEN.mic.timer); LISTEN.mic.stream.getTracks().forEach(function(t){ t.stop(); }); LISTEN.mic = null; }
+function fftMag(x, n){            // Hann-windowed real FFT magnitude, n = power of two >= x.length
+  var re = new Float64Array(n), im = new Float64Array(n), L = x.length, i, j, k;
+  for (i = 0; i < L; i++) re[i] = x[i] * (0.5 - 0.5 * Math.cos(2 * Math.PI * i / (L - 1)));
+  for (i = 1, j = 0; i < n; i++) { var bit = n >> 1; for (; j & bit; bit >>= 1) j ^= bit; j ^= bit; if (i < j) { var t = re[i]; re[i] = re[j]; re[j] = t; } }
+  for (var len = 2; len <= n; len <<= 1) {
+    var ang = -2 * Math.PI / len, wr = Math.cos(ang), wi = Math.sin(ang);
+    for (i = 0; i < n; i += len) { var cr = 1, ci = 0;
+      for (k = 0; k < len / 2; k++) { var a = i + k, b = a + len / 2, tr = re[b] * cr - im[b] * ci, ti = re[b] * ci + im[b] * cr;
+        re[b] = re[a] - tr; im[b] = im[a] - ti; re[a] += tr; im[a] += ti; var nr = cr * wr - ci * wi; ci = cr * wi + ci * wr; cr = nr; } } }
+  var mag = new Float32Array(n / 2); for (i = 0; i < n / 2; i++) mag[i] = Math.sqrt(re[i] * re[i] + im[i] * im[i]); return mag;
+}
+/* Notes that started in `cur` (vs `before`): iterative harmonic matching (after Klapuri 2006). */
+function polyNotes(cur, before, binHz, opt){
+  opt = opt || {};
+  var lo = opt.lo || 36, hi = opt.hi || 96, maxN = opt.maxN || 5, H = 10, n = cur.length, k, m, h;
+  var r = new Float32Array(n);
+  for (k = 0; k < n; k++) r[k] = Math.max(0, cur[k] - (before ? 0.9 * before[k] : 0));
+  var top = 0; for (k = 0; k < n; k++) if (r[k] > top) top = r[k];
+  if (top <= 0) return [];
+  function band(f){ var c = f / binHz, w = Math.max(1, c * 0.029); return [Math.max(1, Math.floor(c - w)), Math.min(n - 1, Math.ceil(c + w))]; }
+  function sal(m){ var f0 = 440 * Math.pow(2, (m - 69) / 12), s = 0;
+    for (h = 1; h <= H; h++) { var f = h * f0; if (f > binHz * n * 0.95) break; var b = band(f), pk = 0;
+      for (k = b[0]; k <= b[1]; k++) if (r[k] > pk) pk = r[k];
+      s += pk * (f0 + 27) / (h * f0 + 320); }
+    return s; }
+  var found = [], first = 0;
+  for (var it = 0; it < maxN; it++) {
+    var best = -1, bs = 0;
+    for (m = lo; m <= hi; m++) { if (found.indexOf(m) >= 0) continue; var s = sal(m); if (s > bs) { bs = s; best = m; } }
+    if (best < 0) break;
+    if (!it) first = bs;
+    if (bs < first * (opt.ratio || 0.3) || bs < (opt.floor || 0) ) break;
+    // the fundamental itself must be present (stops picking a note an octave below a real one)
+    var b0 = band(440 * Math.pow(2, (best - 69) / 12)), pk0 = 0; for (k = b0[0]; k <= b0[1]; k++) if (r[k] > pk0) pk0 = r[k];
+    var f0b = 440 * Math.pow(2, (best - 69) / 12);
+    if (pk0 < top * (opt.fund || 0.05) && f0b > 90) { // weak fundamental: remove this candidate's harmonics a little and continue
+      for (h = 1; h <= H; h++) { var bb = band(h * f0b); for (k = bb[0]; k <= bb[1]; k++) r[k] *= 0.5; } it--; if (found.length > maxN || --opt._guard < 0) break; continue; }
+    found.push(best);
+    for (h = 1; h <= H; h++) { var b2 = band(h * f0b); for (k = b2[0]; k <= b2[1]; k++) r[k] *= 0.15; }
+  }
+  return found.sort(function(a, b){ return a - b; });
+}
+
+/* Given the notes the app expects, which of them are sounding, and is there a strong note that should not be? */
+function verifyNotes(cur, before, binHz, expected, opt){
+  opt = opt || {};
+  var n = cur.length, k, h, H = 8, r = new Float32Array(n);
+  var bf = opt.before === undefined ? 0.9 : opt.before;
+  for (k = 0; k < n; k++) r[k] = Math.max(0, cur[k] - (before ? bf * before[k] : 0));
+  function band(f){ var c = f / binHz, w = Math.max(1, c * 0.029); return [Math.max(1, Math.floor(c - w)), Math.min(n - 1, Math.ceil(c + w))]; }
+  function peak(f){ var b = band(f), p = 0; for (k = b[0]; k <= b[1]; k++) if (r[k] > p) p = r[k]; return p; }
+  function sal(m, excl){ var f0 = 440 * Math.pow(2, (m - 69) / 12), s = 0, wsum = 0;
+    for (h = 1; h <= H; h++) { var f = h * f0; if (f > binHz * n * 0.95) break;
+      if (excl && excl(f)) continue;
+      var w = (f0 + 27) / (h * f0 + 320); s += w * peak(f); wsum += w; }
+    return wsum ? s / wsum : (excl ? -1 : 0); }
+  var all = []; for (var m = 33; m <= 100; m++) all.push(sal(m));
+  var maxS = Math.max.apply(null, all) || 1e-9;
+  function shared(e){ return function(f){ return expected.some(function(o){ if (o === e) return false;
+    var f0 = 440 * Math.pow(2, (o - 69) / 12); for (var j = 1; j <= H; j++) if (Math.abs(1200 * Math.log2(f / (j * f0))) < 40) return true; return false; }); }; }
+  var present = expected.filter(function(e){
+    var own = sal(e, shared(e)), s = sal(e);
+    var nb = Math.max(sal(e - 1), sal(e + 1)), pk = e < 50 ? (opt.peakLow || 0.9) : (opt.peak || 1.05);
+    if (own < 0) return s >= maxS * (opt.need || 0.25);          // every partial shared (an octave doubling): the shared energy must be there
+    return s >= maxS * (opt.need || 0.25) && own >= maxS * (opt.own || 0.12) && s >= nb * pk;
+  });
+  // remove the expected notes, then look for a strong leftover note
+  expected.forEach(function(e){ var f0 = 440 * Math.pow(2, (e - 69) / 12); for (h = 1; h <= H + 4; h++) { var b = band(h * f0); for (k = b[0]; k <= b[1]; k++) r[k] *= 0.1; } });
+  var wrong = null, ws = 0;
+  for (m = 33; m <= 100; m++) { var s2 = sal(m); if (s2 > ws) { ws = s2; wrong = m; } }
+  return { present: present, wrong: ws >= maxS * (opt.wrong || 0.45) ? wrong : null };
+}
+function listenStart(){   // turn on the chosen input (MIDI is always listened to once allowed)
+  if (navigator.requestMIDIAccess && !AU.midi) findMidi(true);
+  if (S.settings.listen === "mic") return micStart().catch(function(){});
+  return Promise.resolve();
+}
+function listenStop(){ LISTEN.fn = null; if (!LISTEN.micTest) micStop(); }
+
+/* ----- the judge: is each played note right, early/late, wrong or missed? ----- */
+var WIN = { perfect:0.09, good:0.2 };
+function makeJudge(notes, onMark){
+  var J = { notes:notes, p:0, g:0, miss:0, wrong:0, combo:0, maxCombo:0, score:0, last:"" };
+  J.hit = function(m, t){
+    var best = null, bd = 1e9;
+    notes.forEach(function(n){ if (!n.res && sameNote(m, n.want)) { var dd = Math.abs(n.t - t); if (dd <= WIN.good && dd < bd) { bd = dd; best = n; } } });
+    if (best) {
+      best.res = bd <= WIN.perfect ? "perfect" : "good";
+      if (best.res === "perfect") J.p++; else J.g++;
+      J.combo++; J.maxCombo = Math.max(J.maxCombo, J.combo);
+      J.score += Math.round((best.res === "perfect" ? 100 : 60) * (1 + Math.min(J.combo, 50) / 50));
+      J.last = best.res; onMark(best, "fp-ok");
+    } else { J.wrong++; J.combo = 0; J.last = "wrong"; onMark(null, "fp-bad", m); }
+  };
+  J.tick = function(t){ var lag = S.settings.listen === "mic" ? 0.3 : 0; notes.forEach(function(n){ if (!n.res && t > n.t + WIN.good + lag) { n.res = "miss"; J.miss++; J.combo = 0; J.last = "miss"; onMark(n, "fp-miss"); } }); };
+  J.done = function(){ return notes.every(function(n){ return n.res; }); };
+  J.accuracy = function(){ var tot = notes.length || 1; return Math.max(0, (J.p + J.g * 0.7 - J.wrong * 0.25) / tot); };
+  return J;
+}
+var MARKS = {};   // id -> right / wrong / missed, kept so a redraw of the score does not lose them
+function markId(id, cls){
+  if (!id) return;
+  if (cls === "fp-ok" || cls === "fp-bad" || cls === "fp-miss") MARKS[id] = cls; else delete MARKS[id];
+  var el = document.getElementById(id); if (!el) return;
+  el.classList.remove("fp-ok", "fp-bad", "fp-miss", "fp-next"); if (cls !== "fp-none") el.classList.add(cls);
+}
+function reapplyMarks(){ Object.keys(MARKS).forEach(function(id){ var el = document.getElementById(id); if (el) el.classList.add(MARKS[id]); }); }
+function starsFor(acc){ return acc >= 0.95 ? 3 : acc >= 0.8 ? 2 : acc >= 0.6 ? 1 : 0; }
+
+/* ----- the game: falling notes or scrolling sheet music, played in time or at your own pace ----- */
+var G = null;
+function screenGame(c){
+  var a = assetById(ui.game.id); if (!a || !a.play) { ui.screen = "pieces"; return screenPieces(c); }
+  var o = ui.game, best = (c.games || {})[a.asset_id];
+  function chips(act, list, val){ return '<div class="fp-chips" role="group">' + list.map(function(x){
+    return '<button type="button" data-act="' + act + '" data-v="' + x[0] + '" aria-pressed="' + (val === x[0]) + '">' + esc(x[1]) + "</button>"; }).join("") + "</div>"; }
+  var setup = '<div class="fp-card fp-stack">' +
+    '<div class="fp-row"><b>' + esc(TEXT.gView) + "</b>" + chips("gview", TEXT.gViews, o.view) + "</div>" +
+    '<div class="fp-row"><b>' + esc(TEXT.gMode) + "</b>" + chips("gmode", TEXT.gModes, o.mode) + "</div>" +
+    '<div class="fp-row"><b>' + esc(TEXT.hands) + "</b>" + chips("ghands", TEXT.handNames, o.hands) + "</div>" +
+    '<div class="fp-row"><label for="fp-gspeed"><b>' + esc(TEXT.speed) + '</b></label><input id="fp-gspeed" type="range" min="40" max="120" step="5" value="' + o.speed + '" data-act="gspeed"><span>' + o.speed + "%</span>" +
+    '<label class="fp-check"><input type="checkbox" data-act="gnames"' + (o.names ? " checked" : "") + "> " + esc(TEXT.gNames) + "</label>" +
+    (o.mode === "challenge" ? '<label class="fp-check"><input type="checkbox" data-act="gmetro"' + (o.metro ? " checked" : "") + "> " + esc(TEXT.mGame) + "</label>" : "") + "</div>" +
+    '<div class="fp-row">' + rangeNote(a) + (best ? '<span class="fp-range-note">' + esc(TEXT.gBest(best.best)) + " " + new Array(best.stars + 1).join("\u2B50") + "</span>" : "") + "</div>" +
+    (S.settings.listen === "mic" ? '<p class="fp-range-note">' + esc(TEXT.micTip) + "</p>" : "") + "</div>";
+  var stage = '<div class="fp-game"><div class="fp-hud" aria-live="off"><span>' + esc(TEXT.gScore) + ' <span class="fp-big" id="fp-gscore">0</span></span>' +
+    "<span>" + esc(TEXT.gCombo) + ' <span class="fp-big" id="fp-gcombo">0</span></span><span class="fp-feedback fp-big" id="fp-gfeed"></span>' +
+    '<span style="margin-left:auto" class="fp-row">' +
+    (G && G.running ? '<button type="button" class="fp-btn fp-yellow" data-act="gpause">' + esc(G.paused ? TEXT.gResume : TEXT.gPause) + '</button><button type="button" class="fp-btn" data-act="gstop" style="background:#fff">' + esc(TEXT.gStop) + "</button>"
+                    : '<button type="button" class="fp-btn fp-yellow" data-act="gstart">\u25B6 ' + esc(TEXT.gStart) + "</button>") + "</span></div>" +
+    (o.view === "sheet" ? '<div class="fp-sheetlane" id="fp-gsheet"><div class="fp-hitline"></div><div class="fp-strip" id="fp-gstrip"></div></div><canvas id="fp-gcanvas" style="height:150px;margin-top:8px"></canvas>'
+                        : '<canvas id="fp-gcanvas" aria-label="' + esc(TEXT.gHowTo) + '"></canvas>') + "</div>";
+  var results = G && G.result ? G.result : "";
+  return head(TEXT.gameTitle(a.title), true, esc(TEXT.gHowTo)) + '<div class="fp-stack">' + (G && G.running ? "" : setup) + stage + results +
+    '<div><button type="button" class="fp-btn" data-go="pieces">' + esc(TEXT.gBack) + "</button></div></div>";
+}
+function gameSetupCanvas(){
+  var cv = document.getElementById("fp-gcanvas"); if (!cv || !G) return;
+  var dpr = window.devicePixelRatio || 1, r = cv.getBoundingClientRect();
+  cv.width = Math.round(r.width * dpr); cv.height = Math.round(r.height * dpr); G.cv = cv; G.dpr = dpr;
+  // which keys to draw: the piece's (moved) range, widened to whole octaves, inside the family's keyboard
+  var kr = kbdRange(), lo = 127, hi = 0;
+  G.notes.forEach(function(n){ lo = Math.min(lo, n.want); hi = Math.max(hi, n.want); });
+  if (lo > hi) { lo = 60; hi = 72; }
+  lo = Math.max(kr[0], lo - lo % 12); hi = Math.min(kr[1], hi + (11 - hi % 12));
+  if (hi - lo < 12) hi = Math.min(kr[1], lo + 12);
+  var whites = []; for (var m = lo; m <= hi; m++) if ([1,3,6,8,10].indexOf(m % 12) < 0) whites.push(m);
+  var ww = cv.width / whites.length, keys = {};
+  whites.forEach(function(m, i){ keys[m] = { x:i * ww, w:ww, black:false }; });
+  for (m = lo; m <= hi; m++) if (!keys[m] && keys[m - 1]) keys[m] = { x:keys[m - 1].x + ww * 0.68, w:ww * 0.64, black:true };
+  G.keys = keys; G.kbH = Math.min(cv.height * 0.3, 120 * dpr);
+}
+function gameStart(){
+  if (ui.game.mode === "challenge") metroQuiet();
+  var c = active(), a = assetById(ui.game.id), o = ui.game, d = a.play, fit = fitPiece(a, o.hands);
+  if (G) gameStop(true);
+  var spq = 60 / (d.bpm * o.speed / 100);
+  var notes = pieceNotes(a).filter(function(n){ return o.hands === "both" || (o.hands === "right" ? n.hand === 0 : n.hand === 1); })
+    .map(function(n){ return { on:n.on, off:n.off, hand:n.hand, m:n.m, want:fit.map(n.m), id:n.id, t:0, res:null }; });
+  var along = pieceNotes(a).filter(function(n){ return !(o.hands === "both" || (o.hands === "right" ? n.hand === 0 : n.hand === 1)); });
+  G = { running:true, paused:false, a:a, spq:spq, notes:notes, along:along, beat:-d.beatsPerBar * d.beat, lead:d.beatsPerBar * d.beat,
+        lastNow:null, groups:[], gi:0, got:[], feed:"", feedT:0, pressed:{}, result:"", end:d.end };
+  if (o.mode === "practice") notes.forEach(function(n){
+    var g = G.groups.length && Math.abs(G.groups[G.groups.length - 1].on - n.on) < 1e-4 ? G.groups[G.groups.length - 1] : null;
+    if (!g) { g = { on:n.on, notes:[] }; G.groups.push(g); } g.notes.push(n); });
+  G.judge = makeJudge(notes, function(n, cls, m){
+    if (n) markId(n.id, cls);
+    G.feed = cls === "fp-ok" ? (n.res === "perfect" ? TEXT.gPerfect : TEXT.gGood) : cls === "fp-bad" ? TEXT.gWrong : TEXT.gMiss; G.feedT = performance.now();
+    if (cls === "fp-bad" && m != null) G.pressed[m] = { bad:true, until:performance.now() + 300 };
+  });
+  LISTEN.fn = function(m, when){ if (G && G.running && !G.paused) gameInput(m, when); };
+  render();
+  audioReady().then(function(){
+    listenStart();
+    G.lastNow = AU.ctx.currentTime;
+    if (o.view === "sheet") gameSheetSetup();
+    gameSetupCanvas();
+    if (o.mode === "challenge") gameSchedule();
+    requestAnimationFrame(gameFrame);
+  }, function(){});
+}
+/* Count-in, then (in time mode) the other hand plays along and every note gets its exact time. */
+function gameSchedule(){
+  var o = ui.game, d = G.a.play, now = AU.ctx.currentTime + 0.05, spq = G.spq, out = (AU.ctx.outputLatency || 0) + (AU.ctx.baseLatency || 0);
+  var start = now - G.beat * spq;   // audio time of beat 0
+  G.start = start;
+  for (var b = Math.ceil(G.beat / d.beat) * d.beat; b < 0; b += d.beat) clickAt(start + b * spq, Math.abs(b % (d.beatsPerBar * d.beat)) < 1e-6);
+  G.notes.forEach(function(n){ n.t = start + n.on * spq + out; });
+  if (o.metro) for (var mb = Math.max(0, Math.ceil(G.beat / d.beat - 1e-6)) * d.beat; mb < G.end - 1e-6; mb += d.beat)
+    clickAt(start + mb * spq, d.bars.some(function(x){ return Math.abs(x - mb) < 1e-6; }));
+  G.along.forEach(function(n){ if (n.on >= G.beat - 1e-6) { noteAt(n.m, start + n.on * spq, (n.off - n.on) * spq * 0.95, 0.5); LISTEN.recent.push({ m:n.m, start:start + n.on * spq, end:start + n.off * spq }); } });
+}
+function gameInput(m, when){
+  var o = ui.game;
+  if (o.mode === "challenge") { G.judge.hit(m, when); return; }
+  var g = G.groups[G.gi]; if (!g) return;
+  var n = g.notes.filter(function(x){ return !x.res && sameNote(m, x.want); })[0];
+  if (!n) { G.judge.wrong++; G.judge.combo = 0; G.feed = TEXT.gWrong; G.feedT = performance.now(); G.pressed[m] = { bad:true, until:performance.now() + 300 }; g.hadWrong = true; return; }
+  n.res = g.hadWrong ? "good" : "perfect"; if (n.res === "perfect") G.judge.p++; else G.judge.g++;
+  G.judge.combo++; G.judge.maxCombo = Math.max(G.judge.maxCombo, G.judge.combo);
+  G.judge.score += n.res === "perfect" ? 100 : 60; markId(n.id, "fp-ok");
+  G.feed = n.res === "perfect" ? TEXT.gPerfect : TEXT.gGood; G.feedT = performance.now();
+  if (g.notes.every(function(x){ return x.res; })) {   // group done: the other hand plays this step, then move on
+    var next = G.groups[G.gi + 1], spq = G.spq, t0 = AU.ctx.currentTime + 0.02;
+    G.along.forEach(function(x){ if (x.on >= g.on - 1e-6 && x.on < (next ? next.on : Infinity) - 1e-6) { var st1 = t0 + (x.on - g.on) * spq;
+      noteAt(x.m, st1, (x.off - x.on) * spq * 0.95, 0.5); LISTEN.recent.push({ m:x.m, start:st1, end:st1 + (x.off - x.on) * spq }); } });
+    G.gi++;
+  }
+}
+function gameFrame(){
+  if (!G || !G.running) return;
+  var now = AU.ctx.currentTime, o = ui.game, dt = G.lastNow === null ? 0 : now - G.lastNow; G.lastNow = now;
+  if (!G.paused) {
+    if (o.mode === "challenge") { G.beat = (now - G.start) / G.spq; G.judge.tick(now); }
+    else {
+      var g = G.groups[G.gi], nb = G.beat + dt / G.spq;
+      G.beat = g && nb >= g.on ? g.on : nb;
+      if (G.beat < 0 && dt) { /* count-in time in practice mode just runs */ }
+    }
+  }
+  var finished = o.mode === "challenge" ? (G.judge.done() && G.beat > G.end) : G.gi >= G.groups.length;
+  if (finished) { gameFinish(); return; }
+  gameDraw(); gameHud();
+  if (o.view === "sheet") gameSheetMove();
+  requestAnimationFrame(gameFrame);
+}
+function gameHud(){
+  var s = document.getElementById("fp-gscore"), cb = document.getElementById("fp-gcombo"), f = document.getElementById("fp-gfeed");
+  if (s) s.textContent = G.judge.score; if (cb) cb.textContent = G.judge.combo;
+  if (f) f.textContent = performance.now() - G.feedT < 700 ? G.feed : "";
+}
+function gameDraw(){
+  var cv = G.cv; if (!cv) return;
+  var x = cv.getContext("2d"), W = cv.width, H = cv.height, kbH = G.kbH, hitY = H - kbH, dpr = G.dpr, o = ui.game;
+  var pps = hitY / 3.2;   // pixels per second: about 3.2 seconds of notes are visible
+  x.clearRect(0, 0, W, H); x.fillStyle = "#14304d"; x.fillRect(0, 0, W, H);
+  // bar lines
+  var d = G.a.play; x.strokeStyle = "rgba(255,255,255,.12)"; x.lineWidth = 1 * dpr;
+  if (o.view !== "sheet") d.bars.forEach(function(b){ var y = hitY - (b - G.beat) * G.spq * pps; if (y > 0 && y < hitY) { x.beginPath(); x.moveTo(0, y); x.lineTo(W, y); x.stroke(); } });
+  // falling notes
+  if (o.view !== "sheet") G.notes.forEach(function(n){
+    var k = G.keys[n.want]; if (!k) return;
+    var yb = hitY - (n.on - G.beat) * G.spq * pps, h = Math.max(6 * dpr, (n.off - n.on) * G.spq * pps - 2 * dpr), yt = yb - h;
+    if (yt > hitY || yb < -10) return;
+    x.fillStyle = n.res === "miss" ? "#6b7785" : n.res ? "#2ecc71" : (n.hand === 0 ? "#3fa7d6" : "#f5a623");
+    var pad = k.w * 0.1; roundRect(x, k.x + pad, yt, k.w - 2 * pad, Math.min(h, hitY - yt), 5 * dpr); x.fill();
+    if (o.names && h > 16 * dpr && k.w > 14 * dpr) { x.fillStyle = "#0f2236"; x.font = "800 " + Math.round(Math.min(14 * dpr, k.w * 0.45)) + "px FP Nunito, sans-serif";
+      x.textAlign = "center"; x.fillText(TEXT.noteNames[n.want % 12], k.x + k.w / 2, Math.min(yb, hitY) - 5 * dpr); }
+  });
+  // hit line
+  x.fillStyle = "#ffc83d"; x.fillRect(0, hitY - 3 * dpr, W, 4 * dpr);
+  // keyboard
+  var tnow = performance.now(), wantNow = {};
+  G.notes.forEach(function(n){ if (!n.res && Math.abs(n.on - G.beat) * G.spq < 0.25) wantNow[n.want] = true; });
+  if (o.mode === "practice" && G.groups[G.gi]) G.groups[G.gi].notes.forEach(function(n){ if (!n.res) wantNow[n.want] = true; });
+  [false, true].forEach(function(black){ Object.keys(G.keys).forEach(function(m){
+    var k = G.keys[m]; if (k.black !== black) return; var pr = G.pressed[m], down = pr && pr.until > tnow;
+    var y = hitY, h = black ? kbH * 0.62 : kbH;
+    x.fillStyle = down ? (pr.bad ? "#e74c3c" : "#2ecc71") : wantNow[m] ? "#ffc83d" : (black ? "#1d1d1d" : "#ffffff");
+    x.fillRect(k.x + (black ? 0 : 1 * dpr), y, k.w - (black ? 0 : 2 * dpr), h);
+    if (!black && Number(m) % 12 === 0) { x.fillStyle = "#555"; x.font = "700 " + Math.round(11 * dpr) + "px sans-serif"; x.textAlign = "center"; x.fillText(noteName(Number(m)), k.x + k.w / 2, y + h - 6 * dpr); }
+  }); });
+}
+function roundRect(x, l, t, w, h, r){ r = Math.min(r, w / 2, h / 2); x.beginPath(); x.moveTo(l + r, t); x.arcTo(l + w, t, l + w, t + h, r); x.arcTo(l + w, t + h, l, t + h, r); x.arcTo(l, t + h, l, t, r); x.arcTo(l, t, l + w, t, r); x.closePath(); }
+/* Sheet-music view: the score as one long line scrolls past a fixed yellow line. */
+function gameSheetSetup(){
+  var strip = document.getElementById("fp-gstrip"), a = G.a; if (!strip || !a.score || !a.score.line) return;
+  var load = SCORES["line:" + a.asset_id] ? Promise.resolve(SCORES["line:" + a.asset_id]) :
+    new Response(new Blob([b64buf(a.score.line)]).stream().pipeThrough(new DecompressionStream("gzip"))).text().then(function(t){ return (SCORES["line:" + a.asset_id] = t); });
+  load.then(function(svg){
+    strip.innerHTML = svg; reapplyMarks();
+    var left = strip.getBoundingClientRect().left, pts = {};
+    G.notes.forEach(function(n){ var el = n.id && document.getElementById(n.id); if (!el) return;
+      var r = (el.querySelector(".notehead") || el).getBoundingClientRect(); var k = n.on.toFixed(4);
+      pts[k] = pts[k] ? Math.min(pts[k], r.left - left) : r.left - left; });
+    G.sheetPts = Object.keys(pts).map(function(k){ return [Number(k), pts[k]]; }).sort(function(p, q){ return p[0] - q[0]; });
+  }, function(){});
+}
+function gameSheetMove(){
+  var strip = document.getElementById("fp-gstrip"), lane = document.getElementById("fp-gsheet"), P = G.sheetPts; if (!strip || !P || !P.length) return;
+  var b = G.beat, xpos;
+  if (b <= P[0][0]) xpos = P[0][1] - (P[0][0] - b) * 60;
+  else { var i = 0; while (i < P.length - 1 && P[i + 1][0] <= b) i++;
+    var p = P[i], q = P[i + 1] || [p[0] + 1, p[1] + 60]; xpos = p[1] + (q[1] - p[1]) * (b - p[0]) / (q[0] - p[0]); }
+  strip.style.transform = "translateX(" + (lane.clientWidth * 0.3 - xpos) + "px)";
+  if (ui.game.mode === "practice") { document.querySelectorAll("#fp-gstrip g.fp-next").forEach(function(e){ e.classList.remove("fp-next"); });
+    var g = G.groups[G.gi]; if (g) g.notes.forEach(function(n){ if (!n.res) markId(n.id, "fp-next"); }); }
+}
+function gameFinish(){
+  var c = active(), J = G.judge, acc = J.accuracy(), stars = starsFor(acc), a = G.a;
+  c.games = c.games || {};
+  var prev = c.games[a.asset_id], isBest = !prev || J.score > prev.best;
+  if (isBest) c.games[a.asset_id] = { best:J.score, stars:Math.max(stars, prev ? prev.stars : 0), acc:Math.round(acc * 100) };
+  else if (stars > prev.stars) prev.stars = stars;
+  save(); if (stars) chime();
+  G.running = false; listenStop(); stopAll();
+  G.result = '<div class="fp-results" role="status"><p class="fp-stars" aria-label="' + stars + ' stars">' + (stars ? new Array(stars + 1).join("\u2B50") : "\u2606") + "</p>" +
+    "<p><b>" + esc(TEXT.gScore) + ": " + J.score + "</b> \u00B7 " + esc(TEXT.gAcc) + ": " + Math.round(acc * 100) + "% " + (isBest ? "\u00B7 " + esc(TEXT.gNewBest) : "") + "</p>" +
+    "<p>" + esc(TEXT.gResult(J.p, J.g, J.miss, J.wrong)) + "</p>" +
+    '<div class="fp-row" style="margin-top:8px"><button type="button" class="fp-btn fp-primary" data-act="gstart">' + esc(TEXT.gAgain) + "</button></div></div>";
+  render();
+}
+function gamePreview(){   // the stage before Start (or after the results): just the keyboard
+  var keep = G, a = assetById(ui.game.id), fit = fitPiece(a, ui.game.hands);
+  G = { preview:true, notes:pieceNotes(a).map(function(n){ return { want:fit.map(n.m) }; }) };
+  gameSetupCanvas(); var cv = G.cv; if (cv) { var x = cv.getContext("2d"); G.beat = 0; G.spq = 1; G.a = a; G.pressed = {}; G.groups = []; G.notes = [];
+    var keys = G.keys, kbH = G.kbH; x.fillStyle = "#14304d"; x.fillRect(0, 0, cv.width, cv.height);
+    [false, true].forEach(function(bl){ Object.keys(keys).forEach(function(m){ var k = keys[m]; if (k.black !== bl) return;
+      x.fillStyle = bl ? "#1d1d1d" : "#fff"; x.fillRect(k.x + (bl ? 0 : G.dpr), cv.height - kbH, k.w - (bl ? 0 : 2 * G.dpr), bl ? kbH * 0.62 : kbH); }); }); }
+  G = keep;
+}
+function gameStop(quiet){ if (!G) return; G.running = false; listenStop(); stopAll(); if (!quiet) { G = null; render(); } }
+function gamePause(){
+  if (!G) return; G.paused = !G.paused;
+  if (ui.game.mode === "challenge") {
+    if (G.paused) { stopAll(); G.pausedBeat = G.beat; }
+    else { G.beat = G.pausedBeat; G.notes.forEach(function(n){ if (!n.res && n.on < G.beat) { n.res = "miss"; G.judge.miss++; markId(n.id, "fp-miss"); } }); gameSchedule(); }
+  }
+  render(); gameSetupCanvas(); if (ui.game.view === "sheet") gameSheetSetup();
+}
+function gamePointer(e){
+  if (!G || !G.running || !G.keys) return;
+  var cv = G.cv, r = cv.getBoundingClientRect(), px = (e.clientX - r.left) * G.dpr, py = (e.clientY - r.top) * G.dpr;
+  if (py < cv.height - G.kbH) return;
+  var hit = null;
+  Object.keys(G.keys).forEach(function(m){ var k = G.keys[m]; if (px >= k.x && px <= k.x + k.w) { if (k.black && py <= cv.height - G.kbH + G.kbH * 0.62) hit = Number(m); else if (!k.black && hit === null) hit = Number(m); } });
+  Object.keys(G.keys).forEach(function(m){ var k = G.keys[m]; if (k.black && px >= k.x && px <= k.x + k.w && py <= cv.height - G.kbH + G.kbH * 0.62) hit = Number(m); });
+  if (hit === null) return;
+  e.preventDefault();
+  noteAt(hit, AU.ctx.currentTime + 0.005, 0.5, 0.8);
+  G.pressed[hit] = { bad:false, until:performance.now() + 200 };
+  gameInput(hit, AU.ctx.currentTime);
+}
+
+/* ----- compose a song: record what is played, play it back, turn it into sheet music ----- */
+var REC = { on:false, t0:0, notes:[], open:{}, metroTimer:null, countUntil:0 };
+var KEYS = { C:{ fifths:0, flats:false }, G:{ fifths:1, flats:false }, D:{ fifths:2, flats:false }, F:{ fifths:-1, flats:true }, Bb:{ fifths:-2, flats:true } };
+function composeOpts(){ if (!ui.compose) ui.compose = { bpm:80, ts:"4/4", grid:0.5, key:"C", metro:true, countIn:true, split:60, songId:null, playing:false }; return ui.compose; }
+function songsOf(c){ c.songs = c.songs || []; return c.songs; }
+function currentSong(c){ var o = composeOpts(); return songsOf(c).filter(function(s){ return s.id === o.songId; })[0] || null; }
+function beatsPerBar(ts){ var p = ts.split("/"); return Number(p[0]) * 4 / Number(p[1]); }   // in quarter notes
+function recNoteOn(m, when, vel){
+  if (!REC.on) return;
+  var t = when - REC.t0;
+  if (REC.open[m] !== undefined) recNoteOff(m, when);
+  if (REC.src === "mic") Object.keys(REC.open).forEach(function(k){   // a microphone cannot hear a key let go: a new attack ends the older notes
+    if (REC.notes[REC.open[k]][0] < t - 0.04) recNoteOff(Number(k), when); });
+  REC.open[m] = REC.notes.length; REC.notes.push([t, null, m, vel || 0.8]);
+  var el = document.getElementById("fp-reclive"); if (el) el.textContent = TEXT.recCount(REC.notes.length) + " · " + noteName(m);
+}
+function recNoteOff(m, when){
+  if (!REC.on || REC.open[m] === undefined) return;
+  var n = REC.notes[REC.open[m]]; n[1] = Math.max(0.05, when - REC.t0 - n[0]); delete REC.open[m];
+}
+function recAllOff(when){ Object.keys(REC.open).forEach(function(m){ recNoteOff(Number(m), when); }); }
+function recStart(){
+  metroQuiet();
+  var o = composeOpts(), c = active();
+  stopAll(); listenStop();
+  audioReady().then(function(){
+    var spb = 60 / o.bpm, now = AU.ctx.currentTime + 0.1, lead = o.countIn ? beatsPerBar(o.ts) * spb : 0;
+    REC = { on:true, t0:now + lead, notes:[], open:{}, metroTimer:null, src:S.settings.listen };
+    if (o.countIn) for (var i = 0; i * spb < lead - 1e-6; i++) clickAt(now + i * spb, i === 0);
+    if (o.metro) {   // keep the clicks going while recording, a little ahead of time
+      var next = REC.t0, bar = beatsPerBar(o.ts), k = 0;
+      REC.metroTimer = setInterval(function(){ while (next < AU.ctx.currentTime + 0.3) { clickAt(next, k % bar === 0); next += spb; k++; } }, 100);
+    }
+    LISTEN.fn = function(m, when){ recNoteOn(m, when, REC.src === "midi" ? REC.lastVel || 0.8 : 0.8); };
+    listenStart();
+    render();
+  }, function(){});
+}
+function recStop(){
+  if (!REC.on) return;
+  var c = active(), o = composeOpts(), end = AU.ctx.currentTime;
+  recAllOff(end); REC.on = false; clearInterval(REC.metroTimer); LISTEN.fn = null; listenStop();
+  REC.notes.forEach(function(n){ if (n[1] === null) n[1] = 0.5; });
+  var notes = REC.notes.filter(function(n){ return n[0] > -0.5; }).map(function(n){ return [Math.max(0, n[0]), n[1], n[2], n[3]]; });
+  if (notes.length) {
+    var song = { id:"s" + Date.now().toString(36), title:TEXT.songDefault(songsOf(c).length + 1), date:new Date().toISOString().slice(0, 10),
+                 bpm:o.bpm, ts:o.ts, key:o.key, grid:o.grid, split:o.split, notes:notes };
+    songsOf(c).push(song); o.songId = song.id; save();
+  }
+  render();
+}
+/* Snap the performance to the beat grid and lay it out in bars: per staff, one voice of chords, rests and ties. */
+function quantize(song){
+  var spq = 60 / song.bpm, g = song.grid, bar = beatsPerBar(song.ts);
+  var staves = [[], []];
+  song.notes.forEach(function(n){
+    var on = Math.round(n[0] / spq / g) * g, dur = Math.max(g, Math.round(n[1] / spq / g) * g);
+    staves[n[2] >= song.split ? 0 : 1].push({ on:on, dur:dur, m:n[2] });
+  });
+  var end = 0;
+  staves.forEach(function(st){ st.forEach(function(n){ end = Math.max(end, n.on + n.dur); }); });
+  var nbars = Math.max(1, Math.ceil(end / bar - 1e-9));
+  return { bar:bar, nbars:nbars, staves:staves.map(function(st){
+    var byOn = {}; st.forEach(function(n){ (byOn[n.on] = byOn[n.on] || []).push(n); });
+    var ons = Object.keys(byOn).map(Number).sort(function(a, b){ return a - b; }), chords = [];
+    ons.forEach(function(on, i){
+      var ns = byOn[on], next = i + 1 < ons.length ? ons[i + 1] : Infinity;
+      var dur = Math.min(Math.max.apply(null, ns.map(function(n){ return n.dur; })), next - on);
+      var ms = []; ns.forEach(function(n){ if (ms.indexOf(n.m) < 0) ms.push(n.m); }); ms.sort(function(a, b){ return a - b; });
+      chords.push({ on:on, dur:dur, ms:ms });
+    });
+    // fill rests, split at barlines (tie the pieces of a note)
+    var events = [], pos = 0;
+    function push(on, dur, ms){
+      var first = true;
+      while (dur > 1e-9) { var bEnd = (Math.floor(on / bar + 1e-9) + 1) * bar, piece = Math.min(dur, bEnd - on);
+        events.push({ on:on, dur:piece, ms:ms, tieNext:!!ms && dur - piece > 1e-9, tieFromPrev:!!ms && !first }); on += piece; dur -= piece; first = false; } }
+    chords.forEach(function(ch){ if (ch.on > pos + 1e-9) push(pos, ch.on - pos, null); push(ch.on, ch.dur, ch.ms); pos = ch.on + ch.dur; });
+    if (pos < nbars * bar - 1e-9) push(pos, nbars * bar - pos, null);
+    return events;
+  }) };
+}
+var NOTATE = [[4,"w",0],[3,"h",1],[2,"h",0],[1.5,"q",1],[1,"q",0],[0.75,"8",1],[0.5,"8",0],[0.375,"16",1],[0.25,"16",0]];
+function pieces(dur){ var out = []; NOTATE.forEach(function(v){ while (dur >= v[0] - 1e-9) { out.push(v); dur -= v[0]; } }); return out; }
+var SHARP = ["c","c#","d","d#","e","f","f#","g","g#","a","a#","b"], FLAT = ["c","db","d","eb","e","f","gb","g","ab","a","bb","b"];
+var KEY_ACC = { C:{}, G:{ f:"#" }, D:{ f:"#", c:"#" }, F:{ b:"b" }, Bb:{ b:"b", e:"b" } };
+function spell(m, key){ var nm = (KEYS[key].flats ? FLAT : SHARP)[m % 12]; return { letter:nm[0], acc:nm.slice(1), octave:Math.floor(m / 12) - 1 }; }
+function drawSheet(box, song, opt){
+  var VF = window.Vex && Vex.Flow; if (!VF) { box.textContent = TEXT.noNotation; return; }
+  var scale = (opt && opt.scale) || 1, realW = Math.max(320, box.clientWidth || 700);
+  var q = quantize(song), w = realW / scale, perRow = Math.max(1, Math.min(4, Math.floor((w - 110) / 190)));
+  var rows = Math.ceil(q.nbars / perRow), H = rows * 250 + 20;
+  box.innerHTML = "";
+  var r = new VF.Renderer(box, VF.Renderer.Backends.SVG); r.resize(realW, H * scale);
+  var ctx = r.getContext(), ts = song.ts, tsParts = ts.split("/");
+  if (scale !== 1) ctx.scale(scale, scale);
+  var ties = [], lastNote = [null, null];
+  for (var b = 0; b < q.nbars; b++) {
+    var row = Math.floor(b / perRow), col = b % perRow, y = 10 + row * 250;
+    var extra = 60 + (row === 0 ? 30 : 0), inner = (w - 20 - extra) / perRow;   // the first bar of a line also holds clef, key (and time on line 1)
+    var x = 10 + (col === 0 ? 0 : extra + col * inner), bw = col === 0 ? inner + extra : inner;
+    var st = [new VF.Stave(x, y, bw), new VF.Stave(x, y + 110, bw)];
+    if (col === 0) { st[0].addClef("treble").addKeySignature(song.key); st[1].addClef("bass").addKeySignature(song.key); }
+    if (b === 0) { st[0].addTimeSignature(ts); st[1].addTimeSignature(ts); }
+    if (b === q.nbars - 1) { st[0].setEndBarType(VF.Barline.type.END); st[1].setEndBarType(VF.Barline.type.END); }
+    st.forEach(function(s){ s.setContext(ctx).draw(); });
+    var sx = Math.max(st[0].getNoteStartX(), st[1].getNoteStartX()) + 12; st[0].setNoteStartX(sx); st[1].setNoteStartX(sx);   // after drawing: line both hands up, a little room after the barline
+    if (col === 0) { new VF.StaveConnector(st[0], st[1]).setType("brace").setContext(ctx).draw(); new VF.StaveConnector(st[0], st[1]).setType("singleLeft").setContext(ctx).draw(); }
+    new VF.StaveConnector(st[0], st[1]).setType(b === q.nbars - 1 ? "boldDoubleRight" : "singleRight").setContext(ctx).draw();
+    var voices = [], allNotes = [];
+    [0, 1].forEach(function(si){
+      var clefName = si ? "bass" : "treble", accState = {}, notes = [];
+      q.staves[si].filter(function(e){ return e.on >= b * q.bar - 1e-9 && e.on < (b + 1) * q.bar - 1e-9; }).forEach(function(e){
+        var parts = pieces(e.dur);
+        parts.forEach(function(pv, pi){
+          var sn;
+          if (!e.ms) sn = new VF.StaveNote({ clef:clefName, keys:[si ? "d/3" : "b/4"], duration:pv[1] + "r" });
+          else {
+            var sp = e.ms.map(function(m){ return spell(m, song.key); });
+            sn = new VF.StaveNote({ clef:clefName, keys:sp.map(function(s){ return s.letter + s.acc + "/" + s.octave; }), duration:pv[1], auto_stem:true });
+            sp.forEach(function(s, i){ var want = s.acc, key = s.letter + s.octave, shown = accState[key] !== undefined ? accState[key] : (KEY_ACC[song.key][s.letter] || "");
+              if (want !== shown) { sn.addModifier(new VF.Accidental(want || "n"), i); accState[key] = want; } });
+          }
+          if (pv[2]) VF.Dot.buildAndAttach([sn], { all:true });
+          if (e.ms && lastNote[si] && lastNote[si].tie) ties.push({ a:lastNote[si].note, b:sn, n:e.ms.length });
+          lastNote[si] = e.ms ? { note:sn, tie: pi < parts.length - 1 || e.tieNext } : null;
+          notes.push(sn);
+        });
+      });
+      var v = new VF.Voice({ num_beats:Number(tsParts[0]), beat_value:Number(tsParts[1]) }).setMode(VF.Voice.Mode.SOFT);
+      v.addTickables(notes); voices.push(v); allNotes.push(notes);
+    });
+    new VF.Formatter().joinVoices([voices[0]]).joinVoices([voices[1]]).format(voices, st[0].getNoteEndX() - sx - 10);
+    voices.forEach(function(v, i){ var beams = VF.Beam.generateBeams(allNotes[i].filter(function(n){ return !n.isRest(); }));
+      v.draw(ctx, st[i]); beams.forEach(function(bm){ bm.setContext(ctx).draw(); }); });
+  }
+  ties.forEach(function(t){ var idx = []; for (var i = 0; i < t.n; i++) idx.push(i);
+    new VF.StaveTie({ first_note:t.a, last_note:t.b, first_indices:idx, last_indices:idx }).setContext(ctx).draw(); });
+}
+/* Files for other music programs */
+function songMusicXML(song){
+  var q = quantize(song), div = 4, k = KEYS[song.key], tsp = song.ts.split("/");
+  var TYPES = { w:"whole", h:"half", q:"quarter", "8":"eighth", "16":"16th" };
+  function xesc(s){ return String(s).replace(/[<>&]/g, function(ch){ return { "<":"&lt;", ">":"&gt;", "&":"&amp;" }[ch]; }); }
+  var out = '<?xml version="1.0" encoding="UTF-8"?>\n<!DOCTYPE score-partwise PUBLIC "-//Recordare//DTD MusicXML 4.0 Partwise//EN" "http://www.musicxml.org/dtds/partwise.dtd">\n' +
+    '<score-partwise version="4.0"><work><work-title>' + xesc(song.title) + '</work-title></work><part-list><score-part id="P1"><part-name>Piano</part-name></score-part></part-list><part id="P1">';
+  for (var b = 0; b < q.nbars; b++) {
+    out += '<measure number="' + (b + 1) + '">';
+    if (!b) out += "<attributes><divisions>" + div + "</divisions><key><fifths>" + k.fifths + "</fifths></key><time><beats>" + tsp[0] + "</beats><beat-type>" + tsp[1] + "</beat-type></time><staves>2</staves>" +
+      '<clef number="1"><sign>G</sign><line>2</line></clef><clef number="2"><sign>F</sign><line>4</line></clef></attributes>' +
+      (b === 0 ? '<direction placement="above"><direction-type><metronome><beat-unit>quarter</beat-unit><per-minute>' + song.bpm + "</per-minute></metronome></direction-type><sound tempo=\"" + song.bpm + "\"/></direction>" : "");
+    [0, 1].forEach(function(si){
+      if (si) out += "<backup><duration>" + Math.round(q.bar * div) + "</duration></backup>";
+      var evs = q.staves[si].filter(function(e){ return e.on >= b * q.bar - 1e-9 && e.on < (b + 1) * q.bar - 1e-9; });
+      evs.forEach(function(e){
+        var parts = pieces(e.dur);
+        parts.forEach(function(pv, pi){
+          var tieStart = e.ms && (pi < parts.length - 1 || e.tieNext), tieStop = e.ms && (pi > 0 || e.tieFromPrev);
+          (e.ms || [null]).forEach(function(m, ci){
+            out += "<note>" + (ci ? "<chord/>" : "");
+            if (m === null) out += "<rest/>";
+            else { var s = spell(m, song.key), alter = s.acc === "#" ? 1 : s.acc === "b" ? -1 : 0;
+              out += "<pitch><step>" + s.letter.toUpperCase() + "</step>" + (alter ? "<alter>" + alter + "</alter>" : "") + "<octave>" + s.octave + "</octave></pitch>"; }
+            out += "<duration>" + Math.round(pv[0] * div) + "</duration>" + (tieStop ? '<tie type="stop"/>' : "") + (tieStart ? '<tie type="start"/>' : "") +
+              "<voice>" + (si ? 5 : 1) + "</voice><type>" + TYPES[pv[1]] + "</type>" + (pv[2] ? "<dot/>" : "") + "<staff>" + (si + 1) + "</staff>" +
+              (tieStart || tieStop ? "<notations>" + (tieStop ? '<tied type="stop"/>' : "") + (tieStart ? '<tied type="start"/>' : "") + "</notations>" : "") + "</note>";
+          });
+        });
+      });
+    });
+    out += "</measure>";
+  }
+  return out + "</part></score-partwise>\n";
+}
+function songMidi(song){
+  var tpq = 480, spq = 60 / song.bpm, ev = [];
+  song.notes.forEach(function(n){ var a = Math.round(n[0] / spq * tpq), b = Math.round((n[0] + n[1]) / spq * tpq);
+    ev.push([a, 1, 0x90, n[2], Math.round(n[3] * 110)]); ev.push([Math.max(a + 1, b), 0, 0x80, n[2], 0]); });
+  ev.sort(function(x, y){ return x[0] - y[0] || x[1] - y[1]; });
+  function vlq(v){ var bytes = [v & 0x7F]; while (v >>= 7) bytes.unshift((v & 0x7F) | 0x80); return bytes; }
+  var trk = [0, 0xFF, 0x51, 3].concat([(Math.round(spq * 1e6) >> 16) & 255, (Math.round(spq * 1e6) >> 8) & 255, Math.round(spq * 1e6) & 255]), last = 0;
+  ev.forEach(function(e){ trk = trk.concat(vlq(e[0] - last), [e[2], e[3], e[4]]); last = e[0]; });
+  trk = trk.concat([0, 0xFF, 0x2F, 0]);
+  var head = [0x4D,0x54,0x68,0x64, 0,0,0,6, 0,0, 0,1, tpq >> 8, tpq & 255, 0x4D,0x54,0x72,0x6B, (trk.length >> 24) & 255, (trk.length >> 16) & 255, (trk.length >> 8) & 255, trk.length & 255];
+  return new Uint8Array(head.concat(trk));
+}
+function download(name, data, type){
+  var a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([data], { type:type })); a.download = name;
+  document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 0);
+}
+function songPlay(song, written){
+  var o = composeOpts(); stopAll();
+  audioReady().then(function(){
+    var t0 = AU.ctx.currentTime + 0.1, spq = 60 / song.bpm, last = 0;
+    if (written) { var qz = quantize(song);
+      qz.staves.forEach(function(st){ st.forEach(function(e, i){
+        if (e.ms && !e.tieFromPrev) { var d = e.dur, j = i; while (st[j].tieNext && st[j + 1]) { j++; d += st[j].dur; }   // a tied note sounds once, for its whole length
+          e.ms.forEach(function(m){ noteAt(m, t0 + e.on * spq, d * spq * 0.95, 0.75); }); }
+        last = Math.max(last, (e.on + e.dur) * spq); }); }); }
+    else song.notes.forEach(function(n){ noteAt(n[2], t0 + n[0], n[1], n[3]); last = Math.max(last, n[0] + n[1]); });
+    o.playing = true; render();
+    AU.timers.push(setTimeout(function(){ o.playing = false; render(); }, (last + 0.4) * 1000));
+  }, function(){});
+}
+function kbdHtml(lo, hi){
+  var kr = kbdRange(); lo = Math.max(lo, kr[0]); hi = Math.min(hi, kr[1]);
+  var whites = 0, keys = "";
+  for (var m = lo; m <= hi; m++) {
+    var pc = m % 12, black = [1, 3, 6, 8, 10].indexOf(pc) >= 0, name = noteName(m);
+    if (black) keys += '<button type="button" class="fp-bk" data-key="' + m + '" aria-label="' + esc(name) + '" style="left:' + (whites * 44 - 15) + 'px"></button>';
+    else { keys += '<button type="button" class="fp-wk" data-key="' + m + '" aria-label="' + esc(name) + '" style="left:' + (whites * 44) + 'px">' + (pc === 0 ? esc(name) : "") + "</button>"; whites++; }
+  }
+  return '<div class="fp-kbdwrap"><div class="fp-kbd" role="group" aria-label="Piano keys" style="width:' + (whites * 44) + 'px">' + keys + "</div></div>";
+}
+function screenCompose(c){
+  var o = composeOpts(), song = currentSong(c), songs = songsOf(c);
+  function sel(act, list, val){ return '<select data-act="' + act + '">' + list.map(function(x){ return '<option value="' + x[0] + '"' + (String(val) === String(x[0]) ? " selected" : "") + ">" + esc(x[1]) + "</option>"; }).join("") + "</select>"; }
+  var listen = TEXT.listenOpts.filter(function(x){ return x[0] === S.settings.listen; })[0];
+  var setup = '<div class="fp-card fp-stack"><div class="fp-form">' +
+    '<label>' + esc(TEXT.cTempo) + '<input type="number" min="40" max="200" value="' + o.bpm + '" data-act="cbpm"></label>' +
+    "<label>" + esc(TEXT.cTime) + sel("cts", [["2/4","2/4"],["3/4","3/4"],["4/4","4/4"],["6/8","6/8"]], o.ts) + "</label>" +
+    "<label>" + esc(TEXT.cKey) + sel("ckey", [["C","C major / A minor"],["G","G major / E minor"],["D","D major / B minor"],["F","F major / D minor"],["Bb","B♭ major / G minor"]], o.key) + "</label>" +
+    "<label>" + esc(TEXT.cGrid) + sel("cgrid", [["1","Quarter notes (simplest)"],["0.5","Eighth notes"],["0.25","Sixteenth notes (most detail)"]], o.grid) + "</label></div>" +
+    '<div class="fp-row"><label class="fp-check"><input type="checkbox" data-act="ccount"' + (o.countIn ? " checked" : "") + "> " + esc(TEXT.countIn) + '</label><label class="fp-check"><input type="checkbox" data-act="cmetro"' + (o.metro ? " checked" : "") + "> " + esc(TEXT.metronome) + "</label>" +
+    '<span class="fp-range-note">' + esc(TEXT.listenWith) + ": " + esc(listen ? listen[1] : "") + " (" + esc(TEXT.cChange) + ")</span></div>" +
+    (S.settings.listen === "mic" ? '<p class="fp-range-note">' + esc(TEXT.cMicNote) + "</p>" : "") +
+    '<div class="fp-row">' + (REC.on ? '<button type="button" class="fp-btn fp-danger" data-act="recstop">■ ' + esc(TEXT.recStop) + '</button><span class="fp-wstatus" id="fp-reclive" role="status">' + esc(TEXT.recOn) + "</span>"
+                                    : '<button type="button" class="fp-btn fp-primary" data-act="recstart">● ' + esc(TEXT.recStart) + "</button>") + "</div>" +
+    (REC.on || S.settings.listen === "screen" ? kbdHtml(48, 84) : "") + "</div>";
+  var list = songs.length ? '<div class="fp-chips" role="group" aria-label="' + esc(TEXT.cMySongs) + '">' + songs.map(function(s){
+    return '<button type="button" data-act="csong" data-id="' + esc(s.id) + '" aria-pressed="' + (song && song.id === s.id) + '">' + esc(s.title) + "</button>"; }).join("") + "</div>" : "<p>" + esc(TEXT.cNone) + "</p>";
+  var view = song ? '<div class="fp-card fp-stack"><div class="fp-row"><label style="flex:1;font-weight:700">' + esc(TEXT.cTitle) + ' <input type="text" maxlength="60" value="' + esc(song.title) + '" data-act="ctitle" style="min-height:44px;width:100%;border:1px solid #9fb3c4;border-radius:8px;padding:0 10px"></label></div>' +
+    '<div class="fp-row">' + (o.playing ? '<button type="button" class="fp-btn fp-primary" data-act="cstop">■ ' + esc(TEXT.stop) + "</button>"
+      : '<button type="button" class="fp-btn fp-primary" data-act="cplay">▶ ' + esc(TEXT.cPlayAsPlayed) + '</button><button type="button" class="fp-btn" data-act="cplayw">▶ ' + esc(TEXT.cPlayAsWritten) + "</button>") +
+    '<button type="button" class="fp-btn" data-act="cprint">' + esc(TEXT.print) + '</button><button type="button" class="fp-btn" data-act="cprint" data-pdf="1">' + esc(TEXT.cPdf) + "</button>" +
+    '<button type="button" class="fp-btn" data-act="cxml">' + esc(TEXT.cXml) + '</button><button type="button" class="fp-btn" data-act="cmidi">' + esc(TEXT.cMidi) + "</button>" +
+    '<button type="button" class="fp-btn" data-act="cwav">' + esc(TEXT.cWav) + "</button>" +
+    '<button type="button" class="fp-btn fp-danger" data-act="cdel">' + esc(TEXT.cDelete) + "</button></div>" +
+    (ui.msg ? '<p role="status">' + esc(ui.msg) + "</p>" : "") +
+    '<p class="fp-range-note">' + esc(TEXT.cAbout(song.notes.length, song.bpm, song.ts)) + "</p>" +
+    '<div class="fp-paper" style="aspect-ratio:auto;padding:.4in"><h2>' + esc(song.title) + '</h2><p style="font-size:.9em">' + esc(TEXT.cBy(c.name, song.date)) + '</p><div id="fp-csheet"></div></div></div>' : "";
+  return head(TEXT.cTitleScreen, false, esc(TEXT.cIntro)) + '<div class="fp-stack">' + setup + '<h2>' + esc(TEXT.cMySongs) + "</h2>" + list + view + "</div>";
+}
+
+/* ----- metronome: a standalone, adjustable beat (keeps running across screens) ----- */
+var METRO = { on:false, timer:null, next:0, count:0, queue:[], taps:[], raf:null };
+function metroSettings(){ if (!S.settings.metro) S.settings.metro = { bpm:80, beats:4, sub:1, accent:true, sound:"click", vol:0.8 }; return S.settings.metro; }
+function metroTone(when, level){
+  var m = metroSettings(), out = midiOut(), ctx = AU.ctx;
+  if (out) { var nn = level === 2 ? 76 : level === 1 ? 77 : 42, vel = level === 2 ? 120 : level === 1 ? 90 : 55;
+    out.send([0x99, nn, Math.round(vel * m.vol)], msAt(when)); out.send([0x89, nn, 0], msAt(when + 0.05)); return; }
+  var g = ctx.createGain(), peak = m.vol * (level === 2 ? 0.7 : level === 1 ? 0.45 : 0.22), src;
+  if (m.sound === "wood") {
+    var len = Math.round(ctx.sampleRate * 0.05), buf = ctx.createBuffer(1, len, ctx.sampleRate), d = buf.getChannelData(0);
+    for (var i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.exp(-i / (len / 6));
+    src = ctx.createBufferSource(); src.buffer = buf;
+    var bp = ctx.createBiquadFilter(); bp.type = "bandpass"; bp.frequency.value = level === 2 ? 2400 : level === 1 ? 1700 : 1200; bp.Q.value = 6;
+    src.connect(bp); bp.connect(g); peak *= 3;
+  } else {
+    src = ctx.createOscillator(); src.type = m.sound === "beep" ? "sine" : "square";
+    src.frequency.value = m.sound === "beep" ? (level === 2 ? 1320 : level === 1 ? 880 : 660) : (level === 2 ? 1800 : level === 1 ? 1200 : 900);
+    src.connect(g); if (m.sound !== "beep") peak *= 0.5;
+  }
+  var dur = m.sound === "beep" ? 0.09 : 0.04;
+  g.gain.setValueAtTime(peak, when); g.gain.exponentialRampToValueAtTime(0.0001, when + dur);
+  g.connect(AU.master); src.start(when); src.stop(when + dur + 0.02);
+}
+function metroStart(){
+  audioReady().then(function(){
+    metroStop(true); METRO.on = true; METRO.next = AU.ctx.currentTime + 0.1; METRO.count = 0; METRO.queue = [];
+    METRO.timer = setInterval(function(){
+      var m = metroSettings(), step = 60 / m.bpm / m.sub;
+      while (METRO.next < AU.ctx.currentTime + 0.12) {
+        var sub = METRO.count % m.sub, beat = Math.floor(METRO.count / m.sub) % m.beats;
+        metroTone(METRO.next, sub ? 0 : (beat === 0 && m.accent && m.beats > 1 ? 2 : 1));
+        METRO.queue.push({ t:METRO.next, beat:beat, sub:sub });
+        METRO.next += step; METRO.count++;
+      }
+    }, 25);
+    render(); metroDrawStart();
+  }, function(){});
+}
+function metroStop(quiet){
+  if (!METRO.on) return;
+  METRO.on = false; clearInterval(METRO.timer); METRO.queue = [];
+  if (!quiet) render();
+}
+function metroQuiet(){ if (METRO.on) { metroStop(true); ui.msg = TEXT.mStopped; } }   // something with its own beat is starting
+function metroDrawStart(){ if (!METRO.drawing && METRO.on) { METRO.drawing = true; requestAnimationFrame(metroDraw); } }
+function metroDraw(){
+  if (!METRO.on) { METRO.drawing = false; return; }
+  var now = AU.ctx.currentTime, cur = null;
+  while (METRO.queue.length && METRO.queue[0].t <= now) cur = METRO.queue.shift();
+  if (cur && !cur.sub) document.querySelectorAll("#fp-mdots li").forEach(function(li, i){ li.classList.toggle("fp-now", i === cur.beat); });
+  requestAnimationFrame(metroDraw);
+}
+function metroTap(){
+  var t = performance.now(); METRO.taps = METRO.taps.filter(function(x){ return t - x < 2500; }); METRO.taps.push(t);
+  if (METRO.taps.length >= 2) {
+    var gaps = []; for (var i = 1; i < METRO.taps.length; i++) gaps.push(METRO.taps[i] - METRO.taps[i - 1]);
+    var avg = gaps.reduce(function(a, b){ return a + b; }, 0) / gaps.length;
+    metroSettings().bpm = Math.max(30, Math.min(240, Math.round(60000 / avg))); save(); render();
+  }
+}
+function screenMetro(){
+  var m = metroSettings();
+  function sel(act, list, val){ return '<select data-act="' + act + '">' + list.map(function(x){ return '<option value="' + x[0] + '"' + (String(val) === String(x[0]) ? " selected" : "") + ">" + esc(x[1]) + "</option>"; }).join("") + "</select>"; }
+  var dots = ""; for (var i = 0; i < m.beats; i++) dots += '<li class="' + (i === 0 && m.accent && m.beats > 1 ? "fp-acc" : "") + '"></li>';
+  return head(TEXT.metro, false, esc(TEXT.metroIntro)) + '<div class="fp-card fp-metro">' +
+    '<ul class="fp-mdots" id="fp-mdots" aria-hidden="true">' + dots + "</ul>" +
+    '<div class="fp-mbpm" aria-live="polite">' + m.bpm + "<small>" + esc(TEXT.mBpm) + "</small></div>" +
+    '<input type="range" class="fp-mrange" min="30" max="240" step="1" value="' + m.bpm + '" data-act="mbpm" aria-label="' + esc(TEXT.mBpm) + '">' +
+    '<div class="fp-row" style="justify-content:center"><button type="button" class="fp-btn" data-act="mstep" data-v="-5">\u2212 5</button><button type="button" class="fp-btn" data-act="mstep" data-v="-1">\u2212 1</button>' +
+    '<button type="button" class="fp-btn" data-act="mstep" data-v="1">+ 1</button><button type="button" class="fp-btn" data-act="mstep" data-v="5">+ 5</button>' +
+    '<button type="button" class="fp-btn fp-yellow" data-act="mtap">' + esc(TEXT.mTap) + "</button></div>" +
+    '<div class="fp-row" style="justify-content:center">' + (METRO.on ? '<button type="button" class="fp-btn fp-primary" data-act="mtoggle" style="min-width:180px;font-size:20px">\u25A0 ' + esc(TEXT.mStop) + "</button>"
+                                                          : '<button type="button" class="fp-btn fp-primary" data-act="mtoggle" style="min-width:180px;font-size:20px">\u25B6 ' + esc(TEXT.mStart) + "</button>") + "</div>" +
+    '<div class="fp-form"><label>' + esc(TEXT.mBeats) + sel("mbeats", [1,2,3,4,5,6,7].map(function(n){ return [n, String(n)]; }), m.beats) + "</label>" +
+    "<label>" + esc(TEXT.mSub) + sel("msub", TEXT.mSubs, m.sub) + "</label><label>" + esc(TEXT.mSound) + sel("msound", TEXT.mSounds, m.sound) + "</label>" +
+    '<label>' + esc(TEXT.volume) + '<input type="range" class="fp-mrange" min="0" max="1" step="0.05" value="' + m.vol + '" data-act="mvol"></label></div>' +
+    '<label class="fp-check"><input type="checkbox" data-act="maccent"' + (m.accent ? " checked" : "") + "> " + esc(TEXT.mAccent) + "</label></div>";
+}
+
+/* ----- composed songs as files: audio (WAV) ----- */
+function songWav(song){
+  return audioReady().then(function(){
+    var rate = 44100, end = 0; song.notes.forEach(function(n){ end = Math.max(end, n[0] + n[1]); });
+    var off = new OfflineAudioContext(1, Math.ceil((end + 1.5) * rate), rate), master = off.createGain(); master.gain.value = 0.9; master.connect(off.destination);
+    song.notes.forEach(function(n){
+      var m = n[2], k = CONTENT.piano.keys[String(Math.max(24, Math.min(96, m)))], smp = CONTENT.piano.samples[k];
+      var src = off.createBufferSource(), g = off.createGain(), when = n[0] + 0.1, stop = when + Math.max(0.05, n[1]);
+      src.buffer = AU.buffers[k]; src.playbackRate.value = Math.pow(2, ((m - smp.root) * 100 + smp.cents) / 1200);
+      g.gain.setValueAtTime(n[3] * 0.8, when); g.gain.setValueAtTime(n[3] * 0.8, stop); g.gain.exponentialRampToValueAtTime(0.001, stop + 0.25);
+      src.connect(g); g.connect(master); src.start(when); src.stop(stop + 0.3);
+    });
+    return off.startRendering();
+  }).then(function(buf){
+    var x = buf.getChannelData(0), n = x.length, out = new DataView(new ArrayBuffer(44 + n * 2)), peak = 0, i;
+    for (i = 0; i < n; i++) peak = Math.max(peak, Math.abs(x[i]));
+    var gain = peak > 0.98 ? 0.98 / peak : 1;
+    function str(o, t){ for (var j = 0; j < t.length; j++) out.setUint8(o + j, t.charCodeAt(j)); }
+    str(0, "RIFF"); out.setUint32(4, 36 + n * 2, true); str(8, "WAVE"); str(12, "fmt "); out.setUint32(16, 16, true); out.setUint16(20, 1, true); out.setUint16(22, 1, true);
+    out.setUint32(24, buf.sampleRate, true); out.setUint32(28, buf.sampleRate * 2, true); out.setUint16(32, 2, true); out.setUint16(34, 16, true); str(36, "data"); out.setUint32(40, n * 2, true);
+    for (i = 0; i < n; i++) out.setInt16(44 + i * 2, Math.max(-1, Math.min(1, x[i] * gain)) * 32767, true);
+    return out.buffer;
+  });
+}
+
+/* ---------- render ---------- */
+var root = document.getElementById("fp-app"), sideEl = document.getElementById("fp-side"),
+    viewEl = document.getElementById("fp-view"), drillHost = document.getElementById("fp-drillhost");
+var drillSynced = null;
+function syncDrills(c){
+  var key = c.id + "|" + c.level, n = document.getElementById("pd-name"), l = document.getElementById("pd-level");
+  if (drillSynced === key || !n || !l) return;
+  drillSynced = key; n.value = c.name; l.value = c.level;
+  l.dispatchEvent(new Event("change"));
+}
+function render(focusHead){
+  var c = active();
+  if (c && !TEXT.nav[c.mode].some(function(n){ return n[0] === ui.screen; }) && ["help","family","placement","game","metro"].indexOf(ui.screen) < 0) ui.screen = "week";
+  if (c && c.mode === "toddler" && ui.screen === "game") ui.screen = "week";
+  if (c && c.mode === "toddler" && ui.screen === "family" && !ui.grown) ui.screen = "week";
+  var body;
+  if (!c) body = ui.screen === "help" ? screenHelp() : screenFamily();
+  else body = ({week:screenWeek, weeks:screenWeeks, print:screenPrint, pieces:screenPieces, stars:screenStars, family:screenFamily, help:screenHelp, placement:screenPlacement, game:screenGame, compose:screenCompose, metro:screenMetro}[ui.screen] || screenWeek)(c);
+  sideEl.innerHTML = sidebar(c);
+  viewEl.innerHTML = (ui.screen !== "family" ? memoryWarning() : "") + body;
+  drillHost.hidden = !(c && ui.screen === "print" && ui.sheet === "drill");
+  if (ui.screen === "compose" && c) { var sg = currentSong(c), sb = document.getElementById("fp-csheet"); if (sg && sb) drawSheet(sb, sg); }
+  if (ui.screen === "print" && c && ui.sheet.indexOf("song:") === 0) { var ps = songsOf(c).filter(function(x){ return "song:" + x.id === ui.sheet; })[0], pb = document.getElementById("fp-psheet");
+    if (ps && pb) drawSheet(pb, ps, { scale: ui.opts.large ? 1.35 : 1 }); }
+  if (ui.screen === "metro") metroDrawStart();
+  if (ui.player && ui.screen === "pieces") { fillScore(assetById(ui.player.id)); if (W) updateWait(); }
+  if (ui.screen === "game" && G && G.running) { gameSetupCanvas(); if (ui.game.view === "sheet" && !document.querySelector("#fp-gstrip svg")) gameSheetSetup(); }
+  else if (ui.screen === "game") { G = G && G.result ? G : null; if (document.getElementById("fp-gcanvas")) gamePreview(); }
+  if (!drillHost.hidden) syncDrills(c);
+  if (focusHead) { var h = document.getElementById("fp-h1"); if (h) h.focus(); }
+}
+
+function go(screen){ if (REC.on) recStop(); MARKS = {}; if (ui.player) { stopAll(); ui.player = null; W = null; } if (G) { gameStop(true); G = null; } listenStop(); ui.screen = screen; ui.msg = ""; ui.grown = false; ui.viewWeek = null; ui.editing = null; render(true); }
+
+/* Printing: copy the paper to a direct child of <body> and hide the rest of the page
+   (works inside a Squarespace page as well as on its own). */
+function makePrintout(){
+  var paper = viewEl.querySelector(".fp-paper"); if (!paper) return false;
+  removePrintout();
+  var out = document.createElement("div"); out.id = "fp-printout"; out.innerHTML = paper.outerHTML;
+  document.body.appendChild(out); document.documentElement.classList.add("fp-printing"); return true;
+}
+function removePrintout(){
+  var out = document.getElementById("fp-printout"); if (out) out.remove();
+  document.documentElement.classList.remove("fp-printing");
+}
+window.addEventListener("beforeprint", function(){ if (ui.screen === "print" && ui.sheet !== "drill" && !document.getElementById("fp-printout")) makePrintout(); });
+window.addEventListener("afterprint", removePrintout);
+
+function exportBackup(){
+  S.lastBackup = new Date().toISOString(); save();
+  var data = { app:"family-piano", format:1, exported:S.lastBackup, state:S };
+  var blob = new Blob([JSON.stringify(data, null, 2)], {type:"application/json"});
+  var a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = "family-piano-backup-" + S.lastBackup.slice(0,10) + ".json";
+  document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 0);
+  ui.msg = ""; render();
+}
+function importBackup(file){
+  var r = new FileReader();
+  r.onload = function(){
+    try {
+      var d = JSON.parse(r.result);
+      if (d.app !== "family-piano" || !d.state || !Array.isArray(d.state.children)) throw 0;
+      S = d.state; S.version = 1; save(); ui.msg = TEXT.importOk;
+    } catch(e){ ui.msg = TEXT.importBad; }
+    render();
+  };
+  r.readAsText(file);
+}
+function readAloud(c){
+  if (!("speechSynthesis" in window)) return;
+  window.speechSynthesis.cancel();
+  readerSteps(c).forEach(function(x, i){
+    var u = new SpeechSynthesisUtterance("Step " + (i + 1) + ". " + (x.item.topic || TEXT.strands[x.strand]));
+    u.lang = "en-US"; window.speechSynthesis.speak(u);
+  });
+}
+
+root.addEventListener("click", function(e){
+  var t = e.target.closest("[data-go],[data-print],[data-act]"); if (!t || t.tagName === "INPUT" || t.tagName === "SELECT") return;
+  var c = active();
+  if (t.dataset.go) return go(t.dataset.go);
+  if (t.dataset.print) { ui.sheet = t.dataset.print; return go("print"); }
+  switch (t.dataset.act) {
+    case "weekdone":
+      if (c.week >= 12) c.complete = true; else c.week++;
+      save(); ui.grown = false; render(true); break;
+    case "tile": c.done[t.dataset.id] = !c.done[t.dataset.id]; save(); render(); if (c.done[t.dataset.id]) chime(); break;
+    case "grown": ui.grown = !ui.grown; render(true); break;
+    case "readme": readAloud(c); break;
+    case "doprint": ui.msg = t.dataset.pdf ? TEXT.savePdfHint : ""; render(); if (makePrintout()) { window.print(); setTimeout(removePrintout, 1000); } break;
+    case "viewweek": ui.viewWeek = parseInt(t.dataset.n, 10); ui.screen = "week"; render(true); break;
+    case "backweek": ui.viewWeek = null; render(true); break;
+    case "nextlevel": var nx = nextLevelOf(c); if (nx) { c.level = nx.id; c.week = 1; c.complete = false; save(); go("week"); } break;
+    case "listen":
+      W = null; MARKS = {};
+      if (ui.player && ui.player.id === t.dataset.id) { stopAll(); ui.player = null; }
+      else { stopAll(); ui.player = newPlayer(assetById(t.dataset.id)); }
+      render(); break;
+    case "pplay": ui.player.result = ""; playerStart(false); break;
+    case "game": stopAll(); ui.player = null; W = null; ui.game = ui.game && ui.game.id === t.dataset.id ? ui.game : { id:t.dataset.id, view:"fall", mode:"practice", hands:"right", speed:70, names:true };
+      ui.screen = "game"; G = null; render(true); break;
+    case "gview": ui.game.view = t.dataset.v; G = null; render(); break;
+    case "gmode": ui.game.mode = t.dataset.v; G = null; render(); break;
+    case "ghands": ui.game.hands = t.dataset.v; G = null; render(); break;
+    case "gstart": MARKS = {}; gameStart(); break;
+    case "recstart": recStart(); break;
+    case "recstop": recStop(); break;
+    case "csong": composeOpts().songId = t.dataset.id; var sgx = currentSong(c); if (sgx) ["bpm","ts","key","grid"].forEach(function(k){ composeOpts()[k] = sgx[k]; }); render(); break;
+    case "cplay": songPlay(currentSong(c), false); break;
+    case "cplayw": songPlay(currentSong(c), true); break;
+    case "cstop": stopAll(); composeOpts().playing = false; render(); break;
+    case "cprint": ui.msg = t.dataset.pdf ? TEXT.savePdfHint : ""; if (t.dataset.pdf) render(); if (makePrintout()) { window.print(); setTimeout(removePrintout, 1000); } break;
+    case "cwav": var sw = currentSong(c); ui.msg = TEXT.cWavWait; render();
+      songWav(sw).then(function(data){ download(sw.title.replace(/[^\w\- ]+/g, "") + ".wav", data, "audio/wav"); ui.msg = ""; render(); }, function(){ ui.msg = ""; render(); }); break;
+    case "gometro": go("metro"); break;
+    case "mtoggle": if (METRO.on) metroStop(); else metroStart(); break;
+    case "mstep": metroSettings().bpm = Math.max(30, Math.min(240, metroSettings().bpm + Number(t.dataset.v))); save(); render(); break;
+    case "mtap": metroTap(); break;
+    case "cxml": var sx1 = currentSong(c); download(sx1.title.replace(/[^\w\- ]+/g, "") + ".musicxml", songMusicXML(sx1), "application/vnd.recordare.musicxml+xml"); break;
+    case "cmidi": var sx2 = currentSong(c); download(sx2.title.replace(/[^\w\- ]+/g, "") + ".mid", songMidi(sx2), "audio/midi"); break;
+    case "cdel": var sx3 = currentSong(c); if (sx3 && confirm(TEXT.cDeleteConfirm(sx3.title))) { c.songs = songsOf(c).filter(function(x){ return x !== sx3; }); composeOpts().songId = null; save(); render(); } break;
+    case "gpause": gamePause(); break;
+    case "gstop": gameStop(false); break;
+    case "mictest":
+      if (LISTEN.micTest) { LISTEN.micTest = false; micStop(); render(); }
+      else { LISTEN.micTest = true; render(); micStart().then(function(){ var el = document.getElementById("fp-mictest"); if (el) el.textContent = TEXT.micNothing; }, function(){ LISTEN.micTest = false; render(); }); }
+      break;
+    case "pwaitgo": waitStart(); break;
+    case "ppause": playerPause(); break;
+    case "pstop": playerStop(); break;
+    case "phands": ui.player.hands = t.dataset.v; playerRestartIfPlaying(); break;
+    case "findmidi": findMidi(false); break;
+    case "testsound": playOnce([[0, 1, 60], [1, 1, 64], [2, 1, 67], [3, 2, 72]], 100); break;
+    case "place": S.activeId = t.dataset.id; save(); go("placement"); break;
+    case "ptype": pState(c).type = t.dataset.v; save(); render(true); break;
+    case "pprint": if (makePrintout()) { window.print(); setTimeout(removePrintout, 1000); } break;
+    case "pclear": var ps = pState(c); ps.answers[ps.type] = {}; save(); render(); break;
+    case "papply":
+      var lvSel = document.getElementById("fp-plevel").value, wkSel = Math.max(1, Math.min(12, parseInt(document.getElementById("fp-pweek").value, 10) || 1));
+      var hasProgress = c.week > 1 || c.complete || Object.keys(c.done).some(function(x){ return c.done[x]; });
+      if ((lvSel !== c.level || wkSel !== c.week) && hasProgress && !confirm(TEXT.pConfirm(c.name))) break;
+      var lvName = (levelById(lvSel) || {}).name || lvSel;
+      c.level = lvSel; c.week = wkSel; c.complete = false;
+      pState(c).result = { level: lvSel, week: wkSel, date: new Date().toISOString().slice(0, 10), type: pState(c).type };
+      save(); ui.msg = TEXT.pDone(c.name, lvName, wkSel); render();
+      break;
+    case "edit": ui.editing = t.dataset.id; ui.adding = false; render(); break;
+    case "filter": ui.filter = t.dataset.f; render(); break;
+    case "add": ui.adding = true; render(); break;
+    case "cancel": ui.adding = false; ui.editing = null; render(); break;
+    case "pick": S.activeId = t.dataset.id; save(); go("week"); break;
+    case "remove":
+      var k = S.children.filter(function(x){ return x.id === t.dataset.id; })[0];
+      if (k && confirm(TEXT.removeConfirm(k.name))) { S.children = S.children.filter(function(x){ return x !== k; }); if (S.activeId === k.id) S.activeId = S.children[0] ? S.children[0].id : null; save(); render(); }
+      break;
+    case "export": exportBackup(); break;
+    case "reset": if (confirm(TEXT.startOverConfirm)) { S = blank(); save(); ui.adding = false; go("family"); } break;
+  }
+});
+root.addEventListener("pointerdown", function(e){
+  var k = e.target.closest(".fp-kbd button[data-key]"); if (!k) return;
+  e.preventDefault();
+  var m = Number(k.dataset.key);
+  audioReady().then(function(){ noteAt(m, AU.ctx.currentTime + 0.01, 0.6, 0.8); heard(m, AU.ctx.currentTime, "screen"); }, function(){});
+});
+root.addEventListener("pointerdown", function(e){ if (e.target.id === "fp-gcanvas") gamePointer(e); });
+["pointerup", "pointercancel", "pointerleave"].forEach(function(evn){ root.addEventListener(evn, function(e){
+  var k = e.target.closest && e.target.closest(".fp-kbd button[data-key]"); if (k && REC.on && AU.ctx) recNoteOff(Number(k.dataset.key), AU.ctx.currentTime);
+}, true); });
+root.addEventListener("keydown", function(e){   // keyboard users: Enter/Space on a focused key
+  var k = e.target.closest && e.target.closest(".fp-kbd button[data-key]");
+  if (k && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); var m = Number(k.dataset.key);
+    audioReady().then(function(){ noteAt(m, AU.ctx.currentTime + 0.01, 0.6, 0.8); heard(m, AU.ctx.currentTime, "screen"); }, function(){}); }
+});
+root.addEventListener("click", function(e){     // tap a note in the score to start from there
+  if (!ui.player || !e.target.closest || !e.target.closest("#fp-score")) return;
+  // Noteheads are tiny and drawn with <use>, so pick the nearest one within a finger's width.
+  var best = null, bestD = 30 * 30;
+  document.querySelectorAll("#fp-score g.note").forEach(function(g){
+    var r = (g.querySelector(".notehead") || g).getBoundingClientRect();
+    var dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.top + r.height / 2), d = dx * dx + dy * dy;
+    if (d < bestD) { bestD = d; best = g; }
+  });
+  if (!best) return;
+  var a = assetById(ui.player.id), info = a.score && a.score.notes[best.id]; if (!info) return;
+  var P = ui.player; P.pos = info[0];
+  if (W && W.active) waitStart(); else if (P.playing) playerStart(true); else render();
+});
+root.addEventListener("input", function(e){   // the tempo slider shows its number while it moves
+  if (e.target.dataset && e.target.dataset.act === "mbpm") { metroSettings().bpm = Number(e.target.value); var big = document.querySelector("#fp-app .fp-mbpm"); if (big) big.firstChild.nodeValue = e.target.value; }
+});
+root.addEventListener("change", function(e){
+  var t = e.target, c = active(), a = t.dataset.act;
+  if (a === "tick") { c.done[t.dataset.id] = t.checked; save(); render(); if (t.checked && c.mode === "reader") chime(); }
+  else if (a === "sound") { S.settings.sound = t.checked; if (!t.checked) { stopAll(); ui.player = null; } save(); render(); if (window.__pdDrills) window.__pdDrills.redraw(); }
+  else if (a === "vol") { S.settings.volume = Number(t.value); if (AU.master) AU.master.gain.value = S.settings.volume; save(); }
+  else if (a === "output") { stopAll(); S.settings.output = t.value; save(); render(); }
+  else if (a === "pspeed") { ui.player.speed = Number(t.value); playerRestartIfPlaying(); }
+  else if (a === "pfrom" || a === "pto") {
+    var P = ui.player; P[a === "pfrom" ? "from" : "to"] = Number(t.value);
+    if (P.from > P.to) { if (a === "pfrom") P.to = P.from; else P.from = P.to; }
+    P.pos = 0; if (P.playing) playerStart(true); else render();
+  }
+  else if (a === "ploop") { ui.player.loop = t.checked; playerRestartIfPlaying(); }
+  else if (a === "pcount") { ui.player.countIn = t.checked; render(); }
+  else if (a === "pcheck") { stopAll(); ui.player.check = t.checked; ui.player.result = ""; render(); }
+  else if (a === "kbd") { S.settings.kbd = Number(t.value); if (S.settings.kbd === 88) S.settings.kbdShift = 0; save(); render(); }
+  else if (a === "kbdshift") { S.settings.kbdShift = Number(t.value); save(); render(); }
+  else if (a === "listen") { S.settings.listen = t.value; if (t.value !== "mic") { LISTEN.micTest = false; micStop(); } save(); render(); }
+  else if (a === "anyoct") { S.settings.anyOctave = t.checked; save(); }
+  else if (a === "gspeed") { ui.game.speed = Number(t.value); render(); }
+  else if (a === "gnames") { ui.game.names = t.checked; }
+  else if (["cbpm","cts","ckey","cgrid"].indexOf(a) >= 0) {
+    var k2 = { cbpm:"bpm", cts:"ts", ckey:"key", cgrid:"grid" }[a], v2 = a === "cbpm" ? Math.max(40, Math.min(200, Number(t.value) || 80)) : a === "cgrid" ? Number(t.value) : t.value;
+    composeOpts()[k2] = v2; var sg2 = currentSong(c); if (sg2) { sg2[k2] = v2; save(); } render();
+  }
+  else if (a === "ccount") composeOpts().countIn = t.checked;
+  else if (a === "gmetro") ui.game.metro = t.checked;
+  else if (a === "mbpm") { metroSettings().bpm = Number(t.value); save(); render(); }
+  else if (a === "mbeats") { metroSettings().beats = Number(t.value); save(); render(); }
+  else if (a === "msub") { metroSettings().sub = Number(t.value); save(); render(); }
+  else if (a === "msound") { metroSettings().sound = t.value; save(); }
+  else if (a === "mvol") { metroSettings().vol = Number(t.value); save(); }
+  else if (a === "maccent") { metroSettings().accent = t.checked; save(); render(); }
+  else if (a === "cmetro") composeOpts().metro = t.checked;
+  else if (a === "ctitle") { var sg3 = currentSong(c); if (sg3) { sg3.title = t.value.trim() || sg3.title; save(); render(); } }
+  else if (a === "pwait") { stopAll(); W = null; ui.player.wait = t.checked; render(); }
+  else if (a === "palong") { ui.player.along = t.checked; render(); }
+  else if (a === "pmetro") { ui.player.metro = t.checked; playerRestartIfPlaying(); }
+  else if (a === "learned") { c.learned[t.dataset.id] = t.checked; save(); render(); }
+  else if (a === "who") { S.activeId = t.value; save(); go("week"); }
+  else if (a === "mode") { c.mode = t.value; save(); go("week"); }
+  else if (a === "sheet") { ui.sheet = t.value; render(); }
+  else if (a === "opt") { ui.opts[t.dataset.opt] = t.checked; render(); }
+  else if (a === "import" && t.files[0]) importBackup(t.files[0]);
+  else if (a === "ptype") { pState(c).type = t.value; save(); render(); }
+  else if (a === "pans") {
+    var st = pState(c); st.answers[st.type][t.dataset.id] = t.type === "number" ? (t.value === "" ? "" : Math.max(0, Number(t.value) || 0)) : t.value;
+    save(); ui.msg = ""; document.getElementById("fp-presult").innerHTML = pResultHtml(c);
+  }
+});
+root.addEventListener("submit", function(e){
+  var f = e.target; if (f.dataset.form !== "child") return; e.preventDefault();
+  var el = f.elements, name = el.namedItem("name").value.trim(); if (!name) return;
+  var age = el.namedItem("age").value, level = el.namedItem("level").value, placeFirst = level === "__place";
+  if (placeFirst) level = age && parseInt(age, 10) <= 6 ? "pre-reader" : "level-1";
+  var mode = el.namedItem("mode").value || (level === "pre-reader" ? "toddler" : "standard");
+  var week = Math.max(1, Math.min(12, parseInt(el.namedItem("week").value, 10) || 1));
+  var old = S.children.filter(function(x){ return x.id === f.dataset.id; })[0];
+  if (old) {
+    old.name = name; old.age = age ? parseInt(age, 10) : null; old.mode = mode;
+    if (old.level !== level || old.week !== week) old.complete = false;
+    old.level = level; old.week = week; save(); ui.editing = null; render(); return;
+  }
+  var k = { id:uid(), name:name, age:age ? parseInt(age, 10) : null, level:level, mode:mode, week:week, complete:false, done:{}, learned:{} };
+  S.children.push(k); S.activeId = k.id; save(); ui.adding = false; go(placeFirst ? "placement" : "week");
+});
+
+if (!S.children.length) ui.screen = "family";
+render();
+})();
+</script>

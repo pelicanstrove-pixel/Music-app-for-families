@@ -26,14 +26,31 @@ content/
   placement/
     reader-quiz-template.md       ← placement quiz for children who read
     prereader-observation-checklist.md  ← checklist a parent fills in by watching a young child
+    placement-rules.json          ← how placement results turn into a suggested level (educator fills in the blanks)
 licenses/
+  THIRD-PARTY.md                  ← fonts, libraries and sounds inside the app, and their licenses
+  candidates.csv                  ← pieces checked for license but not yet verified by a person (not shipped)
   assets.csv                      ← one row per score/recording (now also: derivatives_allowed, source_format)
   SOURCING.md                     ← checklist for checking a license before adding a row
 scores/                           ← Phase 1.5 Part A: rule-based score simplifier (see scores/README.md)
+  candidates/                     ← draft MusicXML of candidate pieces (not shipped, see docs/REPERTOIRE-CANDIDATES.md)
+  tools/mutopia_to_musicxml.py    ← converts a Mutopia LilyPond score to MusicXML (with a note check)
   RULES.md                        ← every simplification rule in plain English
-app/                              ← Phase 1.5 Part B
+app/                              ← Phase 1.5 Part B + main app
   drills.html                     ← drill sheet generator; paste into a Squarespace Code block
   DRILL-RULES.md                  ← every drill rule in plain English
+  family-piano.html               ← main app (built file); paste into a Squarespace Code block
+  src/family-piano.template.html  ← main app source; edit this, then run `python3 app/build.py`
+  build.py                        ← inlines content, drills, font, VexFlow, piano sound and player notes into family-piano.html
+  fonts/                          ← Nunito (SIL Open Font License), embedded so no font server is used
+  vendor/                         ← VexFlow 4.2.2 + Bravura (draws drill sheets), embedded so the app needs no outside files
+    piano/                        ← MIT piano sound for the built-in player (made by tools/extract_piano.py)
+  tools/extract_piano.py          ← makes the piano sound from FluidR3Mono_GM.sf3
+docs/
+  UI-CONTEXT.md, UI-SPEC.md       ← UI design context and the approved UI spec
+  UI-SPEC-REVIEW.md               ← where the two differ (owner decisions needed) + progress/backup format
+  MIDI-PLAYER-OPTIONS.md          ← research: built-in player options and owner decisions
+  REPERTOIRE-CANDIDATES.md        ← research: public-domain pieces to ship, license evidence, steps to ship one
 ```
 
 **assets.csv new columns:** `derivatives_allowed` = `yes`, `no`, or `share-alike` (may we make a simplified version?). `source_format` = `musicxml`, `mxl`, or `xml` for files in `scores/source/` (use `n/a` for linked-only items).
@@ -63,6 +80,7 @@ You can edit these files right on GitHub: open a file, click the ✏️ pencil, 
 | Add a worksheet or exercise | Copy the exercise in `exercise-bank/example.json` into a new file such as `exercise-bank/level-1-theory.json`, give it a new `id`, fill it in |
 | Change what the worksheet generator may produce | `content/parametric-templates.md` (the level tables) |
 | Write the placement quiz or checklist | the two files in `content/placement/` |
+| Set how placement results suggest a level | `content/placement/placement-rules.json` (then run `python3 app/build.py`) |
 | Add a piece of music or recording | Check it with `licenses/SOURCING.md`, then add a row to `licenses/assets.csv` (open it in Google Sheets or Excel, save as CSV) |
 | Use that piece in a week | Put its `asset_id` in that week's `repertoire_ids` list |
 
