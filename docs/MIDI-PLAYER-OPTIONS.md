@@ -31,7 +31,11 @@ optionally send the notes to the family's digital piano over USB (Web MIDI).
   (the child's own timing) or *as written*. The app snaps the performance to the beat (quarter, eighth or sixteenth
   notes), splits right hand / left hand at middle C, writes rests and ties across barlines, spells accidentals for
   the chosen key, and draws a grand staff with VexFlow. Print it (black and white), or download MusicXML (for
-  MuseScore and other programs) and MIDI. Songs are saved per child and included in backups.
+  MuseScore and other programs), MIDI and audio (WAV, rendered with the app's piano). Songs are also on the Print screen
+  (with large print and a name/date line) and can be saved as PDF. Saved per child and included in backups.
+- **Metronome** (side menu): 30–240 bpm, tap tempo, 1–7 beats a bar, 1–4 clicks per beat, louder first beat, three sounds,
+  volume and a visual beat. Keeps going across screens; stops itself when the player, the game (play in time) or
+  Compose starts its own beat. The player, the game and Compose also have their own metronome switch.
 - **Game** (Pieces → Game): falling notes onto a keyboard (rhythm-game style) or the sheet music scrolling past a
   line; *Play in time* (perfect/good/miss timing, combo, score, 1–3 stars) or *Wait for me*; hands, speed, note
   names. Best score and stars are saved per child and piece. Works for every piece the license gate lets the

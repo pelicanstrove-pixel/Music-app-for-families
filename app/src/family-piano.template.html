@@ -204,6 +204,19 @@
 #fp-app .fp-results .fp-stars{font-size:44px}
 @media (max-width:760px){ #fp-app .fp-game canvas{height:380px} }
 
+/* metronome */
+#fp-app .fp-metro{display:flex;flex-direction:column;gap:16px;align-items:stretch}
+#fp-app .fp-mbpm{font-size:64px;font-weight:800;line-height:1;text-align:center}
+#fp-app .fp-mbpm small{font-size:18px;font-weight:700;display:block;color:#4a5a6a}
+#fp-app .fp-mdots{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;list-style:none;margin:0;padding:0}
+#fp-app .fp-mdots li{width:44px;height:44px;border-radius:50%;background:var(--line);transition:transform .05s}
+#fp-app .fp-mdots li.fp-acc{border:4px solid var(--navy)}
+#fp-app .fp-mdots li.fp-now{background:var(--yellow);transform:scale(1.15)}
+#fp-app .fp-mdots li.fp-acc.fp-now{background:var(--blue)}
+#fp-app .fp-mrange{width:100%;accent-color:var(--blue);min-height:44px}
+#fp-app .fp-side .fp-metrobtn{width:100%;min-height:44px;border-radius:8px;border:2px solid rgba(255,255,255,.6);background:transparent;color:#fff;font-weight:800;cursor:pointer;text-align:left;padding:0 10px}
+#fp-app .fp-side .fp-metrobtn.fp-on{background:var(--yellow);color:var(--navy);border-color:var(--yellow)}
+
 /* help */
 #fp-app details{background:#fff;border:1px solid var(--line);border-radius:10px;padding:0 14px}
 #fp-app summary{min-height:44px;display:flex;align-items:center;font-weight:800;cursor:pointer}
@@ -363,7 +376,14 @@ var TEXT = {
   cDeleteConfirm: function(t){ return "Delete \u201C" + t + "\u201D?"; },
   cAbout: function(n, bpm, ts){ return n + " notes \u00B7 " + bpm + " beats per minute \u00B7 " + ts + ". Changing tempo, time, key or note detail above redraws this song."; },
   cBy: function(name, date){ return "By " + name + " \u00B7 " + date; }, songDefault: function(n){ return "My song " + n; },
-  noNotation: "The music could not be drawn here."
+  noNotation: "The music could not be drawn here.",
+  cPdf: "Save as PDF", cWav: "Download audio (WAV)", cWavWait: "Making the audio file\u2026", songSheet: function(t){ return "My song: " + t; },
+  metro: "Metronome", metroIntro: "A steady beat to practice with. It keeps going while you use the rest of the app.",
+  mStart: "Start", mStop: "Stop", mTap: "Tap tempo", mBeats: "Beats in a bar", mSub: "Clicks in each beat",
+  mSubs: [["1","One"],["2","Two (eighth notes)"],["3","Three (triplets)"],["4","Four (sixteenth notes)"]],
+  mAccent: "Louder first beat", mSound: "Sound", mSounds: [["click","Click"],["wood","Wood block"],["beep","Beep"]],
+  mBpm: "beats per minute", mSlower: "Slower", mFaster: "Faster", mRunning: function(b){ return "\u2669 " + b + " \u00B7 Stop"; },
+  mSide: "\u2669 Metronome", mGame: "Metronome", mStopped: "The metronome stopped so it does not clash with this beat."
 };
 
 /* ---------- state ---------- */
@@ -430,7 +450,9 @@ function sidebar(c){
   return '<nav class="fp-side" aria-label="Main">' +
     '<div class="fp-logo"><span aria-hidden="true">♪</span>' + esc(TEXT.appName) + "</div>" + kids +
     (c ? '<ul class="fp-nav">' + nav + "</ul>" : "") +
-    '<div class="fp-side-foot"><div class="fp-backup-note' + (warn ? " fp-warn" : "") + '">' + esc(note) + "</div>" +
+    '<div class="fp-side-foot">' + (c ? '<button type="button" class="fp-metrobtn' + (METRO.on ? " fp-on" : "") + '" data-act="' + (METRO.on ? "mtoggle" : "gometro") + '">' +
+      esc(METRO.on ? TEXT.mRunning(metroSettings().bpm) : TEXT.mSide) + "</button>" : "") +
+    '<div class="fp-backup-note' + (warn ? " fp-warn" : "") + '">' + esc(note) + "</div>" +
     '<button type="button" class="fp-link" data-go="help">' + esc(TEXT.help) + "</button></div></nav>";
 }
 
@@ -548,6 +570,11 @@ function paperHtml(c){
     if (o.key) body += '<div class="fp-pagebreak">PARENT NOTES (for the parent)</div><p>' + esc(plain(w.parent_notes, "Parent notes")) + "</p>";
   } else if (ui.sheet === "quiz" || ui.sheet === "checklist") {
     return placementPaper(ui.sheet, o.key);
+  } else if (ui.sheet.indexOf("song:") === 0) {
+    var sg = songsOf(c).filter(function(x){ return "song:" + x.id === ui.sheet; })[0];
+    if (sg) return '<div class="fp-paper' + (o.large ? " fp-lg" : "") + '" style="aspect-ratio:auto" aria-label="Paper preview"><h2>' + esc(sg.title) + "</h2>" +
+      (o.nameline ? '<div class="fp-nameline"><span>Name: ' + esc(c.name) + "</span><span>Date:</span></div>" : '<p style="font-size:.9em">' + esc(TEXT.cBy(c.name, sg.date)) + "</p>") +
+      '<div id="fp-psheet"></div></div>';
   } else {
     body = "<h2>" + esc(lv.name) + " – 12-week overview</h2>" + nameline + "<table><thead><tr><th>Week</th><th>Focus</th><th>Done</th></tr></thead><tbody>" +
       range12().map(function(n){ var ww = weekOf(c, n); return "<tr><td>" + n + "</td><td>" + esc(plain(ww && ww.focus, "Week focus")) + '</td><td><span class="fp-box"></span></td></tr>'; }).join("") +
@@ -559,7 +586,7 @@ function paperHtml(c){
     '<p class="fp-foot">' + (isDraft(w) ? "DRAFT – needs educator review" : "") + "</p></div>";
 }
 function screenPrint(c){
-  var radios = TEXT.sheets.map(function(s){
+  var radios = TEXT.sheets.concat(songsOf(c).map(function(sg){ return ["song:" + sg.id, TEXT.songSheet(sg.title)]; })).map(function(s){
     return '<label class="fp-check"><input type="radio" name="fp-sheet" value="' + s[0] + '" data-act="sheet"' + (ui.sheet === s[0] ? " checked" : "") + "> " + esc(s[1]) + "</label>"; }).join("");
   var opts = Object.keys(TEXT.printOpts).map(function(k){
     return '<label class="fp-check"><input type="checkbox" data-act="opt" data-opt="' + k + '"' + (ui.opts[k] ? " checked" : "") + "> " + esc(TEXT.printOpts[k]) + "</label>"; }).join("");
@@ -804,6 +831,7 @@ function screenHelp(){
              ["How does the app hear my child play?", "Three ways: a digital piano connected by USB or Bluetooth MIDI (Chrome, Edge or Firefox), the microphone for an acoustic piano (single notes and chords; it checks the notes it is waiting for, and for big chords one quiet note may be missing), or the on-screen keys. Pick one in Family \u2192 Your keyboard and listening. Microphone sound is checked in the browser only and never recorded or sent."],
              ["What do the colors on the music mean?", "Blue: the note playing now. Orange: the note to play next. Green: played right. Red: a wrong note. Grey: a note that was missed."],
              ["How does Compose work?", "Press Record and play on your digital piano, the on-screen keys or (one note at a time works best) an acoustic piano with the microphone. Stop, then play it back as played or as written, print the sheet music, or download it as MusicXML (opens in MuseScore and other music programs) or MIDI. Songs are saved with each child and in backups."],
+             ["Is there a metronome?", "Yes. Press Metronome in the side menu. Set the tempo (or tap it), beats in a bar, clicks per beat and the sound. It keeps going while you use other screens, and stops by itself when the player, the game or Compose starts its own beat. The player, the game (play in time) and Compose also have their own metronome switch."],
              ["Why can some pieces not be played?", "The app only plays pieces whose music is in the public domain and whose edition\u2019s license lets us make a simplified version. Everything else is a link only."]];
   var credits = "<ul><li>Piano sound: Fluid R3 SoundFont by Frank Wen, mono version (FluidR3Mono) by Michael Cowgill, MIT license.</li>" +
     "<li>Music notation on drill sheets: VexFlow by Mohit Muthanna Cheppudira and contributors, MIT license; Bravura music font by Steinberg Media Technologies, SIL Open Font License.</li>" +
@@ -935,6 +963,7 @@ function newPlayer(a){ return { id:a.asset_id, pos:0, playing:false, speed:80, h
 function range(P, d){ return [d.bars[P.from - 1], P.to < d.bars.length ? d.bars[P.to] : d.end]; }
 function curPos(P){ return P.playing ? Math.min(P.startPos + Math.max(0, AU.ctx.currentTime - P.startAt) / P.spq, P.end) : P.pos; }
 function playerStart(noCount){
+  metroQuiet();
   var P = ui.player, a = assetById(P.id), d = a.play;
   stopAll();
   audioReady().then(function(){
@@ -1385,7 +1414,8 @@ function screenGame(c){
     '<div class="fp-row"><b>' + esc(TEXT.gMode) + "</b>" + chips("gmode", TEXT.gModes, o.mode) + "</div>" +
     '<div class="fp-row"><b>' + esc(TEXT.hands) + "</b>" + chips("ghands", TEXT.handNames, o.hands) + "</div>" +
     '<div class="fp-row"><label for="fp-gspeed"><b>' + esc(TEXT.speed) + '</b></label><input id="fp-gspeed" type="range" min="40" max="120" step="5" value="' + o.speed + '" data-act="gspeed"><span>' + o.speed + "%</span>" +
-    '<label class="fp-check"><input type="checkbox" data-act="gnames"' + (o.names ? " checked" : "") + "> " + esc(TEXT.gNames) + "</label></div>" +
+    '<label class="fp-check"><input type="checkbox" data-act="gnames"' + (o.names ? " checked" : "") + "> " + esc(TEXT.gNames) + "</label>" +
+    (o.mode === "challenge" ? '<label class="fp-check"><input type="checkbox" data-act="gmetro"' + (o.metro ? " checked" : "") + "> " + esc(TEXT.mGame) + "</label>" : "") + "</div>" +
     '<div class="fp-row">' + rangeNote(a) + (best ? '<span class="fp-range-note">' + esc(TEXT.gBest(best.best)) + " " + new Array(best.stars + 1).join("\u2B50") + "</span>" : "") + "</div>" +
     (S.settings.listen === "mic" ? '<p class="fp-range-note">' + esc(TEXT.micTip) + "</p>" : "") + "</div>";
   var stage = '<div class="fp-game"><div class="fp-hud" aria-live="off"><span>' + esc(TEXT.gScore) + ' <span class="fp-big" id="fp-gscore">0</span></span>' +
@@ -1416,6 +1446,7 @@ function gameSetupCanvas(){
   G.keys = keys; G.kbH = Math.min(cv.height * 0.3, 120 * dpr);
 }
 function gameStart(){
+  if (ui.game.mode === "challenge") metroQuiet();
   var c = active(), a = assetById(ui.game.id), o = ui.game, d = a.play, fit = fitPiece(a, o.hands);
   if (G) gameStop(true);
   var spq = 60 / (d.bpm * o.speed / 100);
@@ -1450,6 +1481,8 @@ function gameSchedule(){
   G.start = start;
   for (var b = Math.ceil(G.beat / d.beat) * d.beat; b < 0; b += d.beat) clickAt(start + b * spq, Math.abs(b % (d.beatsPerBar * d.beat)) < 1e-6);
   G.notes.forEach(function(n){ n.t = start + n.on * spq + out; });
+  if (o.metro) for (var mb = Math.max(0, Math.ceil(G.beat / d.beat - 1e-6)) * d.beat; mb < G.end - 1e-6; mb += d.beat)
+    clickAt(start + mb * spq, d.bars.some(function(x){ return Math.abs(x - mb) < 1e-6; }));
   G.along.forEach(function(n){ if (n.on >= G.beat - 1e-6) { noteAt(n.m, start + n.on * spq, (n.off - n.on) * spq * 0.95, 0.5); LISTEN.recent.push({ m:n.m, start:start + n.on * spq, end:start + n.off * spq }); } });
 }
 function gameInput(m, when){
@@ -1616,6 +1649,7 @@ function recNoteOff(m, when){
 }
 function recAllOff(when){ Object.keys(REC.open).forEach(function(m){ recNoteOff(Number(m), when); }); }
 function recStart(){
+  metroQuiet();
   var o = composeOpts(), c = active();
   stopAll(); listenStop();
   audioReady().then(function(){
@@ -1680,13 +1714,15 @@ function pieces(dur){ var out = []; NOTATE.forEach(function(v){ while (dur >= v[
 var SHARP = ["c","c#","d","d#","e","f","f#","g","g#","a","a#","b"], FLAT = ["c","db","d","eb","e","f","gb","g","ab","a","bb","b"];
 var KEY_ACC = { C:{}, G:{ f:"#" }, D:{ f:"#", c:"#" }, F:{ b:"b" }, Bb:{ b:"b", e:"b" } };
 function spell(m, key){ var nm = (KEYS[key].flats ? FLAT : SHARP)[m % 12]; return { letter:nm[0], acc:nm.slice(1), octave:Math.floor(m / 12) - 1 }; }
-function drawSheet(box, song){
+function drawSheet(box, song, opt){
   var VF = window.Vex && Vex.Flow; if (!VF) { box.textContent = TEXT.noNotation; return; }
-  var q = quantize(song), w = Math.max(320, box.clientWidth || 700), perRow = Math.max(1, Math.min(4, Math.floor((w - 110) / 190)));
+  var scale = (opt && opt.scale) || 1, realW = Math.max(320, box.clientWidth || 700);
+  var q = quantize(song), w = realW / scale, perRow = Math.max(1, Math.min(4, Math.floor((w - 110) / 190)));
   var rows = Math.ceil(q.nbars / perRow), H = rows * 250 + 20;
   box.innerHTML = "";
-  var r = new VF.Renderer(box, VF.Renderer.Backends.SVG); r.resize(w, H);
+  var r = new VF.Renderer(box, VF.Renderer.Backends.SVG); r.resize(realW, H * scale);
   var ctx = r.getContext(), ts = song.ts, tsParts = ts.split("/");
+  if (scale !== 1) ctx.scale(scale, scale);
   var ties = [], lastNote = [null, null];
   for (var b = 0; b < q.nbars; b++) {
     var row = Math.floor(b / perRow), col = b % perRow, y = 10 + row * 250;
@@ -1825,11 +1861,118 @@ function screenCompose(c){
   var view = song ? '<div class="fp-card fp-stack"><div class="fp-row"><label style="flex:1;font-weight:700">' + esc(TEXT.cTitle) + ' <input type="text" maxlength="60" value="' + esc(song.title) + '" data-act="ctitle" style="min-height:44px;width:100%;border:1px solid #9fb3c4;border-radius:8px;padding:0 10px"></label></div>' +
     '<div class="fp-row">' + (o.playing ? '<button type="button" class="fp-btn fp-primary" data-act="cstop">■ ' + esc(TEXT.stop) + "</button>"
       : '<button type="button" class="fp-btn fp-primary" data-act="cplay">▶ ' + esc(TEXT.cPlayAsPlayed) + '</button><button type="button" class="fp-btn" data-act="cplayw">▶ ' + esc(TEXT.cPlayAsWritten) + "</button>") +
-    '<button type="button" class="fp-btn" data-act="cprint">' + esc(TEXT.print) + '</button><button type="button" class="fp-btn" data-act="cxml">' + esc(TEXT.cXml) + '</button><button type="button" class="fp-btn" data-act="cmidi">' + esc(TEXT.cMidi) + "</button>" +
+    '<button type="button" class="fp-btn" data-act="cprint">' + esc(TEXT.print) + '</button><button type="button" class="fp-btn" data-act="cprint" data-pdf="1">' + esc(TEXT.cPdf) + "</button>" +
+    '<button type="button" class="fp-btn" data-act="cxml">' + esc(TEXT.cXml) + '</button><button type="button" class="fp-btn" data-act="cmidi">' + esc(TEXT.cMidi) + "</button>" +
+    '<button type="button" class="fp-btn" data-act="cwav">' + esc(TEXT.cWav) + "</button>" +
     '<button type="button" class="fp-btn fp-danger" data-act="cdel">' + esc(TEXT.cDelete) + "</button></div>" +
+    (ui.msg ? '<p role="status">' + esc(ui.msg) + "</p>" : "") +
     '<p class="fp-range-note">' + esc(TEXT.cAbout(song.notes.length, song.bpm, song.ts)) + "</p>" +
     '<div class="fp-paper" style="aspect-ratio:auto;padding:.4in"><h2>' + esc(song.title) + '</h2><p style="font-size:.9em">' + esc(TEXT.cBy(c.name, song.date)) + '</p><div id="fp-csheet"></div></div></div>' : "";
   return head(TEXT.cTitleScreen, false, esc(TEXT.cIntro)) + '<div class="fp-stack">' + setup + '<h2>' + esc(TEXT.cMySongs) + "</h2>" + list + view + "</div>";
+}
+
+/* ----- metronome: a standalone, adjustable beat (keeps running across screens) ----- */
+var METRO = { on:false, timer:null, next:0, count:0, queue:[], taps:[], raf:null };
+function metroSettings(){ if (!S.settings.metro) S.settings.metro = { bpm:80, beats:4, sub:1, accent:true, sound:"click", vol:0.8 }; return S.settings.metro; }
+function metroTone(when, level){
+  var m = metroSettings(), out = midiOut(), ctx = AU.ctx;
+  if (out) { var nn = level === 2 ? 76 : level === 1 ? 77 : 42, vel = level === 2 ? 120 : level === 1 ? 90 : 55;
+    out.send([0x99, nn, Math.round(vel * m.vol)], msAt(when)); out.send([0x89, nn, 0], msAt(when + 0.05)); return; }
+  var g = ctx.createGain(), peak = m.vol * (level === 2 ? 0.7 : level === 1 ? 0.45 : 0.22), src;
+  if (m.sound === "wood") {
+    var len = Math.round(ctx.sampleRate * 0.05), buf = ctx.createBuffer(1, len, ctx.sampleRate), d = buf.getChannelData(0);
+    for (var i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.exp(-i / (len / 6));
+    src = ctx.createBufferSource(); src.buffer = buf;
+    var bp = ctx.createBiquadFilter(); bp.type = "bandpass"; bp.frequency.value = level === 2 ? 2400 : level === 1 ? 1700 : 1200; bp.Q.value = 6;
+    src.connect(bp); bp.connect(g); peak *= 3;
+  } else {
+    src = ctx.createOscillator(); src.type = m.sound === "beep" ? "sine" : "square";
+    src.frequency.value = m.sound === "beep" ? (level === 2 ? 1320 : level === 1 ? 880 : 660) : (level === 2 ? 1800 : level === 1 ? 1200 : 900);
+    src.connect(g); if (m.sound !== "beep") peak *= 0.5;
+  }
+  var dur = m.sound === "beep" ? 0.09 : 0.04;
+  g.gain.setValueAtTime(peak, when); g.gain.exponentialRampToValueAtTime(0.0001, when + dur);
+  g.connect(AU.master); src.start(when); src.stop(when + dur + 0.02);
+}
+function metroStart(){
+  audioReady().then(function(){
+    metroStop(true); METRO.on = true; METRO.next = AU.ctx.currentTime + 0.1; METRO.count = 0; METRO.queue = [];
+    METRO.timer = setInterval(function(){
+      var m = metroSettings(), step = 60 / m.bpm / m.sub;
+      while (METRO.next < AU.ctx.currentTime + 0.12) {
+        var sub = METRO.count % m.sub, beat = Math.floor(METRO.count / m.sub) % m.beats;
+        metroTone(METRO.next, sub ? 0 : (beat === 0 && m.accent && m.beats > 1 ? 2 : 1));
+        METRO.queue.push({ t:METRO.next, beat:beat, sub:sub });
+        METRO.next += step; METRO.count++;
+      }
+    }, 25);
+    render(); metroDrawStart();
+  }, function(){});
+}
+function metroStop(quiet){
+  if (!METRO.on) return;
+  METRO.on = false; clearInterval(METRO.timer); METRO.queue = [];
+  if (!quiet) render();
+}
+function metroQuiet(){ if (METRO.on) { metroStop(true); ui.msg = TEXT.mStopped; } }   // something with its own beat is starting
+function metroDrawStart(){ if (!METRO.drawing && METRO.on) { METRO.drawing = true; requestAnimationFrame(metroDraw); } }
+function metroDraw(){
+  if (!METRO.on) { METRO.drawing = false; return; }
+  var now = AU.ctx.currentTime, cur = null;
+  while (METRO.queue.length && METRO.queue[0].t <= now) cur = METRO.queue.shift();
+  if (cur && !cur.sub) document.querySelectorAll("#fp-mdots li").forEach(function(li, i){ li.classList.toggle("fp-now", i === cur.beat); });
+  requestAnimationFrame(metroDraw);
+}
+function metroTap(){
+  var t = performance.now(); METRO.taps = METRO.taps.filter(function(x){ return t - x < 2500; }); METRO.taps.push(t);
+  if (METRO.taps.length >= 2) {
+    var gaps = []; for (var i = 1; i < METRO.taps.length; i++) gaps.push(METRO.taps[i] - METRO.taps[i - 1]);
+    var avg = gaps.reduce(function(a, b){ return a + b; }, 0) / gaps.length;
+    metroSettings().bpm = Math.max(30, Math.min(240, Math.round(60000 / avg))); save(); render();
+  }
+}
+function screenMetro(){
+  var m = metroSettings();
+  function sel(act, list, val){ return '<select data-act="' + act + '">' + list.map(function(x){ return '<option value="' + x[0] + '"' + (String(val) === String(x[0]) ? " selected" : "") + ">" + esc(x[1]) + "</option>"; }).join("") + "</select>"; }
+  var dots = ""; for (var i = 0; i < m.beats; i++) dots += '<li class="' + (i === 0 && m.accent && m.beats > 1 ? "fp-acc" : "") + '"></li>';
+  return head(TEXT.metro, false, esc(TEXT.metroIntro)) + '<div class="fp-card fp-metro">' +
+    '<ul class="fp-mdots" id="fp-mdots" aria-hidden="true">' + dots + "</ul>" +
+    '<div class="fp-mbpm" aria-live="polite">' + m.bpm + "<small>" + esc(TEXT.mBpm) + "</small></div>" +
+    '<input type="range" class="fp-mrange" min="30" max="240" step="1" value="' + m.bpm + '" data-act="mbpm" aria-label="' + esc(TEXT.mBpm) + '">' +
+    '<div class="fp-row" style="justify-content:center"><button type="button" class="fp-btn" data-act="mstep" data-v="-5">\u2212 5</button><button type="button" class="fp-btn" data-act="mstep" data-v="-1">\u2212 1</button>' +
+    '<button type="button" class="fp-btn" data-act="mstep" data-v="1">+ 1</button><button type="button" class="fp-btn" data-act="mstep" data-v="5">+ 5</button>' +
+    '<button type="button" class="fp-btn fp-yellow" data-act="mtap">' + esc(TEXT.mTap) + "</button></div>" +
+    '<div class="fp-row" style="justify-content:center">' + (METRO.on ? '<button type="button" class="fp-btn fp-primary" data-act="mtoggle" style="min-width:180px;font-size:20px">\u25A0 ' + esc(TEXT.mStop) + "</button>"
+                                                          : '<button type="button" class="fp-btn fp-primary" data-act="mtoggle" style="min-width:180px;font-size:20px">\u25B6 ' + esc(TEXT.mStart) + "</button>") + "</div>" +
+    '<div class="fp-form"><label>' + esc(TEXT.mBeats) + sel("mbeats", [1,2,3,4,5,6,7].map(function(n){ return [n, String(n)]; }), m.beats) + "</label>" +
+    "<label>" + esc(TEXT.mSub) + sel("msub", TEXT.mSubs, m.sub) + "</label><label>" + esc(TEXT.mSound) + sel("msound", TEXT.mSounds, m.sound) + "</label>" +
+    '<label>' + esc(TEXT.volume) + '<input type="range" class="fp-mrange" min="0" max="1" step="0.05" value="' + m.vol + '" data-act="mvol"></label></div>' +
+    '<label class="fp-check"><input type="checkbox" data-act="maccent"' + (m.accent ? " checked" : "") + "> " + esc(TEXT.mAccent) + "</label></div>";
+}
+
+/* ----- composed songs as files: audio (WAV) ----- */
+function songWav(song){
+  return audioReady().then(function(){
+    var rate = 44100, end = 0; song.notes.forEach(function(n){ end = Math.max(end, n[0] + n[1]); });
+    var off = new OfflineAudioContext(1, Math.ceil((end + 1.5) * rate), rate), master = off.createGain(); master.gain.value = 0.9; master.connect(off.destination);
+    song.notes.forEach(function(n){
+      var m = n[2], k = CONTENT.piano.keys[String(Math.max(24, Math.min(96, m)))], smp = CONTENT.piano.samples[k];
+      var src = off.createBufferSource(), g = off.createGain(), when = n[0] + 0.1, stop = when + Math.max(0.05, n[1]);
+      src.buffer = AU.buffers[k]; src.playbackRate.value = Math.pow(2, ((m - smp.root) * 100 + smp.cents) / 1200);
+      g.gain.setValueAtTime(n[3] * 0.8, when); g.gain.setValueAtTime(n[3] * 0.8, stop); g.gain.exponentialRampToValueAtTime(0.001, stop + 0.25);
+      src.connect(g); g.connect(master); src.start(when); src.stop(stop + 0.3);
+    });
+    return off.startRendering();
+  }).then(function(buf){
+    var x = buf.getChannelData(0), n = x.length, out = new DataView(new ArrayBuffer(44 + n * 2)), peak = 0, i;
+    for (i = 0; i < n; i++) peak = Math.max(peak, Math.abs(x[i]));
+    var gain = peak > 0.98 ? 0.98 / peak : 1;
+    function str(o, t){ for (var j = 0; j < t.length; j++) out.setUint8(o + j, t.charCodeAt(j)); }
+    str(0, "RIFF"); out.setUint32(4, 36 + n * 2, true); str(8, "WAVE"); str(12, "fmt "); out.setUint32(16, 16, true); out.setUint16(20, 1, true); out.setUint16(22, 1, true);
+    out.setUint32(24, buf.sampleRate, true); out.setUint32(28, buf.sampleRate * 2, true); out.setUint16(32, 2, true); out.setUint16(34, 16, true); str(36, "data"); out.setUint32(40, n * 2, true);
+    for (i = 0; i < n; i++) out.setInt16(44 + i * 2, Math.max(-1, Math.min(1, x[i] * gain)) * 32767, true);
+    return out.buffer;
+  });
 }
 
 /* ---------- render ---------- */
@@ -1844,16 +1987,19 @@ function syncDrills(c){
 }
 function render(focusHead){
   var c = active();
-  if (c && !TEXT.nav[c.mode].some(function(n){ return n[0] === ui.screen; }) && ["help","family","placement","game"].indexOf(ui.screen) < 0) ui.screen = "week";
+  if (c && !TEXT.nav[c.mode].some(function(n){ return n[0] === ui.screen; }) && ["help","family","placement","game","metro"].indexOf(ui.screen) < 0) ui.screen = "week";
   if (c && c.mode === "toddler" && ui.screen === "game") ui.screen = "week";
   if (c && c.mode === "toddler" && ui.screen === "family" && !ui.grown) ui.screen = "week";
   var body;
   if (!c) body = ui.screen === "help" ? screenHelp() : screenFamily();
-  else body = ({week:screenWeek, weeks:screenWeeks, print:screenPrint, pieces:screenPieces, stars:screenStars, family:screenFamily, help:screenHelp, placement:screenPlacement, game:screenGame, compose:screenCompose}[ui.screen] || screenWeek)(c);
+  else body = ({week:screenWeek, weeks:screenWeeks, print:screenPrint, pieces:screenPieces, stars:screenStars, family:screenFamily, help:screenHelp, placement:screenPlacement, game:screenGame, compose:screenCompose, metro:screenMetro}[ui.screen] || screenWeek)(c);
   sideEl.innerHTML = sidebar(c);
   viewEl.innerHTML = (ui.screen !== "family" ? memoryWarning() : "") + body;
   drillHost.hidden = !(c && ui.screen === "print" && ui.sheet === "drill");
   if (ui.screen === "compose" && c) { var sg = currentSong(c), sb = document.getElementById("fp-csheet"); if (sg && sb) drawSheet(sb, sg); }
+  if (ui.screen === "print" && c && ui.sheet.indexOf("song:") === 0) { var ps = songsOf(c).filter(function(x){ return "song:" + x.id === ui.sheet; })[0], pb = document.getElementById("fp-psheet");
+    if (ps && pb) drawSheet(pb, ps, { scale: ui.opts.large ? 1.35 : 1 }); }
+  if (ui.screen === "metro") metroDrawStart();
   if (ui.player && ui.screen === "pieces") { fillScore(assetById(ui.player.id)); if (W) updateWait(); }
   if (ui.screen === "game" && G && G.running) { gameSetupCanvas(); if (ui.game.view === "sheet" && !document.querySelector("#fp-gstrip svg")) gameSheetSetup(); }
   else if (ui.screen === "game") { G = G && G.result ? G : null; if (document.getElementById("fp-gcanvas")) gamePreview(); }
@@ -1942,7 +2088,13 @@ root.addEventListener("click", function(e){
     case "cplay": songPlay(currentSong(c), false); break;
     case "cplayw": songPlay(currentSong(c), true); break;
     case "cstop": stopAll(); composeOpts().playing = false; render(); break;
-    case "cprint": if (makePrintout()) { window.print(); setTimeout(removePrintout, 1000); } break;
+    case "cprint": ui.msg = t.dataset.pdf ? TEXT.savePdfHint : ""; if (t.dataset.pdf) render(); if (makePrintout()) { window.print(); setTimeout(removePrintout, 1000); } break;
+    case "cwav": var sw = currentSong(c); ui.msg = TEXT.cWavWait; render();
+      songWav(sw).then(function(data){ download(sw.title.replace(/[^\w\- ]+/g, "") + ".wav", data, "audio/wav"); ui.msg = ""; render(); }, function(){ ui.msg = ""; render(); }); break;
+    case "gometro": go("metro"); break;
+    case "mtoggle": if (METRO.on) metroStop(); else metroStart(); break;
+    case "mstep": metroSettings().bpm = Math.max(30, Math.min(240, metroSettings().bpm + Number(t.dataset.v))); save(); render(); break;
+    case "mtap": metroTap(); break;
     case "cxml": var sx1 = currentSong(c); download(sx1.title.replace(/[^\w\- ]+/g, "") + ".musicxml", songMusicXML(sx1), "application/vnd.recordare.musicxml+xml"); break;
     case "cmidi": var sx2 = currentSong(c); download(sx2.title.replace(/[^\w\- ]+/g, "") + ".mid", songMidi(sx2), "audio/midi"); break;
     case "cdel": var sx3 = currentSong(c); if (sx3 && confirm(TEXT.cDeleteConfirm(sx3.title))) { c.songs = songsOf(c).filter(function(x){ return x !== sx3; }); composeOpts().songId = null; save(); render(); } break;
@@ -2013,6 +2165,9 @@ root.addEventListener("click", function(e){     // tap a note in the score to st
   var P = ui.player; P.pos = info[0];
   if (W && W.active) waitStart(); else if (P.playing) playerStart(true); else render();
 });
+root.addEventListener("input", function(e){   // the tempo slider shows its number while it moves
+  if (e.target.dataset && e.target.dataset.act === "mbpm") { metroSettings().bpm = Number(e.target.value); var big = document.querySelector("#fp-app .fp-mbpm"); if (big) big.firstChild.nodeValue = e.target.value; }
+});
 root.addEventListener("change", function(e){
   var t = e.target, c = active(), a = t.dataset.act;
   if (a === "tick") { c.done[t.dataset.id] = t.checked; save(); render(); if (t.checked && c.mode === "reader") chime(); }
@@ -2039,6 +2194,13 @@ root.addEventListener("change", function(e){
     composeOpts()[k2] = v2; var sg2 = currentSong(c); if (sg2) { sg2[k2] = v2; save(); } render();
   }
   else if (a === "ccount") composeOpts().countIn = t.checked;
+  else if (a === "gmetro") ui.game.metro = t.checked;
+  else if (a === "mbpm") { metroSettings().bpm = Number(t.value); save(); render(); }
+  else if (a === "mbeats") { metroSettings().beats = Number(t.value); save(); render(); }
+  else if (a === "msub") { metroSettings().sub = Number(t.value); save(); render(); }
+  else if (a === "msound") { metroSettings().sound = t.value; save(); }
+  else if (a === "mvol") { metroSettings().vol = Number(t.value); save(); }
+  else if (a === "maccent") { metroSettings().accent = t.checked; save(); render(); }
   else if (a === "cmetro") composeOpts().metro = t.checked;
   else if (a === "ctitle") { var sg3 = currentSong(c); if (sg3) { sg3.title = t.value.trim() || sg3.title; save(); render(); } }
   else if (a === "pwait") { stopAll(); W = null; ui.player.wait = t.checked; render(); }
