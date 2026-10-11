@@ -4,8 +4,8 @@
 converted into draft MusicXML, ready for a person to check and approve. They come from the **Mutopia Project**, whose
 volunteer typesetters placed these editions in the **public domain**, made from old public-domain editions
 (Bach-Gesellschaft, Peters, Litolff and similar). The compositions are all public domain in the US: every composer died
-before 1926 and every piece was published long before 1929. Nothing here is shipped yet: each piece still needs the
-human steps below.
+before 1926 and every piece was published long before 1929. All 78 files are in the app now, labeled **"Under review"**
+(owner decision 2026-10-11, see `licenses/SOURCING.md`); each piece still needs the human steps below to lose the label.
 
 Files: drafts in `scores/candidates/` (compressed MusicXML, `.mxl`), one row per file with the license evidence in
 `licenses/candidates.csv`, converter in `scores/tools/mutopia_to_musicxml.py` (with `scores/tools/event-performer.ly`).
@@ -161,6 +161,10 @@ automatically in a temporary copy (`-|` staccatissimo, `f8'` octave marks, `#:te
   Streabbog. All are public domain as compositions; scans of old editions on IMSLP could be typed as new CC0 editions.
 
 ## How a candidate becomes a shipped piece
+
+Until then the build (`app/build.py`, `candidate_reason`) puts every candidate that passes the license gate in the app
+labeled "Under review": its notes go inside the app, its drawn score into `app/pieces/<asset_id>.js` (see README,
+"Hosting the piece files"). Once a piece is in `licenses/assets.csv` it is taken from there instead and the label goes.
 
 1. **License check by a person:** open the piece's Mutopia page, confirm the license and source edition, fill the
    row in `licenses/candidates.csv` (`verified_by`, `verified_date`), following `licenses/SOURCING.md`.

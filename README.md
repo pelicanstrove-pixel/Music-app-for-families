@@ -29,11 +29,11 @@ content/
     placement-rules.json          ← how placement results turn into a suggested level (educator fills in the blanks)
 licenses/
   THIRD-PARTY.md                  ← fonts, libraries and sounds inside the app, and their licenses
-  candidates.csv                  ← pieces checked for license but not yet verified by a person (not shipped)
+  candidates.csv                  ← pieces checked for license but not yet verified by a person (in the app, labeled "Under review")
   assets.csv                      ← one row per score/recording (now also: derivatives_allowed, source_format)
   SOURCING.md                     ← checklist for checking a license before adding a row
 scores/                           ← Phase 1.5 Part A: rule-based score simplifier (see scores/README.md)
-  candidates/                     ← draft MusicXML of candidate pieces (not shipped, see docs/REPERTOIRE-CANDIDATES.md)
+  candidates/                     ← draft MusicXML of candidate pieces (in the app as "Under review", see docs/REPERTOIRE-CANDIDATES.md)
   tools/mutopia_to_musicxml.py    ← converts a Mutopia LilyPond score to MusicXML (with a note check)
   RULES.md                        ← every simplification rule in plain English
 app/                              ← Phase 1.5 Part B + main app
@@ -42,6 +42,7 @@ app/                              ← Phase 1.5 Part B + main app
   family-piano.html               ← main app (built file); paste into a Squarespace Code block
   src/family-piano.template.html  ← main app source; edit this, then run `python3 app/build.py`
   build.py                        ← inlines content, drills, font, VexFlow, piano sound and player notes into family-piano.html
+  pieces/                         ← built: one drawn score per piece under review, loaded when the piece is opened (host it, see below)
   fonts/                          ← Nunito (SIL Open Font License), embedded so no font server is used
   vendor/                         ← VexFlow 4.2.2 + Bravura (draws drill sheets), embedded so the app needs no outside files
     piano/                        ← MIT piano sound for the built-in player (made by tools/extract_piano.py)
@@ -57,6 +58,27 @@ docs/
 
 **Strands:** Pre-reader uses Kodály-style strands: `singing`, `rhythm`, `solfege`, `pre_staff`.
 Levels 1–4 use: `technique`, `theory`, `repertoire`, `ear_training`.
+
+## Hosting the piece files
+
+`app/family-piano.html` (about 2 MB) holds everything except the drawn scores of the pieces under review. Each of those
+is in its own file in `app/pieces/` (78 files, about 7 MB together) and is loaded the first time a family opens that piece.
+Without them a piece still plays (player, wait-for-me, game, checking); only the sheet music on screen is missing.
+
+The repository is private, so the files must be put somewhere public that serves `.js` files, for example:
+
+1. **GitHub Pages:** make the repo public (or use a paid plan), then Settings → Pages → Deploy from branch `main`, folder `/`.
+   The folder is then `https://pelicanstrove-pixel.github.io/Music-app-for-families/app/pieces/`.
+2. **Any static host** (Netlify, Cloudflare Pages, your own web space): upload the `app/pieces/` folder.
+
+Then build with that address and paste the new `app/family-piano.html` into Squarespace:
+
+```
+python3 app/build.py --pieces-url https://pelicanstrove-pixel.github.io/Music-app-for-families/app/pieces/
+```
+
+Without `--pieces-url` the app looks for a `pieces/` folder next to the page, which works when the app is opened
+from its own folder (for example `app/family-piano.html` on your computer). `--no-candidates` leaves the pieces under review out.
 
 ## How to fill in content
 
