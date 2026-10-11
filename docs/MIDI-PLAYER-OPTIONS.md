@@ -3,7 +3,26 @@
 Question from the owner: can Family Piano play music itself (a "MIDI player"), and what are the options?
 Short answer: **yes**. The best fit is a small player written for this app on the browser's own sound
 engine (Web Audio). It plays note data made at build time from our own simplified scores, and it can
-optionally send the notes to the family's digital piano over USB (Web MIDI). Nothing below is built yet.
+optionally send the notes to the family's digital piano over USB (Web MIDI).
+
+## Decisions and what is built (2026-10-11)
+
+- **Copyright:** "don't get us sued". The build only lets the player play a piece when the composition is
+  public domain, the edition is CC0 / public domain / plain CC-BY (with credit), `derivatives_allowed` is
+  `yes`, and our simplified score is approved and unchanged. Share-alike, NC and ND are refused. See
+  `licenses/SOURCING.md`. No recordings are used.
+- **Sound:** MIT piano samples (option B), made from MuseScore's MIT-licensed FluidR3Mono, not the CC-BY
+  MIDI.js renders (see `app/vendor/piano/README.md`). Adds about 0.5 MB to the app.
+- **Where:** everywhere, with a switch (Family → Sound): Pieces (full player), drill sheets (a Play button
+  on note-naming, interval and rhythm items, never printed), kid modes (a short chime when a step or tile
+  is marked done). Ear-training items get sound once educators add notes to exercises.
+- **Digital piano:** Web MIDI output as a setting (Family → Sound → Play through). No input / "wait for me" yet.
+- Player options built: Play / Pause / Stop, progress, speed 40–120%, hands (both / right / left),
+  bars from–to, loop, count-in, metronome, volume.
+- Not built yet: highlighting notes on the score, "wait for me" mode.
+
+The research below is kept for reference. Correction to the table: the FluidR3 GM files from MIDI.js are
+labeled CC-BY 3.0 by that project; the original Fluid R3 and MuseScore's FluidR3Mono are MIT.
 
 ## What it would play
 

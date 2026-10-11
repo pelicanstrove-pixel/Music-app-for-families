@@ -889,6 +889,8 @@ window.define = window.__pdDefine;
           pg.grid.appendChild(cell);
           DRAW[st.drill](cell, it, isKey, st.ink);
           cell.appendChild(num);
+          // Inside the Family Piano app: let it add an on-screen Play button (never printed).
+          if (window.fpDrillPlay) window.fpDrillPlay(cell, st.drill, it, p * per + i + 1);
         });
       }
     });
@@ -931,6 +933,8 @@ window.define = window.__pdDefine;
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
 
   /* For testing only: lets a test page check that the same seed gives the same items. */
-  window.__pdDrills = { generate: generate, makeRng: makeRng };
+  window.__pdDrills = { generate: generate, makeRng: makeRng,
+    toMidi: function (p) { return semis(p) + 12; }, // C4 (middle C) = 60
+    redraw: function () { if ($('pd-sheets').childNodes.length) render(); } };
 })();
 </script>

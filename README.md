@@ -28,6 +28,7 @@ content/
     prereader-observation-checklist.md  ← checklist a parent fills in by watching a young child
     placement-rules.json          ← how placement results turn into a suggested level (educator fills in the blanks)
 licenses/
+  THIRD-PARTY.md                  ← fonts, libraries and sounds inside the app, and their licenses
   assets.csv                      ← one row per score/recording (now also: derivatives_allowed, source_format)
   SOURCING.md                     ← checklist for checking a license before adding a row
 scores/                           ← Phase 1.5 Part A: rule-based score simplifier (see scores/README.md)
@@ -37,9 +38,11 @@ app/                              ← Phase 1.5 Part B + main app
   DRILL-RULES.md                  ← every drill rule in plain English
   family-piano.html               ← main app (built file); paste into a Squarespace Code block
   src/family-piano.template.html  ← main app source; edit this, then run `python3 app/build.py`
-  build.py                        ← inlines content/, licenses/assets.csv, drills.html, the font and VexFlow into family-piano.html
+  build.py                        ← inlines content, drills, font, VexFlow, piano sound and player notes into family-piano.html
   fonts/                          ← Nunito (SIL Open Font License), embedded so no font server is used
   vendor/                         ← VexFlow 4.2.2 + Bravura (draws drill sheets), embedded so the app needs no outside files
+    piano/                        ← MIT piano sound for the built-in player (made by tools/extract_piano.py)
+  tools/extract_piano.py          ← makes the piano sound from FluidR3Mono_GM.sf3
 docs/
   UI-CONTEXT.md, UI-SPEC.md       ← UI design context and the approved UI spec
   UI-SPEC-REVIEW.md               ← where the two differ (owner decisions needed) + progress/backup format

@@ -10,9 +10,15 @@ Inlines into app/src/family-piano.template.html:
   - app/fonts/nunito-latin-wght-normal.woff2 (as base64, so no font server is contacted)
   - app/vendor/vexflow-bravura-4.2.2.js (in place of the jsDelivr script tag, so drills need no internet)
 
+  - app/vendor/piano/ (MIT piano samples for the built-in player)
+  - notes for the built-in player, made from approved simplified scores in scores/derived/ that pass the
+    license gate in playable_reason() (needs music21: pip install -r scores/requirements.txt)
+  - every third-party license, in full, in a comment at the top of the file
+
 Usage: python3 app/build.py
+       python3 app/build.py --include-test-fixtures --out /tmp/test.html   (testing only: never publish this)
 """
-import base64, csv, html, json, pathlib, re
+import argparse, base64, csv, hashlib, html, json, pathlib, re
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 TEMPLATE = ROOT / "app" / "src" / "family-piano.template.html"
@@ -95,7 +101,84 @@ def placement(name):
     return {"main": md_to_html(parts[0]), "key": key, "sections": placement_items(parts[0])}
 
 
+PIANO = ROOT / "app" / "vendor" / "piano"
+LICENSE_FILES = [
+    ("VexFlow 4.2.2 (draws music on drill sheets)", ROOT / "app" / "vendor" / "VEXFLOW-LICENSE.txt"),
+    ("Nunito font", ROOT / "app" / "fonts" / "OFL.txt"),
+    ("Bravura music font (inside VexFlow)", None),
+    ("Fluid R3 piano sound (FluidR3Mono_GM)", PIANO / "LICENSE.md"),
+]
+BRAVURA_NOTICE = ("Copyright (c) 2015, Steinberg Media Technologies GmbH (http://www.steinberg.net/), "
+                  "with Reserved Font Name \"Bravura\". Licensed under the SIL Open Font License, Version 1.1 "
+                  "(full text above, under Nunito font).")
+# Edition licenses whose terms let us make and share a simplified version with only a credit line.
+# Share-alike (CC-BY-SA), NonCommercial (NC) and NoDerivatives (ND) are left out on purpose.
+OK_EDITION = re.compile(r"^(CC0(\s*1\.0)?|public[- ]domain|PD|CC[- ]BY(\s*[0-9.]+)?)$", re.I)
+
+
+def playable_reason(row, meta):
+    """Return None if this score may be played in the app, else the reason it may not (copyright gate)."""
+    if not str(row.get("composition_status", "")).lower().startswith("public-domain"):
+        return "composition is not marked public domain"
+    if row.get("derivatives_allowed") != "yes":
+        return "derivatives_allowed is not 'yes'"
+    lic = (row.get("edition_license") or "").strip()
+    if not OK_EDITION.match(lic):
+        return f"edition license '{lic}' is not CC0, public domain or CC-BY"
+    if lic.upper().startswith("CC") and "BY" in lic.upper() and not (row.get("attribution_text") or "").strip():
+        return "CC-BY edition needs attribution_text"
+    if meta is None:
+        return "no simplified score in scores/derived/"
+    if meta.get("status") != "approved":
+        return "simplified score is not approved (scores/pipeline/approve.py)"
+    if (meta.get("license") or {}).get("derivatives_allowed") != "yes":
+        return "meta.json license does not allow derivatives"
+    return None
+
+
+def score_notes(xml_path):
+    """Notes for the player: [start, length, midi, hand] in quarter notes; hand 0 = right, 1 = left."""
+    from music21 import converter, harmony, meter, tempo  # only needed when there is something to play
+    sc = converter.parse(str(xml_path)).stripTies()
+    events = []
+    for hand, part in enumerate(sc.parts[:2]):
+        for n in part.flatten().notes:
+            if isinstance(n, harmony.ChordSymbol) or n.quarterLength <= 0:
+                continue
+            for pt in n.pitches:
+                events.append([round(float(n.offset), 4), round(float(n.quarterLength), 4), pt.midi, hand])
+    events.sort()
+    marks = sc.flatten().getElementsByClass(tempo.MetronomeMark)
+    bpm = float(marks[0].getQuarterBPM()) if marks else 80.0  # playback default when the score gives no tempo
+    ts = sc.flatten().getElementsByClass(meter.TimeSignature)
+    beat = float(ts[0].beatDuration.quarterLength) if ts else 1.0
+    beats = int(ts[0].beatCount) if ts else 4
+    bars = [round(float(m.offset), 4) for m in sc.parts[0].getElementsByClass("Measure")]
+    return {"bpm": bpm, "beat": beat, "beatsPerBar": beats, "bars": bars, "end": round(float(sc.highestTime), 4), "events": events}
+
+
+def piano_samples():
+    info = json.loads((PIANO / "piano.json").read_text(encoding="utf-8"))
+    samples = [{"root": x["root"], "cents": x["cents"],
+                "b64": base64.b64encode((PIANO / x["file"]).read_bytes()).decode("ascii")} for x in info["samples"]]
+    return {"samples": samples, "keys": info["keys"]}
+
+
+def licenses_comment():
+    parts = ["Family Piano includes the following third-party software, fonts and sounds. Their licenses follow in full."]
+    for name, path in LICENSE_FILES:
+        body = BRAVURA_NOTICE if path is None else path.read_text(encoding="utf-8")
+        parts.append("=" * 70 + "\n" + name + "\n" + "=" * 70 + "\n" + body.strip())
+    text = "\n\n".join(parts).replace("--", "\u2013")  # "--" is not allowed inside an HTML comment
+    return "<!--\n" + text + "\n-->\n"
+
+
 def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--out", default=str(OUT))
+    ap.add_argument("--include-test-fixtures", action="store_true", help="testing only; never publish the result")
+    args = ap.parse_args()
+    out_path = pathlib.Path(args.out)
     levels = json.loads((ROOT / "content" / "levels.json").read_text(encoding="utf-8"))
     paths = {}
     for p in sorted((ROOT / "content" / "paths").glob("*.json")):
@@ -104,14 +187,27 @@ def main():
     assets = []
     with open(ROOT / "licenses" / "assets.csv", newline="", encoding="utf-8") as f:
         for r in csv.DictReader(f):
-            if r["asset_id"].endswith("test-fixture"):
+            if r["asset_id"].endswith("test-fixture") and not args.include_test_fixtures:
                 continue  # pipeline test file, not teaching content
             a = {k: r[k] for k in ("asset_id", "title", "composer", "url", "attribution_text")}
             if a["url"] and not re.match(r"https?://", a["url"]):
                 a["url"] = SCORE_BASE_URL + a["url"].lstrip("/")
+            meta_path = ROOT / "scores" / "derived" / r["asset_id"] / "meta.json"
+            meta = json.loads(meta_path.read_text(encoding="utf-8")) if meta_path.exists() else None
+            if args.include_test_fixtures and r["asset_id"].endswith("test-fixture") and meta:
+                meta = dict(meta, status="approved")  # testing only
+            why = playable_reason(r, meta)
+            if why is None:
+                xml = meta_path.parent / meta["outputs"]["musicxml"]
+                if hashlib.sha256(xml.read_bytes()).hexdigest() != meta.get("musicxml_sha256"):
+                    why = "simplified score changed after it was approved"
+            if why is None:
+                a["play"] = score_notes(meta_path.parent / meta["outputs"]["musicxml"])
+            else:
+                print(f"  player off for {r['asset_id']}: {why}")
             assets.append(a)
     content = {
-        "levels": levels, "paths": paths, "assets": assets,
+        "levels": levels, "paths": paths, "assets": assets, "piano": piano_samples(),
         "placement": {"quiz": placement("reader-quiz-template.md"),
                       "checklist": placement("prereader-observation-checklist.md"),
                       "rules": json.loads((ROOT / "content" / "placement" / "placement-rules.json").read_text(encoding="utf-8"))},
@@ -132,8 +228,10 @@ def main():
     page = page.replace(FONT_MARK, font).replace(MARK, blob).replace(DRILLS_MARK, drills)
     header = ("<!DOCTYPE html>\n<meta charset=\"utf-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n"
               "<title>Family Piano</title>\n<!-- BUILT FILE: do not edit. Edit app/src/family-piano.template.html and run python3 app/build.py -->\n")
-    OUT.write_text(header + page, encoding="utf-8")
-    print(f"wrote {OUT.relative_to(ROOT)} ({OUT.stat().st_size:,} bytes)")
+    if args.include_test_fixtures:
+        header += "<!-- TEST BUILD with pipeline test fixtures: do not publish -->\n"
+    out_path.write_text(header + licenses_comment() + page, encoding="utf-8")
+    print(f"wrote {out_path} ({out_path.stat().st_size:,} bytes)")
 
 
 if __name__ == "__main__":

@@ -30,7 +30,15 @@ A piece of music has **three layers**, and each one has its own copyright:
 4. **CC-BY-NC / CC-BY-ND**: avoid if possible. Note it in `notes`.
 5. **"All rights reserved", no license, or unclear**: **do not use.**
 
-Our app links to scores and audio. It never copies them into the app. We still track licenses so we only point families to properly licensed material, and so we can show correct credits.
+Our app links to scores and audio. It never copies **recordings** or other people's score files into the app. We still track licenses so we only point families to properly licensed material, and so we can show correct credits.
+
+**Built-in player (owner decision, 2026-10-11).** The app may play the *notes* of our own simplified score (from `scores/derived/`), synthesized with the app's own MIT-licensed piano sound. `app/build.py` (function `playable_reason`) only allows this when **all** of these are true, and prints the reason when one is not:
+- `composition_status` starts with `public-domain`;
+- `derivatives_allowed` is `yes` (share-alike is left out on purpose: its conditions would spread to the app);
+- `edition_license` is CC0, public domain, or plain CC-BY (not SA, NC or ND), and a CC-BY edition has its credit in `attribution_text` (shown next to the player);
+- the simplified score is approved (`scores/pipeline/approve.py`) and has not changed since approval.
+
+If any of this is unclear for a piece, leave `derivatives_allowed` as `no`: it stays link-only.
 
 ---
 

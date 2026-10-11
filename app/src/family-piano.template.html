@@ -153,6 +153,14 @@
 #fp-app .fp-suggest{background:var(--t-green);border-radius:12px;padding:12px 16px;font-weight:800;font-size:18px}
 #fp-app .fp-suggest.fp-none{background:var(--t-amber);font-weight:700;font-size:16px}
 
+/* built-in player */
+#fp-app .fp-player{grid-column:1/-1;border-top:1px solid var(--line);padding-top:12px;margin-top:4px;display:flex;flex-direction:column;gap:10px}
+#fp-app .fp-player progress{flex:1;min-width:120px;height:12px;accent-color:var(--blue)}
+#fp-app .fp-player input[type=range],#fp-app .fp-range{accent-color:var(--blue);min-height:44px;width:180px;max-width:100%}
+#fp-app .fp-player select{min-height:44px;border:1px solid #9fb3c4;border-radius:8px;padding:0 8px;background:#fff}
+#fp-app .fp-player .fp-chips{margin:0}
+#fp-app #pd-drills .pd-cell button.fp-dplay{position:absolute;right:0;top:0;width:44px;height:44px;min-height:44px;padding:0;border-radius:50%;border:2px solid var(--blue);background:#fff;color:var(--blue);font-size:18px;line-height:1;z-index:1}
+
 /* help */
 #fp-app details{background:#fff;border:1px solid var(--line);border-radius:10px;padding:0 14px}
 #fp-app summary{min-height:44px;display:flex;align-items:center;font-weight:800;cursor:pointer}
@@ -258,7 +266,17 @@ var TEXT = {
   pDone: function(n, l, w){ return n + " now starts at " + l + ", week " + w + "."; },
   pLast: function(d, l, w){ return "Last placement: " + d + " \u2013 started " + l + ", week " + w + "."; },
   pClear: "Clear results", pNotSure: "Not sure \u2013 do placement first",
-  pStart: function(n){ return "Start placement for " + n; }
+  pStart: function(n){ return "Start placement for " + n; },
+  play: "Play", pause: "Pause", stop: "Stop", listen: "Listen", speed: "Speed", hands: "Hands",
+  handNames: [["both","Both"],["right","Right"],["left","Left"]],
+  bars: "Bars", barsTo: "to", loop: "Loop", countIn: "Count-in", metronome: "Metronome",
+  playItem: function(n){ return "Play item " + n; },
+  sound: "Sound", soundOn: "Sound and music player on", volume: "Volume", output: "Play through",
+  thisDevice: "This device", findPiano: "Find my digital piano", testSound: "Test sound",
+  noMidi: "This browser can\u2019t play through a digital piano (Safari, iPhone and iPad can\u2019t). Chrome, Edge or Firefox can.",
+  midiDenied: "The browser did not allow access to MIDI devices.",
+  midiNone: "No digital piano found. Plug it in (USB or Bluetooth MIDI), then press the button again.",
+  credits: "Credits"
 };
 
 /* ---------- state ---------- */
@@ -271,6 +289,7 @@ function load(){
 }
 function save(){ try { localStorage.setItem(STORE_KEY, JSON.stringify(S)); } catch(e){ memoryOnly = true; } }
 var S = load();
+if (!S.settings) S.settings = { sound:true, output:"device", volume:0.8 };
 var ui = { screen:"week", grown:false, sheet:"plan", opts:{large:false,key:false,nameline:true}, filter:"all", adding:false, editing:null, viewWeek:null, msg:"" };
 
 /* ---------- content helpers ---------- */
@@ -484,7 +503,9 @@ function screenPieces(c){
       '><span class="fp-sr">' + esc(TEXT.learned + ": " + a.title) + "</span></label>" +
       "<div><b>" + esc(a.title) + "</b> – " + esc(a.composer) + "<br><small>" + txt(a.attribution_text, "License credit") + "</small></div>" +
       '<div class="fp-row">' + (wk ? '<span class="fp-weekchip">' + esc(TEXT.week) + " " + wk + "</span>" : "") +
-      (a.url ? '<a class="fp-btn" href="' + esc(a.url) + '" target="_blank" rel="noopener">' + esc(TEXT.openScore) + "</a>" : "") + "</div></div>";
+      (a.play && soundOn() ? '<button type="button" class="fp-btn fp-yellow" data-act="listen" data-id="' + esc(a.asset_id) + '" aria-expanded="' + !!(ui.player && ui.player.id === a.asset_id) + '">\u266B ' + esc(TEXT.listen) + "</button>" : "") +
+      (a.url ? '<a class="fp-btn" href="' + esc(a.url) + '" target="_blank" rel="noopener">' + esc(TEXT.openScore) + "</a>" : "") + "</div>" +
+      (a.play && soundOn() && ui.player && ui.player.id === a.asset_id ? playerHtml(a) : "") + "</div>";
   }).join("") + "</div>" : '<div class="fp-card"><p>' + esc(TEXT.piecesEmpty) + "</p></div>";
   var title = c.mode === "reader" ? TEXT.nav.reader[1][1] : TEXT.nav.standard[3][1];
   return head(title, true) + chips + rows;
@@ -519,6 +540,17 @@ function backupBanner(){
   return '<div class="fp-banner' + (ok ? " fp-ok" : "") + '"><span>' + esc(d === null ? TEXT.backupNever : TEXT.backupDays(d)) + "</span>" +
     '<button type="button" class="fp-btn fp-primary" data-act="export">' + esc(TEXT.backupNow) + "</button></div>";
 }
+function soundCard(){
+  var st = S.settings, outs = '<option value="device">' + esc(TEXT.thisDevice) + "</option>";
+  if (AU.midi) AU.midi.outputs.forEach(function(o){ outs += '<option value="' + esc(o.id) + '"' + (o.id === st.output ? " selected" : "") + ">" + esc(o.name || o.id) + "</option>"; });
+  else if (st.output !== "device") outs += '<option value="' + esc(st.output) + '" selected>' + esc(TEXT.findPiano) + "\u2026</option>";
+  return '<section class="fp-card"><h2 style="margin-bottom:6px">' + esc(TEXT.sound) + "</h2>" +
+    '<label class="fp-check"><input type="checkbox" data-act="sound"' + (soundOn() ? " checked" : "") + "> " + esc(TEXT.soundOn) + "</label>" +
+    (soundOn() ? '<div class="fp-row"><label for="fp-vol"><b>' + esc(TEXT.volume) + '</b></label><input id="fp-vol" class="fp-range" type="range" min="0" max="1" step="0.05" value="' + st.volume + '" data-act="vol"></div>' +
+      '<div class="fp-form" style="margin-top:8px"><label>' + esc(TEXT.output) + '<select data-act="output">' + outs + "</select></label></div>" +
+      '<div class="fp-row" style="margin-top:10px">' + (navigator.requestMIDIAccess ? '<button type="button" class="fp-btn" data-act="findmidi">' + esc(TEXT.findPiano) + "</button>" : "<p>" + esc(TEXT.noMidi) + "</p>") +
+      '<button type="button" class="fp-btn" data-act="testsound">\u266B ' + esc(TEXT.testSound) + "</button></div>" : "") + "</section>";
+}
 function screenFamily(){
   var cards = S.children.map(function(k){
     var lv = levelById(k.level), pct = Math.round(weeksDoneCount(k) / 12 * 100);
@@ -541,6 +573,7 @@ function screenFamily(){
     '<div class="fp-row" style="margin-top:10px"><button type="button" class="fp-btn fp-primary" data-act="export">' + esc(TEXT.exportBtn) + "</button>" +
     '<label class="fp-btn" for="fp-import">' + esc(TEXT.importBtn) + '</label><input id="fp-import" type="file" accept=".json,application/json" class="fp-sr" data-act="import"></div>' +
     (ui.msg ? '<p role="status" style="margin-top:8px">' + esc(ui.msg) + "</p>" : "") + "</section>" +
+    soundCard() +
     '<section class="fp-card"><h2 style="margin-bottom:6px">' + esc(TEXT.startOver) + "</h2><p>Removes every child and all progress from this browser.</p>" +
     '<button type="button" class="fp-btn fp-danger" style="margin-top:10px" data-act="reset">' + esc(TEXT.startOver) + "</button></section></div>";
 }
@@ -659,11 +692,188 @@ function screenHelp(){
   var faq = [["How do I print?", "Go to Print, pick one sheet, then press Print. To make a PDF, press Save as PDF and choose “Save as PDF” in the print window. Sheets always print in black and white."],
              ["Where is my progress saved?", "Only in this browser on this device. Nothing is sent anywhere. Clearing your browser data deletes it, so save a backup file now and then (Family → Backup & restore)."],
              ["Can I use another device?", "Yes. Save a backup file on this device, move the file to the other device, and use Restore from file there."],
-             ["How do I change a child's mode?", "Pick the child, then change Mode in the side menu. Their progress stays the same."]];
+             ["How do I change a child's mode?", "Pick the child, then change Mode in the side menu. Their progress stays the same."],
+             ["Why is there no sound?", "Check that Sound is on (Family \u2192 Sound) and the volume is up. On iPhone and iPad, turn off the silent switch: it mutes the app."],
+             ["Can it play through our digital piano?", "Yes, in Chrome, Edge or Firefox (not Safari, iPhone or iPad). Connect the piano by USB or Bluetooth MIDI, go to Family \u2192 Sound, press Find my digital piano and pick it under Play through."],
+             ["Why can some pieces not be played?", "The app only plays pieces whose music is in the public domain and whose edition\u2019s license lets us make a simplified version. Everything else is a link only."]];
+  var credits = "<ul><li>Piano sound: Fluid R3 SoundFont by Frank Wen, mono version (FluidR3Mono) by Michael Cowgill, MIT license.</li>" +
+    "<li>Music notation on drill sheets: VexFlow by Mohit Muthanna Cheppudira and contributors, MIT license; Bravura music font by Steinberg Media Technologies, SIL Open Font License.</li>" +
+    "<li>Nunito font by the Nunito Project Authors, SIL Open Font License.</li><li>The full license texts are at the top of this app\u2019s file.</li></ul>";
   var starts = S.children.map(function(k){ return '<button type="button" class="fp-btn fp-primary" data-act="place" data-id="' + esc(k.id) + '">' + esc(TEXT.pStart(k.name)) + "</button>"; }).join("");
   return head(TEXT.help, true) + '<div class="fp-stack"><h2>Modes</h2><div class="fp-kids">' + modes + "</div>" +
     '<h2>Placement</h2><div class="fp-card"><ul>' + levels + "</ul>" + (starts ? '<div class="fp-row" style="margin-top:10px">' + starts + "</div>" : "") + "</div><h2>Questions</h2>" +
-    faq.map(function(f){ return "<details><summary>" + esc(f[0]) + "</summary><p>" + esc(f[1]) + "</p></details>"; }).join("") + "</div>";
+    faq.map(function(f){ return "<details><summary>" + esc(f[0]) + "</summary><p>" + esc(f[1]) + "</p></details>"; }).join("") +
+    "<h2>" + esc(TEXT.credits) + '</h2><div class="fp-card">' + credits + "</div></div>";
+}
+
+/* ---------- sound: built-in piano (Fluid R3, MIT) or the family's digital piano (Web MIDI) ---------- */
+var AU = { ctx:null, master:null, buffers:null, loading:null, voices:[], timers:[], midi:null };
+function soundOn(){ return S.settings.sound !== false; }
+function b64buf(b64){ var bin = atob(b64), u = new Uint8Array(bin.length); for (var i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return u.buffer; }
+function audioReady(){
+  if (!AU.ctx) {
+    var AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return Promise.reject(new Error("no Web Audio"));
+    AU.ctx = new AC(); AU.master = AU.ctx.createGain(); AU.master.connect(AU.ctx.destination);
+    if (S.settings.output !== "device" && navigator.requestMIDIAccess && !AU.midi) findMidi(true);
+  }
+  AU.master.gain.value = S.settings.volume;
+  if (AU.ctx.state === "suspended") AU.ctx.resume();
+  if (!AU.loading) AU.loading = Promise.all(CONTENT.piano.samples.map(function(smp){
+    return new Promise(function(res, rej){ AU.ctx.decodeAudioData(b64buf(smp.b64), res, rej); });
+  })).then(function(b){ AU.buffers = b; });
+  return AU.loading;
+}
+function findMidi(quiet){
+  if (!navigator.requestMIDIAccess) { ui.msg = TEXT.noMidi; render(); return; }
+  navigator.requestMIDIAccess({ sysex:false }).then(function(acc){
+    AU.midi = acc; acc.onstatechange = function(){ if (ui.screen === "family") render(); };
+    if (!quiet) { ui.msg = acc.outputs.size ? "" : TEXT.midiNone; render(); }
+  }, function(){ if (!quiet) { ui.msg = TEXT.midiDenied; render(); } });
+}
+function midiOut(){
+  var id = S.settings.output, o = null;
+  if (id === "device" || !AU.midi) return null;
+  AU.midi.outputs.forEach(function(x){ if (x.id === id) o = x; });
+  return o;
+}
+function msAt(when){ return performance.now() + (when - AU.ctx.currentTime) * 1000; }
+/* Play one note. when = seconds on the audio clock, dur = seconds. */
+function noteAt(m, when, dur, vel){
+  vel = vel || 0.8; dur = Math.max(dur, 0.05);
+  var out = midiOut();
+  if (out) { out.send([0x90, m, Math.round(vel * 127)], msAt(when)); out.send([0x80, m, 0], msAt(when + dur)); return; }
+  var k = CONTENT.piano.keys[String(Math.max(24, Math.min(96, m)))], smp = CONTENT.piano.samples[k];
+  var src = AU.ctx.createBufferSource(), g = AU.ctx.createGain(), end = when + dur;
+  src.buffer = AU.buffers[k];
+  src.playbackRate.value = Math.pow(2, ((m - smp.root) * 100 + smp.cents) / 1200);
+  g.gain.setValueAtTime(vel, when); g.gain.setValueAtTime(vel, end); g.gain.exponentialRampToValueAtTime(0.001, end + 0.25);
+  src.connect(g); g.connect(AU.master); src.start(when); src.stop(end + 0.3);
+  AU.voices.push(src);
+}
+function clickAt(when, strong){
+  var out = midiOut();
+  if (out) { var n = strong ? 76 : 77; out.send([0x99, n, 100], msAt(when)); out.send([0x89, n, 0], msAt(when + 0.05)); return; }
+  var o = AU.ctx.createOscillator(), g = AU.ctx.createGain();
+  o.frequency.value = strong ? 1600 : 1100;
+  g.gain.setValueAtTime(0.35, when); g.gain.exponentialRampToValueAtTime(0.001, when + 0.05);
+  o.connect(g); g.connect(AU.master); o.start(when); o.stop(when + 0.06);
+  AU.voices.push(o);
+}
+function stopAll(){
+  AU.voices.forEach(function(v){ try { v.stop(); } catch(e){} }); AU.voices = [];
+  AU.timers.forEach(clearTimeout); AU.timers = [];
+  var out = midiOut();
+  if (out) { if (out.clear) out.clear(); out.send([0xB0, 123, 0]); out.send([0xB9, 123, 0]); }
+  if (ui.player) ui.player.playing = false;
+}
+/* Play a short list of [startBeat, beats, midi] once (drill items, kid-mode sounds). */
+function playOnce(notes, bpm, countIn){
+  if (!soundOn()) return;
+  stopAll();
+  audioReady().then(function(){
+    var spb = 60 / bpm, t = AU.ctx.currentTime + 0.05;
+    if (countIn) { for (var i = 0; i < countIn; i++) clickAt(t + i * spb, i === 0); t += countIn * spb; }
+    notes.forEach(function(n){ noteAt(n[2], t + n[0] * spb, n[1] * spb * 0.95, 0.8); });
+  }, function(){});
+}
+function chime(){ playOnce([[0, 0.5, 72], [0.25, 0.5, 76], [0.5, 1, 79]], 160); }
+
+/* Drill sheet items -> notes (only items whose answer is something you can hear). */
+var DUR = { w:4, hd:3, h:2, qd:1.5, q:1, "8":0.5, "16":0.25 };
+function drillNotes(drill, it){
+  var mid = window.__pdDrills && window.__pdDrills.toMidi;
+  if (!mid) return null;
+  if (drill === "note-naming") return { notes:[[0, 1.5, mid(it.p)]], bpm:80 };
+  if (drill === "intervals") {
+    var a = mid(it.lo), b = mid(it.hi);
+    if (it.pres === "harmonic") return { notes:[[0, 2, a], [0, 2, b]], bpm:80 };
+    if (it.dir === "down") { var x = a; a = b; b = x; }
+    return { notes:[[0, 1, a], [1, 1.5, b]], bpm:80 };
+  }
+  if (drill === "rhythm") {
+    var ts = it.time.split("/"), bar = parseInt(ts[0], 10) * 4 / parseInt(ts[1], 10), t = 0, out = [];
+    it.measures.forEach(function(groups, mi){
+      var t0 = t;
+      groups.forEach(function(g){ g.events.forEach(function(e){
+        var code = e.dur.replace("r", ""), len = e.dur === "wr" ? bar : DUR[code];
+        if (!e.rest) {
+          if (it.tie && mi === 1 && t === t0 && out.length) out[out.length - 1][1] += len; // tied into bar 2
+          else out.push([t, len, 67]);
+        }
+        t += len;
+      }); });
+      t = t0 + bar;
+    });
+    return { notes:out, bpm: ts[1] === "8" ? 120 : 80, countIn: Math.round(parseInt(ts[0], 10) / (ts[1] === "8" ? 3 : 1)) };
+  }
+  return null;
+}
+window.fpDrillPlay = function(cell, drill, it, n){
+  if (!soundOn()) return;
+  var d = drillNotes(drill, it); if (!d) return;
+  var b = document.createElement("button");
+  b.type = "button"; b.className = "pd-noprint fp-dplay"; b.textContent = "\u25B6"; b.setAttribute("aria-label", TEXT.playItem(n));
+  b.addEventListener("click", function(){ playOnce(d.notes, d.bpm, d.countIn); });
+  cell.appendChild(b);
+};
+
+/* ----- piece player ----- */
+function assetById(id){ return CONTENT.assets.filter(function(a){ return a.asset_id === id; })[0]; }
+function newPlayer(a){ return { id:a.asset_id, pos:0, playing:false, speed:80, hands:"both", loop:false, from:1, to:a.play.bars.length, countIn:true, metro:false }; }
+function range(P, d){ return [d.bars[P.from - 1], P.to < d.bars.length ? d.bars[P.to] : d.end]; }
+function curPos(P){ return P.playing ? Math.min(P.startPos + Math.max(0, AU.ctx.currentTime - P.startAt) / P.spq, P.end) : P.pos; }
+function playerStart(noCount){
+  var P = ui.player, a = assetById(P.id), d = a.play;
+  stopAll();
+  audioReady().then(function(){
+    var r = range(P, d), from = r[0], to = r[1];
+    var spq = 60 / (d.bpm * P.speed / 100), t0 = AU.ctx.currentTime + 0.1;
+    if (P.pos < from || P.pos >= to - 1e-6) P.pos = from;
+    if (P.countIn && !noCount) { for (var i = 0; i < d.beatsPerBar; i++) clickAt(t0 + i * d.beat * spq, i === 0); t0 += d.beatsPerBar * d.beat * spq; }
+    d.events.forEach(function(e){
+      if (e[0] < P.pos - 1e-6 || e[0] >= to - 1e-6) return;
+      if ((P.hands === "right" && e[3] !== 0) || (P.hands === "left" && e[3] !== 1)) return;
+      noteAt(e[2], t0 + (e[0] - P.pos) * spq, Math.min(e[1], to - e[0]) * spq * 0.95, 0.7);
+    });
+    if (P.metro) for (var bt = from; bt < to - 1e-6; bt += d.beat) if (bt >= P.pos - 1e-6)
+      clickAt(t0 + (bt - P.pos) * spq, d.bars.some(function(x){ return Math.abs(x - bt) < 1e-6; }));
+    P.playing = true; P.startAt = t0; P.startPos = P.pos; P.spq = spq; P.end = to;
+    AU.timers.push(setTimeout(function(){
+      if (P.loop) { P.pos = from; playerStart(true); }
+      else { P.playing = false; P.pos = from; render(); }
+    }, (t0 + (to - P.pos) * spq - AU.ctx.currentTime) * 1000 + 50));
+    render(); tickPlayer();
+  }, function(){});
+}
+function playerPause(){ var P = ui.player; P.pos = curPos(P); stopAll(); render(); }
+function playerStop(){ var P = ui.player, a = assetById(P.id); stopAll(); P.pos = range(P, a.play)[0]; render(); }
+function playerRestartIfPlaying(){ var P = ui.player; if (P.playing) { P.pos = curPos(P); playerStart(true); } else render(); }
+function fmtTime(sec){ sec = Math.max(0, Math.round(sec)); return Math.floor(sec / 60) + ":" + ("0" + sec % 60).slice(-2); }
+function tickPlayer(){
+  var P = ui.player; if (!P || !P.playing) return;
+  var a = assetById(P.id), d = a.play, pos = curPos(P), spq = 60 / (d.bpm * P.speed / 100);
+  var bar = document.getElementById("fp-prog"), tm = document.getElementById("fp-ptime");
+  if (bar) bar.value = pos;
+  if (tm) tm.textContent = fmtTime(pos * spq) + " / " + fmtTime(d.end * spq);
+  requestAnimationFrame(tickPlayer);
+}
+function playerHtml(a){
+  var P = ui.player, d = a.play, spq = 60 / (d.bpm * P.speed / 100);
+  var bars = d.bars.map(function(_, i){ return i + 1; });
+  function sel(act, val){ return '<select data-act="' + act + '" aria-label="' + esc(act === "pfrom" ? TEXT.bars : TEXT.barsTo) + '">' + bars.map(function(n){
+    return '<option value="' + n + '"' + (n === val ? " selected" : "") + ">" + n + "</option>"; }).join("") + "</select>"; }
+  function chk(act, on, label){ return '<label class="fp-check"><input type="checkbox" data-act="' + act + '"' + (on ? " checked" : "") + "> " + esc(label) + "</label>"; }
+  return '<div class="fp-player" role="group" aria-label="' + esc(TEXT.play + ": " + a.title) + '">' +
+    '<div class="fp-row">' + (P.playing ? '<button type="button" class="fp-btn fp-primary" data-act="ppause">\u275A\u275A ' + esc(TEXT.pause) + "</button>"
+                                        : '<button type="button" class="fp-btn fp-primary" data-act="pplay">\u25B6 ' + esc(TEXT.play) + "</button>") +
+    '<button type="button" class="fp-btn" data-act="pstop">\u25A0 ' + esc(TEXT.stop) + "</button>" +
+    '<progress id="fp-prog" max="' + d.end + '" value="' + P.pos + '"></progress><span id="fp-ptime">' + fmtTime(P.pos * spq) + " / " + fmtTime(d.end * spq) + "</span></div>" +
+    '<div class="fp-row"><label for="fp-speed"><b>' + esc(TEXT.speed) + '</b></label><input id="fp-speed" type="range" min="40" max="120" step="5" value="' + P.speed + '" data-act="pspeed"><span>' + P.speed + "%</span></div>" +
+    '<div class="fp-row"><b>' + esc(TEXT.hands) + '</b><div class="fp-chips" role="group" aria-label="' + esc(TEXT.hands) + '">' + TEXT.handNames.map(function(h){
+      return '<button type="button" data-act="phands" data-v="' + h[0] + '" aria-pressed="' + (P.hands === h[0]) + '">' + esc(h[1]) + "</button>"; }).join("") + "</div></div>" +
+    '<div class="fp-row"><b>' + esc(TEXT.bars) + "</b>" + sel("pfrom", P.from) + esc(TEXT.barsTo) + sel("pto", P.to) +
+      chk("ploop", P.loop, TEXT.loop) + chk("pcount", P.countIn, TEXT.countIn) + chk("pmetro", P.metro, TEXT.metronome) + "</div></div>";
 }
 
 /* ---------- render ---------- */
@@ -690,7 +900,7 @@ function render(focusHead){
   if (focusHead) { var h = document.getElementById("fp-h1"); if (h) h.focus(); }
 }
 
-function go(screen){ ui.screen = screen; ui.msg = ""; ui.grown = false; ui.viewWeek = null; ui.editing = null; render(true); }
+function go(screen){ if (ui.player) { stopAll(); ui.player = null; } ui.screen = screen; ui.msg = ""; ui.grown = false; ui.viewWeek = null; ui.editing = null; render(true); }
 
 /* Printing: copy the paper to a direct child of <body> and hide the rest of the page
    (works inside a Squarespace page as well as on its own). */
@@ -746,13 +956,23 @@ root.addEventListener("click", function(e){
     case "weekdone":
       if (c.week >= 12) c.complete = true; else c.week++;
       save(); ui.grown = false; render(true); break;
-    case "tile": c.done[t.dataset.id] = !c.done[t.dataset.id]; save(); render(); break;
+    case "tile": c.done[t.dataset.id] = !c.done[t.dataset.id]; save(); render(); if (c.done[t.dataset.id]) chime(); break;
     case "grown": ui.grown = !ui.grown; render(true); break;
     case "readme": readAloud(c); break;
     case "doprint": ui.msg = t.dataset.pdf ? TEXT.savePdfHint : ""; render(); if (makePrintout()) { window.print(); setTimeout(removePrintout, 1000); } break;
     case "viewweek": ui.viewWeek = parseInt(t.dataset.n, 10); ui.screen = "week"; render(true); break;
     case "backweek": ui.viewWeek = null; render(true); break;
     case "nextlevel": var nx = nextLevelOf(c); if (nx) { c.level = nx.id; c.week = 1; c.complete = false; save(); go("week"); } break;
+    case "listen":
+      if (ui.player && ui.player.id === t.dataset.id) { stopAll(); ui.player = null; }
+      else { stopAll(); ui.player = newPlayer(assetById(t.dataset.id)); }
+      render(); break;
+    case "pplay": playerStart(false); break;
+    case "ppause": playerPause(); break;
+    case "pstop": playerStop(); break;
+    case "phands": ui.player.hands = t.dataset.v; playerRestartIfPlaying(); break;
+    case "findmidi": findMidi(false); break;
+    case "testsound": playOnce([[0, 1, 60], [1, 1, 64], [2, 1, 67], [3, 2, 72]], 100); break;
     case "place": S.activeId = t.dataset.id; save(); go("placement"); break;
     case "ptype": pState(c).type = t.dataset.v; save(); render(true); break;
     case "pprint": if (makePrintout()) { window.print(); setTimeout(removePrintout, 1000); } break;
@@ -781,7 +1001,19 @@ root.addEventListener("click", function(e){
 });
 root.addEventListener("change", function(e){
   var t = e.target, c = active(), a = t.dataset.act;
-  if (a === "tick") { c.done[t.dataset.id] = t.checked; save(); render(); }
+  if (a === "tick") { c.done[t.dataset.id] = t.checked; save(); render(); if (t.checked && c.mode === "reader") chime(); }
+  else if (a === "sound") { S.settings.sound = t.checked; if (!t.checked) { stopAll(); ui.player = null; } save(); render(); if (window.__pdDrills) window.__pdDrills.redraw(); }
+  else if (a === "vol") { S.settings.volume = Number(t.value); if (AU.master) AU.master.gain.value = S.settings.volume; save(); }
+  else if (a === "output") { stopAll(); S.settings.output = t.value; save(); render(); }
+  else if (a === "pspeed") { ui.player.speed = Number(t.value); playerRestartIfPlaying(); }
+  else if (a === "pfrom" || a === "pto") {
+    var P = ui.player; P[a === "pfrom" ? "from" : "to"] = Number(t.value);
+    if (P.from > P.to) { if (a === "pfrom") P.to = P.from; else P.from = P.to; }
+    P.pos = 0; if (P.playing) playerStart(true); else render();
+  }
+  else if (a === "ploop") { ui.player.loop = t.checked; playerRestartIfPlaying(); }
+  else if (a === "pcount") { ui.player.countIn = t.checked; render(); }
+  else if (a === "pmetro") { ui.player.metro = t.checked; playerRestartIfPlaying(); }
   else if (a === "learned") { c.learned[t.dataset.id] = t.checked; save(); render(); }
   else if (a === "who") { S.activeId = t.value; save(); go("week"); }
   else if (a === "mode") { c.mode = t.value; save(); go("week"); }
