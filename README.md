@@ -43,6 +43,7 @@ app/                              ← Phase 1.5 Part B + main app
 docs/
   UI-CONTEXT.md, UI-SPEC.md       ← UI design context and the approved UI spec
   UI-SPEC-REVIEW.md               ← where the two differ (owner decisions needed) + progress/backup format
+  MIDI-PLAYER-OPTIONS.md          ← research: built-in player options and owner decisions
 ```
 
 **assets.csv new columns:** `derivatives_allowed` = `yes`, `no`, or `share-alike` (may we make a simplified version?). `source_format` = `musicxml`, `mxl`, or `xml` for files in `scores/source/` (use `n/a` for linked-only items).
