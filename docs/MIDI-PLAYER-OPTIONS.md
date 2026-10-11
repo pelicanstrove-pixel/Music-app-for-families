@@ -40,6 +40,9 @@ optionally send the notes to the family's digital piano over USB (Web MIDI).
   line; *Play in time* (perfect/good/miss timing, combo, score, 1–3 stars) or *Wait for me*; hands, speed, note
   names. Best score and stars are saved per child and piece. Works for every piece the license gate lets the
   player play, now and in future.
+- **Pieces under review** (owner decision): the 78 Mutopia candidates are in Pieces, with the player, highlighting,
+  wait-for-me, checking and the game, each labeled "Under review" (with a search box and an "Under review" filter). Their drawn
+  scores load from `app/pieces/` when opened; ties and grace notes in the drawing are shown but not checked.
 - Player options built: Play / Pause / Stop, progress, speed 40–120%, hands (both / right / left),
   bars from–to, loop, count-in, metronome, volume.
 - Also built: the score is shown with the sounding notes highlighted (tap a note to start there), and

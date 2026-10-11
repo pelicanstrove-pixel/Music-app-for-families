@@ -121,6 +121,11 @@
 #fp-app .fp-chips button[aria-pressed="true"]{background:var(--blue);color:#fff}
 #fp-app .fp-piece{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center}
 #fp-app .fp-weekchip{background:var(--t-blue);border-radius:999px;padding:2px 10px;font-size:13px;font-weight:800}
+#fp-app .fp-reviewchip{background:var(--t-amber);border-radius:999px;padding:2px 10px;font-size:13px;font-weight:800;cursor:help}
+#fp-app .fp-piece[hidden]{display:none}
+#fp-app .fp-loading{font-size:14px;font-style:italic}
+#fp-app .fp-note{background:var(--t-amber);border-radius:12px;padding:10px 14px;margin:0 0 12px}
+#fp-app .fp-search{width:100%;max-width:420px;font:inherit;padding:8px 12px;border:2px solid currentColor;border-radius:10px;background:transparent;color:inherit}
 
 /* family */
 #fp-app .fp-kids{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
@@ -292,7 +297,11 @@ var TEXT = {
   savePdf: "Save as PDF",
   savePdfHint: "In the print window, choose “Save as PDF” as the printer.",
   piecesEmpty: "No pieces are approved yet. They will show up here when the educator adds them.",
-  filters: [["all","All"],["level","This level"],["todo","Not learned"],["learned","Learned"]],
+  filters: [["all","All"],["level","This level"],["todo","Not learned"],["learned","Learned"],["review","Under review"]],
+  underReview: "Under review", searchPieces: "Search pieces (title or composer)", noMatch: "No pieces match.",
+  reviewTip: "An educator has not checked this piece yet. The notes may still have mistakes.",
+  reviewIntro: "Pieces marked \u201cUnder review\u201d are old public-domain music from the Mutopia Project that an educator has not checked yet. You can play them now; the notes may still have mistakes.",
+  reviewNote: "Under review: an educator has not checked these notes yet, so they may still have mistakes.",
   learned: "Learned", openScore: "Open score",
   addChild: "Add a child", backup: "Backup & restore", startOver: "Start over",
   startOverConfirm: "Delete all children and progress from this browser? This cannot be undone. Make a backup first if you may want it back.",
@@ -340,6 +349,7 @@ var TEXT = {
   wAgain: "Not that one \u2013 try again.", wDone: "Well done! You played it all.",
   wCount: function(i, n){ return "Note " + i + " of " + n; },
   scoreLoading: "Loading the music\u2026", scoreNone: "This browser can\u2019t show the music here, but the player still works.",
+  scoreOffline: "The music for this piece couldn\u2019t be loaded (no internet?), but the player still works.",
   noteNames: ["C","C\u266F","D","D\u266F","E","F","F\u266F","G","G\u266F","A","A\u266F","B"],
   kbdCard: "Your keyboard and listening", kbdSize: "Keyboard size", kbdShift: "Octave buttons on your keyboard",
   kbdSizes: [["1","1 octave (13 keys)"],["2","2 octaves (25 keys)"],["3","3 octaves (37 keys)"],["4","4 octaves (49 keys)"],
@@ -609,25 +619,33 @@ function screenPieces(c){
   var weeks = pieceWeeks(c.level);
   var chips = '<div class="fp-chips" role="group" aria-label="Filter">' + TEXT.filters.map(function(f){
     return '<button type="button" data-act="filter" data-f="' + f[0] + '" aria-pressed="' + (ui.filter === f[0]) + '">' + esc(f[1]) + "</button>"; }).join("") + "</div>";
+  var q = (ui.q || "").trim().toLowerCase();
+  var search = CONTENT.assets.length > 8 ? '<div class="fp-row"><input type="search" class="fp-search" data-act="pq" value="' + esc(ui.q || "") + '" placeholder="' + esc(TEXT.searchPieces) +
+    '" aria-label="' + esc(TEXT.searchPieces) + '"></div>' : "";
   var list = CONTENT.assets.filter(function(a){
+    if (ui.filter === "review") return !!a.review;
     if (ui.filter === "level") return a.asset_id in weeks;
     if (ui.filter === "learned") return !!c.learned[a.asset_id];
     if (ui.filter === "todo") return !c.learned[a.asset_id];
     return true;
   });
   var rows = list.length ? '<div class="fp-stack">' + list.map(function(a){
-    var wk = weeks[a.asset_id];
-    return '<div class="fp-card fp-piece"><label class="fp-check"><input type="checkbox" data-act="learned" data-id="' + esc(a.asset_id) + '"' + (c.learned[a.asset_id] ? " checked" : "") +
+    var wk = weeks[a.asset_id], loading = ui.loadingPiece === a.asset_id;
+    var key = (a.title + " " + a.composer).toLowerCase();
+    return '<div class="fp-card fp-piece" data-q="' + esc(key) + '"' + (q && key.indexOf(q) < 0 ? " hidden" : "") + '><label class="fp-check"><input type="checkbox" data-act="learned" data-id="' + esc(a.asset_id) + '"' + (c.learned[a.asset_id] ? " checked" : "") +
       '><span class="fp-sr">' + esc(TEXT.learned + ": " + a.title) + "</span></label>" +
       "<div><b>" + esc(a.title) + "</b> – " + esc(a.composer) + "<br><small>" + txt(a.attribution_text, "License credit") + "</small></div>" +
       '<div class="fp-row">' + (wk ? '<span class="fp-weekchip">' + esc(TEXT.week) + " " + wk + "</span>" : "") +
+      (a.review ? '<span class="fp-reviewchip" title="' + esc(TEXT.reviewTip) + '">' + esc(TEXT.underReview) + "</span>" : "") +
+      (loading ? '<span class="fp-loading" role="status">' + esc(TEXT.scoreLoading) + "</span>" : "") +
       (a.play && soundOn() ? '<button type="button" class="fp-btn fp-yellow" data-act="listen" data-id="' + esc(a.asset_id) + '" aria-expanded="' + !!(ui.player && ui.player.id === a.asset_id) + '">\u266B ' + esc(TEXT.listen) + "</button>" : "") +
       (a.play ? '<button type="button" class="fp-btn" data-act="game" data-id="' + esc(a.asset_id) + '">\uD83C\uDFAE ' + esc(TEXT.game) + "</button>" : "") +
       (a.url ? '<a class="fp-btn" href="' + esc(a.url) + '" target="_blank" rel="noopener">' + esc(TEXT.openScore) + "</a>" : "") + "</div>" +
       (a.play && soundOn() && ui.player && ui.player.id === a.asset_id ? playerHtml(a) : "") + "</div>";
-  }).join("") + "</div>" : '<div class="fp-card"><p>' + esc(TEXT.piecesEmpty) + "</p></div>";
+  }).join("") + "</div>" : '<div class="fp-card"><p>' + esc(CONTENT.assets.length ? TEXT.noMatch : TEXT.piecesEmpty) + "</p></div>";
   var title = c.mode === "reader" ? TEXT.nav.reader[1][1] : TEXT.nav.standard[3][1];
-  return head(title, true) + chips + rows;
+  var review = CONTENT.assets.some(function(a){ return a.review; }) ? '<p class="fp-note">' + esc(TEXT.reviewIntro) + "</p>" : "";
+  return head(title, true) + review + search + chips + rows;
 }
 
 /* ----- stars (reader) ----- */
@@ -1035,10 +1053,41 @@ function playerHtml(a){
       ((P.wait || P.check) && P.hands !== "both" ? chk("palong", P.along, TEXT.along) : "") + rangeNote(a) + "</div>" +
     (P.result ? '<p class="fp-result" role="status">' + esc(P.result) + "</p>" : "") +
     (P.wait ? '<p class="fp-wstatus" id="fp-wstatus" role="status"></p>' + keyboardHtml(a) : "") +
-    (a.score ? '<div class="fp-score" id="fp-score" aria-label="' + esc(a.title) + '"></div>' : "") + "</div>";
+    (a.review ? '<p class="fp-note">' + esc(TEXT.reviewNote) + "</p>" : "") +
+    (a.score ? '<div class="fp-score" id="fp-score" aria-label="' + esc(a.title) + '"></div>' : a.scoreFail ? "<p>" + esc(TEXT.scoreOffline) + "</p>" : "") + "</div>";
 }
 
 /* ----- score display and note highlighting ----- */
+/* Pieces under review keep their drawn score in a file of its own (app/pieces/<asset_id>.js, made by app/build.py),
+   loaded the first time the piece is opened. If it can't be loaded, the piece still plays, without the music shown. */
+var PIECE_LOADS = {};
+function pieceUrl(a){ var base = CONTENT.piecesUrl || "pieces/"; return base + (/\/$/.test(base) ? "" : "/") + a.scoreSrc; }
+function loadPiece(a){
+  if (!a || a.score || !a.scoreSrc) return Promise.resolve(a);
+  if (PIECE_LOADS[a.asset_id]) return PIECE_LOADS[a.asset_id];
+  return (PIECE_LOADS[a.asset_id] = new Promise(function(resolve){
+    var s = document.createElement("script"), done = false;
+    function finish(ok){ if (done) return; done = true; if (!ok) { a.scoreFail = true; delete PIECE_LOADS[a.asset_id]; } resolve(a); }
+    window.fpPiece = window.fpPiece || function(id, d){
+      var x = assetById(id); if (x && d && d.notes) { x.score = d; x.scoreFail = false; }
+      var cb = PIECE_WAIT[id]; delete PIECE_WAIT[id]; if (cb) cb(true);
+    };
+    PIECE_WAIT[a.asset_id] = finish;
+    s.async = true; s.src = pieceUrl(a);
+    s.onload = function(){ setTimeout(function(){ finish(!!a.score); }, 0); };
+    s.onerror = function(){ finish(false); };
+    setTimeout(function(){ finish(!!a.score); }, 20000);
+    document.head.appendChild(s);
+  }));
+}
+var PIECE_WAIT = {};
+/* Open a piece (player or game) once its score file has loaded, or failed to. */
+function withPiece(id, then){
+  var a = assetById(id);
+  if (!a || a.score || !a.scoreSrc || a.scoreFail) return then();
+  ui.loadingPiece = id; render();
+  loadPiece(a).then(function(){ if (ui.loadingPiece !== id) return; ui.loadingPiece = null; then(); });
+}
 var SCORES = {};   // asset_id -> SVG pages (decoded once)
 function loadScore(a){
   if (SCORES[a.asset_id] || !a.score) return Promise.resolve(SCORES[a.asset_id]);
@@ -1088,8 +1137,8 @@ function waitGroups(a, P){
     if (g.need.indexOf(mm) < 0) g.need.push(mm);
   });
   if (a.score) Object.keys(a.score.notes).forEach(function(id){
-    var n = a.score.notes[id]; if (!handOk(P, n[2])) return;
-    groups.forEach(function(g){ if (Math.abs(g.t - n[0]) < 1e-4) g.ids.push(id); });
+    var n = a.score.notes[id]; if (!handOk(P, n[2]) || n[4]) return;
+    groups.forEach(function(g){ if (Math.abs(g.t - n[0]) < 0.07) g.ids.push(id); });
   });
   return { groups:groups, along:along, from:from, to:to };
 }
@@ -1180,7 +1229,8 @@ function kbdRange(){ var r = KBD[S.settings.kbd] || KBD[88], sh = (S.settings.kb
   return [Math.max(21, r[0] + sh), Math.min(108, r[1] + sh)]; }
 function noteName(m){ return TEXT.noteNames[m % 12] + (Math.floor(m / 12) - 1); }
 function pieceNotes(a){   // [{on, off, hand, m, id}] for checking: from the drawn score when there is one
-  if (a.score) return Object.keys(a.score.notes).map(function(id){ var n = a.score.notes[id]; return { on:n[0], off:n[1], hand:n[2], m:n[3], id:id }; })
+  if (a.score) return Object.keys(a.score.notes).filter(function(id){ return !a.score.notes[id][4]; })   // [4]: tied-over or grace note, not checked
+    .map(function(id){ var n = a.score.notes[id]; return { on:n[0], off:n[1], hand:n[2], m:n[3], id:id }; })
     .filter(function(n){ return typeof n.m === "number"; }).sort(function(x, y){ return x.on - y.on || x.m - y.m; });
   return a.play.events.map(function(e, i){ return { on:e[0], off:e[0] + e[1], hand:e[3], m:e[2], id:null }; });
 }
@@ -1426,7 +1476,7 @@ function screenGame(c){
     (o.view === "sheet" ? '<div class="fp-sheetlane" id="fp-gsheet"><div class="fp-hitline"></div><div class="fp-strip" id="fp-gstrip"></div></div><canvas id="fp-gcanvas" style="height:150px;margin-top:8px"></canvas>'
                         : '<canvas id="fp-gcanvas" aria-label="' + esc(TEXT.gHowTo) + '"></canvas>') + "</div>";
   var results = G && G.result ? G.result : "";
-  return head(TEXT.gameTitle(a.title), true, esc(TEXT.gHowTo)) + '<div class="fp-stack">' + (G && G.running ? "" : setup) + stage + results +
+  return head(TEXT.gameTitle(a.title), true, esc(TEXT.gHowTo)) + '<div class="fp-stack">' + (G && G.running ? "" : (a.review ? '<p class="fp-note">' + esc(TEXT.reviewNote) + "</p>" : "") + setup) + stage + results +
     '<div><button type="button" class="fp-btn" data-go="pieces">' + esc(TEXT.gBack) + "</button></div></div>";
 }
 function gameSetupCanvas(){
@@ -2072,12 +2122,14 @@ root.addEventListener("click", function(e){
     case "nextlevel": var nx = nextLevelOf(c); if (nx) { c.level = nx.id; c.week = 1; c.complete = false; save(); go("week"); } break;
     case "listen":
       W = null; MARKS = {};
-      if (ui.player && ui.player.id === t.dataset.id) { stopAll(); ui.player = null; }
-      else { stopAll(); ui.player = newPlayer(assetById(t.dataset.id)); }
-      render(); break;
+      if (ui.player && ui.player.id === t.dataset.id) { stopAll(); ui.player = null; ui.loadingPiece = null; render(); break; }
+      stopAll(); ui.player = null;
+      var lid = t.dataset.id; withPiece(lid, function(){ ui.player = newPlayer(assetById(lid)); render(); }); break;
     case "pplay": ui.player.result = ""; playerStart(false); break;
-    case "game": stopAll(); ui.player = null; W = null; ui.game = ui.game && ui.game.id === t.dataset.id ? ui.game : { id:t.dataset.id, view:"fall", mode:"practice", hands:"right", speed:70, names:true };
-      ui.screen = "game"; G = null; render(true); break;
+    case "game": stopAll(); ui.player = null; W = null;
+      var gid = t.dataset.id; withPiece(gid, function(){
+        ui.game = ui.game && ui.game.id === gid ? ui.game : { id:gid, view:"fall", mode:"practice", hands:"right", speed:70, names:true };
+        ui.screen = "game"; G = null; render(true); }); break;
     case "gview": ui.game.view = t.dataset.v; G = null; render(); break;
     case "gmode": ui.game.mode = t.dataset.v; G = null; render(); break;
     case "ghands": ui.game.hands = t.dataset.v; G = null; render(); break;
@@ -2165,7 +2217,12 @@ root.addEventListener("click", function(e){     // tap a note in the score to st
   var P = ui.player; P.pos = info[0];
   if (W && W.active) waitStart(); else if (P.playing) playerStart(true); else render();
 });
-root.addEventListener("input", function(e){   // the tempo slider shows its number while it moves
+root.addEventListener("input", function(e){   // the tempo slider shows its number while it moves; the piece search filters as you type
+  if (e.target.dataset && e.target.dataset.act === "pq") {
+    ui.q = e.target.value; var q = ui.q.trim().toLowerCase(), any = false;
+    Array.prototype.forEach.call(root.querySelectorAll(".fp-piece"), function(card){ var hit = !q || card.dataset.q.indexOf(q) >= 0; card.hidden = !hit; any = any || hit; });
+    return;
+  }
   if (e.target.dataset && e.target.dataset.act === "mbpm") { metroSettings().bpm = Number(e.target.value); var big = document.querySelector("#fp-app .fp-mbpm"); if (big) big.firstChild.nodeValue = e.target.value; }
 });
 root.addEventListener("change", function(e){
