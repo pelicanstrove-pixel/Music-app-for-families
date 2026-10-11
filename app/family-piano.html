@@ -1504,7 +1504,7 @@ var TEXT = {
   listenWith: "Listen with", listenOpts: [["midi","Digital piano (MIDI cable or Bluetooth)"],["mic","Microphone (acoustic piano)"],["screen","On-screen keys only"]],
   anyOctave: "Count the right note in any octave (good for small keyboards)",
   micPrivacy: "The microphone sound is checked inside this browser only. It is never recorded, saved or sent anywhere.",
-  micTest: "Test the microphone", micStop: "Stop the test", micHeard: function(n){ return "I hear: " + n; }, micNothing: "Play a note\u2026",
+  micTest: "Test the microphone", micStop: "Stop the test", micHeard: function(n){ return "Best guess: " + n + " (when the app knows what to expect, it checks much more exactly)"; }, micNothing: "Play a note\u2026",
   micDenied: "The browser did not allow the microphone.", micNone: "This browser has no microphone access.",
   micTip: "Tip: with the microphone, use headphones or turn the app's sound down so the app only hears the piano.",
   fits: function(r){ return "Range " + r + " \u00B7 fits your keyboard"; },
@@ -1958,7 +1958,7 @@ function screenHelp(){
              ["Why is there no sound?", "Check that Sound is on (Family \u2192 Sound) and the volume is up. On iPhone and iPad, turn off the silent switch: it mutes the app."],
              ["Can it play through our digital piano?", "Yes, in Chrome, Edge or Firefox (not Safari, iPhone or iPad). Connect the piano by USB or Bluetooth MIDI, go to Family \u2192 Sound, press Find my digital piano and pick it under Play through."],
              ["Our keyboard is small. Does that matter?", "Tell the app its size in Family \u2192 Your keyboard and listening (1 to 7 octaves, or a full piano). The app moves pieces by octaves to fit, and the on-screen keys and the game show only your keys. If your keyboard has octave buttons, say which way you moved it."],
-             ["How does the app hear my child play?", "Three ways: a digital piano connected by USB or Bluetooth MIDI (Chrome, Edge or Firefox), the microphone for an acoustic piano (one note at a time works best; chords count when one of their notes is heard), or the on-screen keys. Pick one in Family \u2192 Your keyboard and listening. Microphone sound is checked in the browser only and never recorded or sent."],
+             ["How does the app hear my child play?", "Three ways: a digital piano connected by USB or Bluetooth MIDI (Chrome, Edge or Firefox), the microphone for an acoustic piano (single notes and chords; it checks the notes it is waiting for, and for big chords one quiet note may be missing), or the on-screen keys. Pick one in Family \u2192 Your keyboard and listening. Microphone sound is checked in the browser only and never recorded or sent."],
              ["What do the colors on the music mean?", "Blue: the note playing now. Orange: the note to play next. Green: played right. Red: a wrong note. Grey: a note that was missed."],
              ["Why can some pieces not be played?", "The app only plays pieces whose music is in the public domain and whose edition\u2019s license lets us make a simplified version. Everything else is a link only."]];
   var credits = "<ul><li>Piano sound: Fluid R3 SoundFont by Frank Wen, mono version (FluidR3Mono) by Michael Cowgill, MIT license.</li>" +
@@ -2333,10 +2333,20 @@ function rangeNote(a){
   if (f.shift) return '<span class="fp-range-note fp-warn">' + esc(TEXT.shifted(r, (Math.abs(f.shift) / 12) + " octave" + (Math.abs(f.shift) > 12 ? "s " : " ") + (f.shift > 0 ? "up" : "down"))) + "</span>";
   return '<span class="fp-range-note">' + esc(TEXT.fits(r)) + "</span>";
 }
-function sameNote(m, want){ return m === want || ((S.settings.anyOctave || S.settings.listen === "mic") && (m - want) % 12 === 0); }
+function sameNote(m, want){ return m === want || (S.settings.anyOctave && (m - want) % 12 === 0); }
 
 /* ----- listening: every played note (digital piano, microphone, on-screen keys) goes to the active listener ----- */
-var LISTEN = { fn:null, mic:null, micTest:false, recent:[] };
+var LISTEN = { fn:null, mic:null, micTest:false, recent:[], expect:function(t){ return expectedNow(t); } };
+function expectedNow(t){   // the notes the child should be playing around audio time t (for the microphone's chord check)
+  if (G && G.running && G.notes) {
+    if (ui.game.mode === "practice") { var g = G.groups[G.gi]; return g ? g.notes.filter(function(n){ return !n.res; }).map(function(n){ return n.want; }) : null; }
+    return G.notes.filter(function(n){ return !n.res && Math.abs(n.t - t) < 0.3; }).map(function(n){ return n.want; });
+  }
+  var P = ui.player;
+  if (P && P.judge) return P.judge.notes.filter(function(n){ return !n.res && Math.abs(n.t - t) < 0.3; }).map(function(n){ return n.want; });
+  if (W && W.active) return W.groups[W.i].need.filter(function(m){ return W.got.indexOf(m) < 0; });
+  return null;
+}
 function heard(m, when, from){
   flashKey(m, "fp-down");
   if (from === "mic" && AU.ctx) {   // ignore the app's own backing notes coming back through the microphone
@@ -2346,10 +2356,14 @@ function heard(m, when, from){
   }
   if (LISTEN.fn) LISTEN.fn(m, when);
   else waitKey(m);
-  if (LISTEN.micTest) { var el = document.getElementById("fp-mictest"); if (el) el.textContent = TEXT.micHeard(noteName(m)); }
+  if (LISTEN.micTest && from !== "mic") { var el = document.getElementById("fp-mictest"); if (el) el.textContent = TEXT.micHeard(noteName(m)); }
 }
 function nowT(){ return AU.ctx ? AU.ctx.currentTime : 0; }
-/* Microphone: one note at a time (YIN pitch detection), run in this browser only. */
+/* Microphone (acoustic piano), run in this browser only: nothing is recorded or sent.
+   On each new attack the app takes four looks (60-220 ms after it) at the sound that is new since just before.
+   When it knows which notes it is waiting for, it checks those (chords too) and whether a strong other note is
+   there; otherwise (the microphone test) it names the notes it can find. */
+var MIC = { looks:[0.06, 0.1, 0.15, 0.22], N:4096, NF:8192, opt:{ need:0.15, own:0.075, wrong:0.6, before:0.7, peakLow:0.7 } };
 function micStart(){
   if (LISTEN.mic) return Promise.resolve();
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { ui.msg = TEXT.micNone; render(); return Promise.reject(); }
@@ -2357,37 +2371,125 @@ function micStart(){
     return navigator.mediaDevices.getUserMedia({ audio:{ echoCancellation:false, noiseSuppression:false, autoGainControl:false } });
   }).then(function(stream){
     var src = AU.ctx.createMediaStreamSource(stream), an = AU.ctx.createAnalyser();
-    an.fftSize = 2048; src.connect(an);
-    var buf = new Float32Array(an.fftSize), st = { note:null, stable:0, cand:null, level:0 };
+    an.fftSize = MIC.N; src.connect(an);
+    var buf = new Float32Array(MIC.N), binHz = AU.ctx.sampleRate / MIC.NF;
+    var st = { level:0, prev:null, hit:null, quietUntil:0 };
     var timer = setInterval(function(){
       an.getFloatTimeDomainData(buf);
-      var r = detectPitch(buf, AU.ctx.sampleRate), rise = r.rms > st.level * 1.8 + 0.004;
-      st.level = st.level * 0.7 + r.rms * 0.3;
-      if (r.rms < 0.008 || r.midi === null) { st.cand = null; st.stable = 0; if (r.rms < 0.006) st.note = null; return; }
-      if (r.midi === st.cand) st.stable++; else { st.cand = r.midi; st.stable = 1; }
-      if (st.stable === 2 && (r.midi !== st.note || rise)) { st.note = r.midi; heard(r.midi, nowT() - 0.05, "mic"); }
-      else if (rise && r.midi === st.note && st.stable > 2) heard(r.midi, nowT() - 0.03, "mic");
+      var now = AU.ctx.currentTime, rms = 0, i, L = 1024;
+      for (i = MIC.N - L; i < MIC.N; i++) rms += buf[i] * buf[i];
+      rms = Math.sqrt(rms / L);
+      var spec = fftMag(buf, MIC.NF);
+      if (!st.hit && rms > 0.01 && rms > st.level * 1.6 + 0.004 && now > st.quietUntil) {
+        st.hit = { t:now - 0.02, before:st.prev, looks:[] };          // a new attack
+      }
+      if (st.hit) {
+        var age = now - st.hit.t;
+        if (st.hit.looks.length < MIC.looks.length && age >= MIC.looks[st.hit.looks.length]) st.hit.looks.push(spec);
+        if (st.hit.looks.length === MIC.looks.length) { micDecide(st.hit, binHz); st.quietUntil = now + 0.03; st.hit = null; }
+      }
+      st.level = st.level * 0.6 + rms * 0.4;
+      if (!st.hit) st.prev = spec;
     }, 20);
     LISTEN.mic = { stream:stream, timer:timer };
   }, function(e){ if (e) { ui.msg = TEXT.micDenied; render(); } throw e; });
 }
+function micDecide(hit, binHz){
+  var expected = LISTEN.expect ? LISTEN.expect(hit.t) : null;
+  if (expected && expected.length) {
+    var present = {}, wrongs = {};
+    hit.looks.forEach(function(sp){
+      var v = verifyNotes(sp, hit.before, binHz, expected, MIC.opt);
+      v.present.forEach(function(m){ present[m] = true; });
+      if (v.wrong !== null) wrongs[v.wrong] = (wrongs[v.wrong] || 0) + 1;
+    });
+    var got = expected.filter(function(m){ return present[m]; });
+    var wrong = Object.keys(wrongs).filter(function(k){ return wrongs[k] >= 2; }).map(Number)[0];
+    // a big chord heard through a microphone: one quiet note may hide, so all but one is enough (if nothing wrong was heard)
+    if (wrong === undefined && expected.length >= 3 && got.length >= expected.length - 1) got = expected.slice();
+    got.forEach(function(m){ heard(m, hit.t, "mic"); });
+    if (wrong !== undefined) heard(wrong, hit.t, "mic");
+  } else {
+    var votes = {};   // nothing expected (the microphone test): name the notes found in at least 3 of the 4 looks
+    hit.looks.forEach(function(sp){ polyNotes(sp, hit.before, binHz, { ratio:0.3, maxN:4, _guard:20 }).forEach(function(m){ votes[m] = (votes[m] || 0) + 1; }); });
+    var notes = Object.keys(votes).filter(function(k){ return votes[k] >= 3; }).map(Number).sort(function(x, y){ return x - y; });
+    notes = notes.filter(function(m){ return !notes.some(function(lo){ return [19, 24, 28, 31, 34, 36].indexOf(m - lo) >= 0; }); });   // an overtone of a lower note
+    notes.forEach(function(m){ heard(m, hit.t, "mic"); });
+    if (LISTEN.micTest) { var el = document.getElementById("fp-mictest"); if (el && notes.length) el.textContent = TEXT.micHeard(notes.map(noteName).join(" ")); }
+  }
+}
 function micStop(){ if (!LISTEN.mic) return; clearInterval(LISTEN.mic.timer); LISTEN.mic.stream.getTracks().forEach(function(t){ t.stop(); }); LISTEN.mic = null; }
-/* YIN (de Cheveigné & Kawahara 2002) on a 2x downsampled window: returns {rms, midi or null}. */
-function detectPitch(x, rate){
-  var n = x.length >> 1, y = new Float32Array(n), rms = 0, i, t;
-  for (i = 0; i < n; i++) { y[i] = (x[2 * i] + x[2 * i + 1]) * 0.5; rms += y[i] * y[i]; }
-  rms = Math.sqrt(rms / n);
-  if (rms < 0.008) return { rms:rms, midi:null };
-  var sr = rate / 2, W = n >> 1, tmin = Math.floor(sr / 2100), tmax = Math.min(W - 1, Math.ceil(sr / 60));
-  var d = new Float32Array(tmax + 1), sum = 0, best = -1;
-  for (t = 1; t <= tmax; t++) { var acc = 0; for (i = 0; i < W; i++) { var df = y[i] - y[i + t]; acc += df * df; } d[t] = acc; }
-  d[0] = 1;
-  for (t = 1; t <= tmax; t++) { sum += d[t]; d[t] = sum ? d[t] * t / sum : 1; }
-  for (t = tmin; t <= tmax; t++) if (d[t] < 0.15) { while (t + 1 <= tmax && d[t + 1] < d[t]) t++; best = t; break; }
-  if (best < 0) return { rms:rms, midi:null };
-  var a = d[best - 1] || d[best], b = d[best], c = d[best + 1] || d[best], den = a - 2 * b + c;
-  var tau = best + (den ? (a - c) / (2 * den) : 0), f = sr / tau, mf = 69 + 12 * Math.log2(f / 440), m = Math.round(mf);
-  return { rms:rms, midi: Math.abs(mf - m) < 0.4 && m >= 21 && m <= 108 ? m : null };
+function fftMag(x, n){            // Hann-windowed real FFT magnitude, n = power of two >= x.length
+  var re = new Float64Array(n), im = new Float64Array(n), L = x.length, i, j, k;
+  for (i = 0; i < L; i++) re[i] = x[i] * (0.5 - 0.5 * Math.cos(2 * Math.PI * i / (L - 1)));
+  for (i = 1, j = 0; i < n; i++) { var bit = n >> 1; for (; j & bit; bit >>= 1) j ^= bit; j ^= bit; if (i < j) { var t = re[i]; re[i] = re[j]; re[j] = t; } }
+  for (var len = 2; len <= n; len <<= 1) {
+    var ang = -2 * Math.PI / len, wr = Math.cos(ang), wi = Math.sin(ang);
+    for (i = 0; i < n; i += len) { var cr = 1, ci = 0;
+      for (k = 0; k < len / 2; k++) { var a = i + k, b = a + len / 2, tr = re[b] * cr - im[b] * ci, ti = re[b] * ci + im[b] * cr;
+        re[b] = re[a] - tr; im[b] = im[a] - ti; re[a] += tr; im[a] += ti; var nr = cr * wr - ci * wi; ci = cr * wi + ci * wr; cr = nr; } } }
+  var mag = new Float32Array(n / 2); for (i = 0; i < n / 2; i++) mag[i] = Math.sqrt(re[i] * re[i] + im[i] * im[i]); return mag;
+}
+/* Notes that started in `cur` (vs `before`): iterative harmonic matching (after Klapuri 2006). */
+function polyNotes(cur, before, binHz, opt){
+  opt = opt || {};
+  var lo = opt.lo || 36, hi = opt.hi || 96, maxN = opt.maxN || 5, H = 10, n = cur.length, k, m, h;
+  var r = new Float32Array(n);
+  for (k = 0; k < n; k++) r[k] = Math.max(0, cur[k] - (before ? 0.9 * before[k] : 0));
+  var top = 0; for (k = 0; k < n; k++) if (r[k] > top) top = r[k];
+  if (top <= 0) return [];
+  function band(f){ var c = f / binHz, w = Math.max(1, c * 0.029); return [Math.max(1, Math.floor(c - w)), Math.min(n - 1, Math.ceil(c + w))]; }
+  function sal(m){ var f0 = 440 * Math.pow(2, (m - 69) / 12), s = 0;
+    for (h = 1; h <= H; h++) { var f = h * f0; if (f > binHz * n * 0.95) break; var b = band(f), pk = 0;
+      for (k = b[0]; k <= b[1]; k++) if (r[k] > pk) pk = r[k];
+      s += pk * (f0 + 27) / (h * f0 + 320); }
+    return s; }
+  var found = [], first = 0;
+  for (var it = 0; it < maxN; it++) {
+    var best = -1, bs = 0;
+    for (m = lo; m <= hi; m++) { if (found.indexOf(m) >= 0) continue; var s = sal(m); if (s > bs) { bs = s; best = m; } }
+    if (best < 0) break;
+    if (!it) first = bs;
+    if (bs < first * (opt.ratio || 0.3) || bs < (opt.floor || 0) ) break;
+    // the fundamental itself must be present (stops picking a note an octave below a real one)
+    var b0 = band(440 * Math.pow(2, (best - 69) / 12)), pk0 = 0; for (k = b0[0]; k <= b0[1]; k++) if (r[k] > pk0) pk0 = r[k];
+    var f0b = 440 * Math.pow(2, (best - 69) / 12);
+    if (pk0 < top * (opt.fund || 0.05) && f0b > 90) { // weak fundamental: remove this candidate's harmonics a little and continue
+      for (h = 1; h <= H; h++) { var bb = band(h * f0b); for (k = bb[0]; k <= bb[1]; k++) r[k] *= 0.5; } it--; if (found.length > maxN || --opt._guard < 0) break; continue; }
+    found.push(best);
+    for (h = 1; h <= H; h++) { var b2 = band(h * f0b); for (k = b2[0]; k <= b2[1]; k++) r[k] *= 0.15; }
+  }
+  return found.sort(function(a, b){ return a - b; });
+}
+
+/* Given the notes the app expects, which of them are sounding, and is there a strong note that should not be? */
+function verifyNotes(cur, before, binHz, expected, opt){
+  opt = opt || {};
+  var n = cur.length, k, h, H = 8, r = new Float32Array(n);
+  var bf = opt.before === undefined ? 0.9 : opt.before;
+  for (k = 0; k < n; k++) r[k] = Math.max(0, cur[k] - (before ? bf * before[k] : 0));
+  function band(f){ var c = f / binHz, w = Math.max(1, c * 0.029); return [Math.max(1, Math.floor(c - w)), Math.min(n - 1, Math.ceil(c + w))]; }
+  function peak(f){ var b = band(f), p = 0; for (k = b[0]; k <= b[1]; k++) if (r[k] > p) p = r[k]; return p; }
+  function sal(m, excl){ var f0 = 440 * Math.pow(2, (m - 69) / 12), s = 0, wsum = 0;
+    for (h = 1; h <= H; h++) { var f = h * f0; if (f > binHz * n * 0.95) break;
+      if (excl && excl(f)) continue;
+      var w = (f0 + 27) / (h * f0 + 320); s += w * peak(f); wsum += w; }
+    return wsum ? s / wsum : (excl ? -1 : 0); }
+  var all = []; for (var m = 33; m <= 100; m++) all.push(sal(m));
+  var maxS = Math.max.apply(null, all) || 1e-9;
+  function shared(e){ return function(f){ return expected.some(function(o){ if (o === e) return false;
+    var f0 = 440 * Math.pow(2, (o - 69) / 12); for (var j = 1; j <= H; j++) if (Math.abs(1200 * Math.log2(f / (j * f0))) < 40) return true; return false; }); }; }
+  var present = expected.filter(function(e){
+    var own = sal(e, shared(e)), s = sal(e);
+    var nb = Math.max(sal(e - 1), sal(e + 1)), pk = e < 50 ? (opt.peakLow || 0.9) : (opt.peak || 1.05);
+    if (own < 0) return s >= maxS * (opt.need || 0.25);          // every partial shared (an octave doubling): the shared energy must be there
+    return s >= maxS * (opt.need || 0.25) && own >= maxS * (opt.own || 0.12) && s >= nb * pk;
+  });
+  // remove the expected notes, then look for a strong leftover note
+  expected.forEach(function(e){ var f0 = 440 * Math.pow(2, (e - 69) / 12); for (h = 1; h <= H + 4; h++) { var b = band(h * f0); for (k = b[0]; k <= b[1]; k++) r[k] *= 0.1; } });
+  var wrong = null, ws = 0;
+  for (m = 33; m <= 100; m++) { var s2 = sal(m); if (s2 > ws) { ws = s2; wrong = m; } }
+  return { present: present, wrong: ws >= maxS * (opt.wrong || 0.45) ? wrong : null };
 }
 function listenStart(){   // turn on the chosen input (MIDI is always listened to once allowed)
   if (navigator.requestMIDIAccess && !AU.midi) findMidi(true);
@@ -2411,7 +2513,7 @@ function makeJudge(notes, onMark){
       J.last = best.res; onMark(best, "fp-ok");
     } else { J.wrong++; J.combo = 0; J.last = "wrong"; onMark(null, "fp-bad", m); }
   };
-  J.tick = function(t){ notes.forEach(function(n){ if (!n.res && t > n.t + WIN.good) { n.res = "miss"; J.miss++; J.combo = 0; J.last = "miss"; onMark(n, "fp-miss"); } }); };
+  J.tick = function(t){ var lag = S.settings.listen === "mic" ? 0.3 : 0; notes.forEach(function(n){ if (!n.res && t > n.t + WIN.good + lag) { n.res = "miss"; J.miss++; J.combo = 0; J.last = "miss"; onMark(n, "fp-miss"); } }); };
   J.done = function(){ return notes.every(function(n){ return n.res; }); };
   J.accuracy = function(){ var tot = notes.length || 1; return Math.max(0, (J.p + J.g * 0.7 - J.wrong * 0.25) / tot); };
   return J;

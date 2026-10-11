@@ -20,8 +20,9 @@ optionally send the notes to the family's digital piano over USB (Web MIDI).
 - **Keyboard size** (Family → Your keyboard and listening): 1–7 octaves or 88 keys, plus the keyboard's octave
   buttons. Pieces are moved by octaves to fit (or single notes folded in when a piece is wider than the keyboard);
   the on-screen keys and the game show only the family's keys. Optional: count the right note in any octave.
-- **Listening and checking:** the app hears the child through a digital piano (MIDI), the **microphone** (YIN pitch
-  detection in the browser, one note at a time; nothing is recorded or sent) or the on-screen keys. *Check my
+- **Listening and checking:** the app hears the child through a digital piano (MIDI), the **microphone** (chords too: on each
+  attack the app checks the notes it is waiting for against the new sound, by harmonic matching after Klapuri;
+  nothing is recorded or sent) or the on-screen keys. *Check my
   playing* grades every note in time (green right, red wrong, grey missed) while the app plays the other hand;
   *Wait for me* marks right-first-time notes and gives a summary.
 - **Game** (Pieces → Game): falling notes onto a keyboard (rhythm-game style) or the sheet music scrolling past a
