@@ -5,12 +5,12 @@
   All CSS is scoped under #fp-app. All on-screen wording is in the TEXT table below
   so an educator can rewrite it. Progress lives in this browser only (localStorage).
 -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
 <style>
+/* Nunito, SIL Open Font License 1.1 (app/fonts/OFL.txt). Embedded by app/build.py: no font server is contacted. */
+@font-face{font-family:"FP Nunito";font-style:normal;font-weight:200 1000;font-display:swap;src:url(data:font/woff2;base64,/*__FP_FONT__*/) format("woff2")}
 #fp-app{--navy:#1d3b5c;--blue:#1b6a8c;--yellow:#ffc83d;--text:#1d2b3a;--bg:#f2f7fb;--line:#d5e2ec;
   --t-blue:#cfe8f5;--t-amber:#ffe3a3;--t-green:#d9f0dd;--t-pink:#f3d6ee;
-  font-family:Nunito,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;font-size:16px;line-height:1.45;color:var(--text);
+  font-family:"FP Nunito",system-ui,-apple-system,"Segoe UI",Arial,sans-serif;font-size:16px;line-height:1.45;color:var(--text);
   display:flex;min-height:640px;background:var(--bg);border-radius:12px;overflow:hidden;text-align:left;box-sizing:border-box}
 #fp-app *,#fp-app *::before,#fp-app *::after{box-sizing:border-box}
 #fp-app h1,#fp-app h2,#fp-app h3,#fp-app p{margin:0;font-family:inherit;color:inherit;letter-spacing:normal;text-transform:none}
@@ -132,12 +132,26 @@
 
 /* drill sheet maker (app/drills.html) inside the Print screen: restyle its controls only */
 #fp-app #fp-drillhost{overflow-x:auto;margin-top:14px}
-#fp-app #pd-drills .pd-controls{background:#fff;border:1px solid var(--line);border-radius:12px;max-width:none;font-family:Nunito,system-ui,Arial,sans-serif;color:var(--text)}
+#fp-app #pd-drills .pd-controls{background:#fff;border:1px solid var(--line);border-radius:12px;max-width:none;font-family:"FP Nunito",system-ui,Arial,sans-serif;color:var(--text)}
 #fp-app #pd-drills .pd-controls input[type=text],#fp-app #pd-drills .pd-controls input[type=number],#fp-app #pd-drills .pd-controls select{min-height:44px;border-radius:8px;border-color:#9fb3c4}
 #fp-app #pd-drills .pd-controls label.pd-check{min-height:44px}
 #fp-app #pd-drills .pd-controls input[type=checkbox]{width:24px;height:24px;accent-color:var(--blue)}
 #fp-app #pd-drills .pd-controls button{min-height:44px;border-radius:10px;border:2px solid var(--blue);color:var(--blue);font-weight:800;font-family:inherit;background:#fff}
 #fp-app #pd-drills .pd-controls button.pd-primary{background:var(--blue);color:#fff}
+
+/* placement */
+#fp-app .fp-steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:14px}
+#fp-app .fp-steps > li > .fp-card > h2{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+#fp-app .fp-steps .fp-n{width:34px;height:34px;flex:0 0 34px;border-radius:50%;background:var(--navy);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:16px}
+#fp-app .fp-ptable{width:100%;border-collapse:collapse;margin-bottom:12px}
+#fp-app .fp-ptable caption{text-align:left;font-weight:800;padding:6px 0}
+#fp-app .fp-ptable th,#fp-app .fp-ptable td{border-bottom:1px solid var(--line);padding:4px 6px;text-align:left;vertical-align:middle}
+#fp-app .fp-ptable td.fp-c{text-align:center}
+#fp-app .fp-ptable input[type=number]{width:80px;min-height:44px;border:1px solid #9fb3c4;border-radius:8px;padding:0 8px}
+#fp-app .fp-ptable input[type=radio]{width:24px;height:24px;accent-color:var(--blue);margin:0}
+#fp-app .fp-ptable label.fp-rad{display:inline-flex;min-width:44px;min-height:44px;align-items:center;justify-content:center;cursor:pointer}
+#fp-app .fp-suggest{background:var(--t-green);border-radius:12px;padding:12px 16px;font-weight:800;font-size:18px}
+#fp-app .fp-suggest.fp-none{background:var(--t-amber);font-weight:700;font-size:16px}
 
 /* help */
 #fp-app details{background:#fff;border:1px solid var(--line);border-radius:10px;padding:0 14px}
@@ -155,6 +169,7 @@
   #fp-app .fp-grid4,#fp-app .fp-printwrap{grid-template-columns:1fr}
   #fp-app .fp-weeks{grid-template-columns:repeat(2,minmax(0,1fr))}
   #fp-app .fp-reader{font-size:22px}
+  #fp-app .fp-ptable th:nth-child(2),#fp-app .fp-ptable td:nth-child(2){display:none}
 }
 
 /* print: the app copies the chosen sheet into #fp-printout (a direct child of <body>) and hides everything else */
@@ -225,7 +240,25 @@ var TEXT = {
   backToWeek: "Back to this week", openWeek: "Open",
   nextLevel: function(name){ return "Start " + name; },
   edit: "Edit", saveChild: "Save", drillHint: "Pick the drill below, press Make sheet, then Print.",
-  placementKey: "ANSWER KEY (for the parent)"
+  placementKey: "ANSWER KEY (for the parent)",
+  placement: "Placement", placementFor: function(n){ return "Placement for " + n; },
+  pTypes: { quiz: "Reader quiz", checklist: "Pre-reader checklist" },
+  pTypeHelp: { quiz: "For children who can read. They answer on paper; you mark it.",
+               checklist: "For ages about 4\u20136. Your child does not read or write. You watch and mark what you see." },
+  pSteps: ["Choose the test", "Print it", "Enter the results", "Pick the starting level"],
+  pPrint: "Print the sheet", pShow: "Show the sheet",
+  pPoints: "Points", pYes: "Yes", pNotYet: "Not yet", pSometimes: "Sometimes", pUsually: "Usually",
+  pAnswered: function(a, t){ return a + " of " + t + " answered. Answer every item to see a suggestion."; },
+  pNoRules: "The educator has not written the scoring rules yet, so the app cannot suggest a level. Pick one yourself.",
+  pNoMatch: "No rule matched these results. Pick a level yourself.",
+  pSuggest: "Suggested start:",
+  pTryQuiz: "Try the reader quiz", pTryQuizLong: "These results suggest your child is ready for the reader quiz.",
+  pUse: function(n){ return "Use this for " + n; },
+  pConfirm: function(n){ return "Change " + n + "'s level and week? Ticked items stay saved."; },
+  pDone: function(n, l, w){ return n + " now starts at " + l + ", week " + w + "."; },
+  pLast: function(d, l, w){ return "Last placement: " + d + " \u2013 started " + l + ", week " + w + "."; },
+  pClear: "Clear results", pNotSure: "Not sure \u2013 do placement first",
+  pStart: function(n){ return "Start placement for " + n; }
 };
 
 /* ---------- state ---------- */
@@ -404,9 +437,7 @@ function paperHtml(c){
       "</tbody></table>";
     if (o.key) body += '<div class="fp-pagebreak">PARENT NOTES (for the parent)</div><p>' + esc(plain(w.parent_notes, "Parent notes")) + "</p>";
   } else if (ui.sheet === "quiz" || ui.sheet === "checklist") {
-    var pl = CONTENT.placement[ui.sheet];
-    body = pl.main + (o.key && pl.key ? '<div class="fp-pagebreak">' + esc(TEXT.placementKey) + "</div>" + pl.key : "");
-    return '<div class="fp-paper' + (o.large ? " fp-lg" : "") + '" aria-label="Paper preview">' + body + "</div>";
+    return placementPaper(ui.sheet, o.key);
   } else {
     body = "<h2>" + esc(lv.name) + " – 12-week overview</h2>" + nameline + "<table><thead><tr><th>Week</th><th>Focus</th><th>Done</th></tr></thead><tbody>" +
       range12().map(function(n){ var ww = weekOf(c, n); return "<tr><td>" + n + "</td><td>" + esc(plain(ww && ww.focus, "Week focus")) + '</td><td><span class="fp-box"></span></td></tr>'; }).join("") +
@@ -476,7 +507,7 @@ function childForm(k){
   return '<form class="fp-card" data-form="child"' + (k ? ' data-id="' + esc(k.id) + '"' : "") + '><h2 style="margin-bottom:10px">' + esc(title) + '</h2><div class="fp-form">' +
     '<label>Name<input name="name" required maxlength="40" autocomplete="off" value="' + esc(k ? k.name : "") + '"></label>' +
     '<label>Age<input name="age" type="number" min="2" max="18" inputmode="numeric" value="' + esc(k && k.age ? k.age : "") + '"></label>' +
-    '<label>Level<select name="level">' + opts + "</select></label>" +
+    '<label>Level<select name="level">' + opts + (k ? "" : '<option value="__place">' + esc(TEXT.pNotSure) + "</option>") + "</select></label>" +
     '<label>Mode<select name="mode">' + modes + "</select></label>" +
     '<label>' + (k ? "Current week" : "Start at week") + '<input name="week" type="number" min="1" max="12" value="' + (k ? k.week : 1) + '"></label></div>' +
     '<div class="fp-row" style="margin-top:12px"><button type="submit" class="fp-btn fp-primary">' + esc(k ? TEXT.saveChild : TEXT.addChild) + "</button>" +
@@ -496,6 +527,7 @@ function screenFamily(){
       '<div class="fp-bar" role="img" aria-label="' + pct + '% done"><i style="width:' + pct + '%"></i></div>' +
       '<div class="fp-row"><button type="button" class="fp-btn" data-act="pick" data-id="' + esc(k.id) + '">Open</button>' +
       '<button type="button" class="fp-btn" data-act="edit" data-id="' + esc(k.id) + '">' + esc(TEXT.edit) + "</button>" +
+      '<button type="button" class="fp-btn" data-act="place" data-id="' + esc(k.id) + '">' + esc(TEXT.placement) + "</button>" +
       '<button type="button" class="fp-btn fp-danger" data-act="remove" data-id="' + esc(k.id) + '">' + esc(TEXT.remove) + "</button></div></section>";
   }).join("");
   var adding = ui.adding || !S.children.length;
@@ -513,6 +545,111 @@ function screenFamily(){
     '<button type="button" class="fp-btn fp-danger" style="margin-top:10px" data-act="reset">' + esc(TEXT.startOver) + "</button></section></div>";
 }
 
+/* ----- placement ----- */
+function pState(c){
+  if (!c.placement) c.placement = { type: (c.level === "pre-reader" || (c.age && c.age <= 6)) ? "checklist" : "quiz", answers: { quiz:{}, checklist:{} } };
+  return c.placement;
+}
+function pItems(type){ var out = []; CONTENT.placement[type].sections.forEach(function(sec){ sec.items.forEach(function(it){ out.push({sec:sec, item:it}); }); }); return out; }
+function pMetrics(type, ans){
+  var m = { answered:0, total:0, sum:0, section:{}, yes:0, usually:0, notYet:0, usuallyIn:{} };
+  pItems(type).forEach(function(x){
+    var v = ans[x.item.id], sid = x.sec.id; m.total++;
+    if (v === undefined || v === "") return; m.answered++;
+    if (type === "quiz") {
+      if (x.sec.kind === "yesno") { if (v === "yes") m.yes++; }
+      else { var n = Number(v) || 0; m.sum += n; m.section[sid] = (m.section[sid] || 0) + n; }
+    } else {
+      if (v === "usually") { m.usually++; m.usuallyIn[sid] = (m.usuallyIn[sid] || 0) + 1; }
+      if (v === "not_yet") m.notYet++;
+    }
+  });
+  return m;
+}
+/* Returns {status:"incomplete"} while any rule still has an unwritten (null) condition,
+   {status:"ok", rule} for the first rule that matches, or {status:"none"}. */
+function pEvaluate(type, m){
+  var rules = CONTENT.placement.rules[type === "quiz" ? "reader_quiz" : "prereader_checklist"].rules;
+  var unwritten = false;
+  function conds(r){
+    var list = [];
+    function add(v, ok){ if (v === null) unwritten = true; else list.push(ok); }
+    if ("min_total" in r) add(r.min_total, function(){ return m.sum >= r.min_total; });
+    if ("min_playing_yes" in r) add(r.min_playing_yes, function(){ return m.yes >= r.min_playing_yes; });
+    if ("min_usually" in r) add(r.min_usually, function(){ return m.usually >= r.min_usually; });
+    if ("max_not_yet" in r) add(r.max_not_yet, function(){ return m.notYet <= r.max_not_yet; });
+    Object.keys(r.min_section || {}).forEach(function(k){ add(r.min_section[k], function(){ return (m.section[k] || 0) >= r.min_section[k]; }); });
+    Object.keys(r.min_usually_in || {}).forEach(function(k){ add(r.min_usually_in[k], function(){ return (m.usuallyIn[k] || 0) >= r.min_usually_in[k]; }); });
+    if (r.suggest === "pre-reader" && r.start_week === null) unwritten = true;
+    return list;
+  }
+  var checked = rules.map(function(r){ return { r:r, c:conds(r) }; });
+  if (unwritten) return { status:"incomplete" };
+  for (var i = 0; i < checked.length; i++) {
+    var x = checked[i];
+    if (x.r.always || (x.c.length && x.c.every(function(f){ return f(); }))) return { status:"ok", rule:x.r };
+  }
+  return { status:"none" };
+}
+function placementPaper(type, withKey){
+  var pl = CONTENT.placement[type];
+  return '<div class="fp-paper' + (ui.opts.large ? " fp-lg" : "") + '" aria-label="Paper preview">' + pl.main +
+    (withKey && pl.key ? '<div class="fp-pagebreak">' + esc(TEXT.placementKey) + "</div>" + pl.key : "") + "</div>";
+}
+function pResultHtml(c){
+  var st = pState(c), type = st.type, m = pMetrics(type, st.answers[type]);
+  var lvId = c.level, wk = 1, msg;
+  if (m.answered < m.total) msg = '<p class="fp-suggest fp-none">' + esc(TEXT.pAnswered(m.answered, m.total)) + "</p>";
+  else {
+    var ev = pEvaluate(type, m);
+    if (ev.status === "incomplete") msg = '<p class="fp-suggest fp-none">' + esc(TEXT.pNoRules) + "</p>";
+    else if (ev.status === "none") msg = '<p class="fp-suggest fp-none">' + esc(TEXT.pNoMatch) + "</p>";
+    else if (ev.rule.suggest === "reader-quiz") msg = '<p class="fp-suggest">' + esc(TEXT.pTryQuizLong) + '</p><p style="margin-top:8px"><button type="button" class="fp-btn fp-primary" data-act="ptype" data-v="quiz">' + esc(TEXT.pTryQuiz) + "</button></p>";
+    else {
+      lvId = ev.rule.suggest; wk = ev.rule.start_week || 1;
+      var sl = levelById(lvId);
+      msg = '<p class="fp-suggest">' + esc(TEXT.pSuggest) + " " + esc(sl ? sl.name : lvId) + ", " + esc(TEXT.week.toLowerCase()) + " " + wk + "</p>";
+    }
+  }
+  var opts = CONTENT.levels.levels.slice().sort(function(a,b){ return a.order - b.order; }).map(function(l){
+    return '<option value="' + esc(l.id) + '"' + (l.id === lvId ? " selected" : "") + ">" + esc(l.name) + "</option>"; }).join("");
+  var last = st.result ? "<p>" + esc(TEXT.pLast(st.result.date, (levelById(st.result.level) || {}).name || st.result.level, st.result.week)) + "</p>" : "";
+  return msg + '<div class="fp-form" style="margin-top:12px"><label>Level<select id="fp-plevel">' + opts + "</select></label>" +
+    '<label>' + esc(TEXT.week) + '<input id="fp-pweek" type="number" min="1" max="12" value="' + wk + '"></label></div>' +
+    '<div class="fp-row" style="margin-top:12px"><button type="button" class="fp-btn fp-primary" data-act="papply">' + esc(TEXT.pUse(c.name)) + "</button></div>" +
+    (ui.msg ? '<p role="status" style="margin-top:8px">' + esc(ui.msg) + "</p>" : "") + last;
+}
+function screenPlacement(c){
+  var st = pState(c), type = st.type, ans = st.answers[type];
+  var types = Object.keys(TEXT.pTypes).map(function(t){
+    return '<label class="fp-check"><input type="radio" name="fp-ptype" value="' + t + '" data-act="ptype"' + (t === type ? " checked" : "") + "> <span><b>" +
+      esc(TEXT.pTypes[t]) + "</b><br><small>" + esc(TEXT.pTypeHelp[t]) + "</small></span></label>"; }).join("");
+  var choices = type === "quiz" ? null : [["not_yet", TEXT.pNotYet], ["sometimes", TEXT.pSometimes], ["usually", TEXT.pUsually]];
+  var max = CONTENT.placement.rules.reader_quiz.points_per_item_max;
+  var tables = CONTENT.placement[type].sections.map(function(sec){
+    var cols = choices || (sec.kind === "yesno" ? [["yes", TEXT.pYes], ["no", TEXT.pNotYet]] : null);
+    var headCols = cols ? cols.map(function(o){ return '<th scope="col" class="fp-c">' + esc(o[1]) + "</th>"; }).join("") : '<th scope="col">' + esc(TEXT.pPoints) + "</th>";
+    var rows = sec.items.map(function(it){
+      var v = ans[it.id], cells;
+      if (cols) cells = cols.map(function(o){
+        return '<td class="fp-c"><label class="fp-rad"><input type="radio" name="fp-p-' + esc(it.id) + '" value="' + o[0] + '" data-act="pans" data-id="' + esc(it.id) + '"' + (v === o[0] ? " checked" : "") +
+          '><span class="fp-sr">' + esc(it.id + ": " + o[1]) + "</span></label></td>"; }).join("");
+      else cells = '<td><input type="number" min="0"' + (max ? ' max="' + max + '"' : "") + ' inputmode="numeric" data-act="pans" data-id="' + esc(it.id) + '" value="' + esc(v === undefined ? "" : v) + '" aria-label="' + esc(it.id + " " + TEXT.pPoints) + '"></td>';
+      return '<tr><th scope="row">' + esc(it.id) + "</th><td>" + esc(it.prompt) + "</td>" + cells + "</tr>";
+    }).join("");
+    return '<table class="fp-ptable"><caption>' + esc(sec.name) + '</caption><thead><tr><th scope="col">#</th><th scope="col">Prompt</th>' + headCols + "</tr></thead><tbody>" + rows + "</tbody></table>";
+  }).join("");
+  var step = function(i, body){ return '<li><section class="fp-card"><h2><span class="fp-n" aria-hidden="true">' + (i + 1) + "</span>" + esc(TEXT.pSteps[i]) + "</h2>" + body + "</section></li>"; };
+  return head(TEXT.placementFor(c.name), true) + '<ol class="fp-steps">' +
+    step(0, '<fieldset style="border:0;padding:0;margin:0"><legend class="fp-sr">' + esc(TEXT.pSteps[0]) + "</legend>" + types + "</fieldset>") +
+    step(1, '<div class="fp-row"><button type="button" class="fp-btn fp-primary" data-act="pprint">' + esc(TEXT.pPrint) + "</button>" +
+      '<label class="fp-check"><input type="checkbox" data-act="opt" data-opt="key"' + (ui.opts.key ? " checked" : "") + "> " + esc(TEXT.printOpts.key) + "</label>" +
+      '<label class="fp-check"><input type="checkbox" data-act="opt" data-opt="large"' + (ui.opts.large ? " checked" : "") + "> " + esc(TEXT.printOpts.large) + "</label></div>" +
+      '<details style="margin-top:10px"><summary>' + esc(TEXT.pShow) + "</summary>" + placementPaper(type, ui.opts.key) + "</details>") +
+    step(2, tables + '<button type="button" class="fp-btn fp-danger" data-act="pclear">' + esc(TEXT.pClear) + "</button>") +
+    step(3, '<div id="fp-presult">' + pResultHtml(c) + "</div>") + "</ol>";
+}
+
 /* ----- help ----- */
 function screenHelp(){
   var modes = Object.keys(TEXT.modes).map(function(m){
@@ -523,8 +660,9 @@ function screenHelp(){
              ["Where is my progress saved?", "Only in this browser on this device. Nothing is sent anywhere. Clearing your browser data deletes it, so save a backup file now and then (Family → Backup & restore)."],
              ["Can I use another device?", "Yes. Save a backup file on this device, move the file to the other device, and use Restore from file there."],
              ["How do I change a child's mode?", "Pick the child, then change Mode in the side menu. Their progress stays the same."]];
+  var starts = S.children.map(function(k){ return '<button type="button" class="fp-btn fp-primary" data-act="place" data-id="' + esc(k.id) + '">' + esc(TEXT.pStart(k.name)) + "</button>"; }).join("");
   return head(TEXT.help, true) + '<div class="fp-stack"><h2>Modes</h2><div class="fp-kids">' + modes + "</div>" +
-    '<h2>Placement</h2><div class="fp-card"><ul>' + levels + "</ul></div><h2>Questions</h2>" +
+    '<h2>Placement</h2><div class="fp-card"><ul>' + levels + "</ul>" + (starts ? '<div class="fp-row" style="margin-top:10px">' + starts + "</div>" : "") + "</div><h2>Questions</h2>" +
     faq.map(function(f){ return "<details><summary>" + esc(f[0]) + "</summary><p>" + esc(f[1]) + "</p></details>"; }).join("") + "</div>";
 }
 
@@ -540,11 +678,11 @@ function syncDrills(c){
 }
 function render(focusHead){
   var c = active();
-  if (c && !TEXT.nav[c.mode].some(function(n){ return n[0] === ui.screen; }) && ["help","family"].indexOf(ui.screen) < 0) ui.screen = "week";
+  if (c && !TEXT.nav[c.mode].some(function(n){ return n[0] === ui.screen; }) && ["help","family","placement"].indexOf(ui.screen) < 0) ui.screen = "week";
   if (c && c.mode === "toddler" && ui.screen === "family" && !ui.grown) ui.screen = "week";
   var body;
   if (!c) body = ui.screen === "help" ? screenHelp() : screenFamily();
-  else body = ({week:screenWeek, weeks:screenWeeks, print:screenPrint, pieces:screenPieces, stars:screenStars, family:screenFamily, help:screenHelp}[ui.screen] || screenWeek)(c);
+  else body = ({week:screenWeek, weeks:screenWeeks, print:screenPrint, pieces:screenPieces, stars:screenStars, family:screenFamily, help:screenHelp, placement:screenPlacement}[ui.screen] || screenWeek)(c);
   sideEl.innerHTML = sidebar(c);
   viewEl.innerHTML = (ui.screen !== "family" ? memoryWarning() : "") + body;
   drillHost.hidden = !(c && ui.screen === "print" && ui.sheet === "drill");
@@ -615,6 +753,19 @@ root.addEventListener("click", function(e){
     case "viewweek": ui.viewWeek = parseInt(t.dataset.n, 10); ui.screen = "week"; render(true); break;
     case "backweek": ui.viewWeek = null; render(true); break;
     case "nextlevel": var nx = nextLevelOf(c); if (nx) { c.level = nx.id; c.week = 1; c.complete = false; save(); go("week"); } break;
+    case "place": S.activeId = t.dataset.id; save(); go("placement"); break;
+    case "ptype": pState(c).type = t.dataset.v; save(); render(true); break;
+    case "pprint": if (makePrintout()) { window.print(); setTimeout(removePrintout, 1000); } break;
+    case "pclear": var ps = pState(c); ps.answers[ps.type] = {}; save(); render(); break;
+    case "papply":
+      var lvSel = document.getElementById("fp-plevel").value, wkSel = Math.max(1, Math.min(12, parseInt(document.getElementById("fp-pweek").value, 10) || 1));
+      var hasProgress = c.week > 1 || c.complete || Object.keys(c.done).some(function(x){ return c.done[x]; });
+      if ((lvSel !== c.level || wkSel !== c.week) && hasProgress && !confirm(TEXT.pConfirm(c.name))) break;
+      var lvName = (levelById(lvSel) || {}).name || lvSel;
+      c.level = lvSel; c.week = wkSel; c.complete = false;
+      pState(c).result = { level: lvSel, week: wkSel, date: new Date().toISOString().slice(0, 10), type: pState(c).type };
+      save(); ui.msg = TEXT.pDone(c.name, lvName, wkSel); render();
+      break;
     case "edit": ui.editing = t.dataset.id; ui.adding = false; render(); break;
     case "filter": ui.filter = t.dataset.f; render(); break;
     case "add": ui.adding = true; render(); break;
@@ -637,13 +788,19 @@ root.addEventListener("change", function(e){
   else if (a === "sheet") { ui.sheet = t.value; render(); }
   else if (a === "opt") { ui.opts[t.dataset.opt] = t.checked; render(); }
   else if (a === "import" && t.files[0]) importBackup(t.files[0]);
+  else if (a === "ptype") { pState(c).type = t.value; save(); render(); }
+  else if (a === "pans") {
+    var st = pState(c); st.answers[st.type][t.dataset.id] = t.type === "number" ? (t.value === "" ? "" : Math.max(0, Number(t.value) || 0)) : t.value;
+    save(); ui.msg = ""; document.getElementById("fp-presult").innerHTML = pResultHtml(c);
+  }
 });
 root.addEventListener("submit", function(e){
   var f = e.target; if (f.dataset.form !== "child") return; e.preventDefault();
   var el = f.elements, name = el.namedItem("name").value.trim(); if (!name) return;
-  var level = el.namedItem("level").value, mode = el.namedItem("mode").value || (level === "pre-reader" ? "toddler" : "standard");
+  var age = el.namedItem("age").value, level = el.namedItem("level").value, placeFirst = level === "__place";
+  if (placeFirst) level = age && parseInt(age, 10) <= 6 ? "pre-reader" : "level-1";
+  var mode = el.namedItem("mode").value || (level === "pre-reader" ? "toddler" : "standard");
   var week = Math.max(1, Math.min(12, parseInt(el.namedItem("week").value, 10) || 1));
-  var age = el.namedItem("age").value;
   var old = S.children.filter(function(x){ return x.id === f.dataset.id; })[0];
   if (old) {
     old.name = name; old.age = age ? parseInt(age, 10) : null; old.mode = mode;
@@ -651,7 +808,7 @@ root.addEventListener("submit", function(e){
     old.level = level; old.week = week; save(); ui.editing = null; render(); return;
   }
   var k = { id:uid(), name:name, age:age ? parseInt(age, 10) : null, level:level, mode:mode, week:week, complete:false, done:{}, learned:{} };
-  S.children.push(k); S.activeId = k.id; save(); ui.adding = false; go("week");
+  S.children.push(k); S.activeId = k.id; save(); ui.adding = false; go(placeFirst ? "placement" : "week");
 });
 
 if (!S.children.length) ui.screen = "family";

@@ -8,8 +8,8 @@ The app follows **UI-SPEC** for now; each item says what the app does today.
 | # | Topic | UI-CONTEXT says | UI-SPEC says | App today |
 |---|---|---|---|---|
 | 1 | Draft content | "Only `approved` content is shown"; drafts clearly labeled *if shown at all* | Show unreviewed content with a "Draft content" chip and `[… – educator to write]` placeholders | Shows drafts with the chip (nothing is approved yet, so hiding drafts would leave every screen empty) |
-| 2 | Outside font vs. "no tracking" | One self-contained file; must sit inside an unknown Squarespace page | Nunito font; "no tracking" | Loads Nunito from Google Fonts, which sees the visitor's IP address. Falls back to the system font if blocked. Option: self-host the font or drop it |
-| 3 | Placement | A full flow: choose quiz or checklist → print → enter results → suggested level (parent can override) | Only "Help & placement": mode guide per child type, FAQ | Placement sheets can be printed (Print screen); the parent picks the level by hand when adding a child. No results entry or suggestion |
+| 2 | Outside font vs. "no tracking" | One self-contained file; must sit inside an unknown Squarespace page | Nunito font; "no tracking" | **Resolved (owner, 2026-10-11):** Nunito is embedded in the file (`app/fonts/`, OFL). No font server is contacted. The only outside request left is VexFlow for drill sheets (jsDelivr) |
+| 3 | Placement | A full flow: choose quiz or checklist → print → enter results → suggested level (parent can override) | Only "Help & placement": mode guide per child type, FAQ | **Resolved (owner, 2026-10-11):** full flow built (Placement screen, reached from Family, Help & placement, or "Not sure" when adding a child). Suggestions come from `content/placement/placement-rules.json`; its thresholds are blank until an educator writes them, and until then the parent picks the level |
 | 4 | First-run welcome | Its own screen (what this is, data stays in this browser, add first child) | Not listed | Family screen shows a welcome line and the Add-a-child form |
 | 5 | Printables list | Drills, exercise-bank worksheets, simplified scores, placement sheets | "pick one sheet" (no list) | Week plan, practice chart, 12-week overview, drill sheet, placement quiz, pre-reader checklist. Exercise-bank worksheets and simplified-score PDFs are not in the list yet |
 | 6 | Level overview | Goals per strand on the 12-week screen | All 12 weeks: 4x3 grid only | Grid only; level goals are printed on the "12-week overview" answer-key page |
@@ -37,11 +37,16 @@ The app follows **UI-SPEC** for now; each item says what the app does today.
     "level": "level-1", "mode": "standard",
     "week": 3, "complete": false,
     "done":    { "level-1-w01-theory-01": true },
-    "learned": { "<asset_id>": true }
+    "learned": { "<asset_id>": true },
+    "placement": {
+      "type": "quiz",
+      "answers": { "quiz": { "A1": 2, "E1": "yes" }, "checklist": { "S1": "usually" } },
+      "result": { "level": "level-2", "week": 1, "date": "2026-10-11", "type": "quiz" }
+    }
   }]
 }
 ```
 
-`mode` is `standard`, `reader` or `toddler`. `done` is keyed by strand-item ids from `content/paths/*.json`; `learned` by `asset_id` from `licenses/assets.csv`.
+`mode` is `standard`, `reader` or `toddler`. `placement` appears once a parent opens the Placement screen; answers are keyed by the item ids in `content/placement/*.md` (`yes`/`no` for the playing check, `not_yet`/`sometimes`/`usually` for the checklist, points otherwise). `done` is keyed by strand-item ids from `content/paths/*.json`; `learned` by `asset_id` from `licenses/assets.csv`.
 
 Backup file (`family-piano-backup-YYYY-MM-DD.json`): `{ "app": "family-piano", "format": 1, "exported": "<ISO time>", "state": <the object above> }`.

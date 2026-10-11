@@ -4,18 +4,22 @@
 Inlines into app/src/family-piano.template.html:
   - content/levels.json and content/paths/*.json (the 12-week plans)
   - licenses/assets.csv (pieces; repo-relative links are turned into full links, see SCORE_BASE_URL)
-  - content/placement/*.md (placement sheets, as simple HTML)
+  - content/placement/*.md (placement sheets as simple HTML, plus their items for the results form)
+  - content/placement/placement-rules.json (how results turn into a suggested level)
   - app/drills.html (the drill sheet maker, shown on the Print screen)
+  - app/fonts/nunito-latin-wght-normal.woff2 (as base64, so no font server is contacted)
 
 Usage: python3 app/build.py
 """
-import csv, html, json, pathlib, re
+import base64, csv, html, json, pathlib, re
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 TEMPLATE = ROOT / "app" / "src" / "family-piano.template.html"
 OUT = ROOT / "app" / "family-piano.html"
 MARK = "/*__FP_CONTENT__*/null"
 DRILLS_MARK = "<!--__FP_DRILLS__-->"
+FONT_MARK = "/*__FP_FONT__*/"
+FONT = ROOT / "app" / "fonts" / "nunito-latin-wght-normal.woff2"
 # Where repo files (like scores/...) are reachable on the web. Change this if the files are hosted elsewhere.
 SCORE_BASE_URL = "https://github.com/pelicanstrove-pixel/Music-app-for-families/blob/main/"
 
@@ -57,11 +61,35 @@ def md_to_html(md):
     return "".join(out)
 
 
+def placement_items(md):
+    """Sections and items (rows like "| A1 | prompt |") from a placement template, for the results form."""
+    sections, heading, yesno = [], "", False
+    for line in md.splitlines():
+        t = line.strip()
+        m = re.match(r"## (.*)", t)
+        if m:
+            heading = re.sub(r"^(Section [A-Z]:|\d+\.)\s*", "", m.group(1))
+            heading = re.sub(r"\s*\(.*\)$", "", heading)
+            continue
+        if t.startswith("|"):
+            cells = [c.strip() for c in t.strip("|").split("|")]
+            if "Yes / Not yet" in cells:
+                yesno = True
+            elif cells and cells[0] == "#":
+                yesno = False
+            if cells and re.fullmatch(r"[A-Z]\d+", cells[0]):
+                sid = cells[0][0]
+                if not sections or sections[-1]["id"] != sid:
+                    sections.append({"id": sid, "name": heading, "kind": "yesno" if yesno else "points", "items": []})
+                sections[-1]["items"].append({"id": cells[0], "prompt": cells[1] if len(cells) > 1 else ""})
+    return sections
+
+
 def placement(name):
     md = (ROOT / "content" / "placement" / name).read_text(encoding="utf-8")
     parts = re.split(r"^## ANSWER KEY.*$", md, maxsplit=1, flags=re.M)
     key = md_to_html(parts[1]).replace("<hr>", "") if len(parts) > 1 else ""
-    return {"main": md_to_html(parts[0]), "key": key}
+    return {"main": md_to_html(parts[0]), "key": key, "sections": placement_items(parts[0])}
 
 
 def main():
@@ -82,7 +110,8 @@ def main():
     content = {
         "levels": levels, "paths": paths, "assets": assets,
         "placement": {"quiz": placement("reader-quiz-template.md"),
-                      "checklist": placement("prereader-observation-checklist.md")},
+                      "checklist": placement("prereader-observation-checklist.md"),
+                      "rules": json.loads((ROOT / "content" / "placement" / "placement-rules.json").read_text(encoding="utf-8"))},
     }
     blob = json.dumps(content, ensure_ascii=False).replace("</", "<\\/")
 
@@ -91,8 +120,9 @@ def main():
     drills = drills[start:]
 
     page = TEMPLATE.read_text(encoding="utf-8")
-    assert MARK in page and DRILLS_MARK in page, "placeholder missing in template"
-    page = page.replace(MARK, blob).replace(DRILLS_MARK, drills)
+    assert MARK in page and DRILLS_MARK in page and FONT_MARK in page, "placeholder missing in template"
+    font = base64.b64encode(FONT.read_bytes()).decode("ascii")
+    page = page.replace(FONT_MARK, font).replace(MARK, blob).replace(DRILLS_MARK, drills)
     header = ("<!DOCTYPE html>\n<meta charset=\"utf-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n"
               "<title>Family Piano</title>\n<!-- BUILT FILE: do not edit. Edit app/src/family-piano.template.html and run python3 app/build.py -->\n")
     OUT.write_text(header + page, encoding="utf-8")

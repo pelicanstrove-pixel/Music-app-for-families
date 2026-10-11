@@ -26,6 +26,7 @@ content/
   placement/
     reader-quiz-template.md       ← placement quiz for children who read
     prereader-observation-checklist.md  ← checklist a parent fills in by watching a young child
+    placement-rules.json          ← how placement results turn into a suggested level (educator fills in the blanks)
 licenses/
   assets.csv                      ← one row per score/recording (now also: derivatives_allowed, source_format)
   SOURCING.md                     ← checklist for checking a license before adding a row
@@ -36,7 +37,8 @@ app/                              ← Phase 1.5 Part B + main app
   DRILL-RULES.md                  ← every drill rule in plain English
   family-piano.html               ← main app (built file); paste into a Squarespace Code block
   src/family-piano.template.html  ← main app source; edit this, then run `python3 app/build.py`
-  build.py                        ← inlines content/, licenses/assets.csv and drills.html into family-piano.html
+  build.py                        ← inlines content/, licenses/assets.csv, drills.html and the font into family-piano.html
+  fonts/                          ← Nunito (SIL Open Font License), embedded so no font server is used
 docs/
   UI-CONTEXT.md, UI-SPEC.md       ← UI design context and the approved UI spec
   UI-SPEC-REVIEW.md               ← where the two differ (owner decisions needed) + progress/backup format
@@ -69,6 +71,7 @@ You can edit these files right on GitHub: open a file, click the ✏️ pencil, 
 | Add a worksheet or exercise | Copy the exercise in `exercise-bank/example.json` into a new file such as `exercise-bank/level-1-theory.json`, give it a new `id`, fill it in |
 | Change what the worksheet generator may produce | `content/parametric-templates.md` (the level tables) |
 | Write the placement quiz or checklist | the two files in `content/placement/` |
+| Set how placement results suggest a level | `content/placement/placement-rules.json` (then run `python3 app/build.py`) |
 | Add a piece of music or recording | Check it with `licenses/SOURCING.md`, then add a row to `licenses/assets.csv` (open it in Google Sheets or Excel, save as CSV) |
 | Use that piece in a week | Put its `asset_id` in that week's `repertoire_ids` list |
 
