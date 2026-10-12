@@ -35,8 +35,9 @@ VEXFLOW_TAG = '<script src="https://cdn.jsdelivr.net/npm/vexflow@4.2.2/build/cjs
 # Where repo files (like scores/...) are reachable on the web. Change this if the files are hosted elsewhere.
 SCORE_BASE_URL = "https://github.com/pelicanstrove-pixel/Music-app-for-families/blob/main/"
 # Where the app/pieces/ folder is on the web (the drawn score of each piece under review loads from here when the
-# piece is opened). "pieces/" works when the app page sits next to that folder. See README.md, "Hosting the piece files".
-PIECES_URL = "pieces/"
+# piece is opened): GitHub Pages for this repository. Use --pieces-url pieces/ for a copy that sits next to that folder.
+# See README.md, "Hosting the piece files".
+PIECES_URL = "https://pelicanstrove-pixel.github.io/Music-app-for-families/app/pieces/"
 
 
 def inline(s):

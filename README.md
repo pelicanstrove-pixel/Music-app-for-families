@@ -65,20 +65,25 @@ Levels 1–4 use: `technique`, `theory`, `repertoire`, `ear_training`.
 is in its own file in `app/pieces/` (78 files, about 7 MB together) and is loaded the first time a family opens that piece.
 Without them a piece still plays (player, wait-for-me, game, checking); only the sheet music on screen is missing.
 
-The repository is private, so the files must be put somewhere public that serves `.js` files, for example:
+The app loads them from **GitHub Pages** for this repository. Turn it on once (the repository must stay public):
 
-1. **GitHub Pages:** make the repo public (or use a paid plan), then Settings → Pages → Deploy from branch `main`, folder `/`.
-   The folder is then `https://pelicanstrove-pixel.github.io/Music-app-for-families/app/pieces/`.
-2. **Any static host** (Netlify, Cloudflare Pages, your own web space): upload the `app/pieces/` folder.
+1. On GitHub, open the repository → **Settings** → **Pages** (left menu).
+2. Under **Build and deployment**, set **Source** to **Deploy from a branch**, **Branch** to `main`, folder `/ (root)`, and press **Save**.
+3. Wait a minute or two, then open
+   `https://pelicanstrove-pixel.github.io/Music-app-for-families/app/pieces/bach-bwv-anh-114-menuet.js`.
+   If you see a page of text starting with `/* Family Piano piece file`, it works.
+4. Paste `app/family-piano.html` into the Squarespace Code block again (it already points at that address).
 
-Then build with that address and paste the new `app/family-piano.html` into Squarespace:
+Every push to `main` updates the hosted files. The empty `.nojekyll` file in the root tells GitHub Pages to serve the files as they are.
+
+To host the folder somewhere else (Netlify, Cloudflare Pages, your own web space), upload `app/pieces/` and build with its address:
 
 ```
-python3 app/build.py --pieces-url https://pelicanstrove-pixel.github.io/Music-app-for-families/app/pieces/
+python3 app/build.py --pieces-url https://example.com/pieces/
 ```
 
-Without `--pieces-url` the app looks for a `pieces/` folder next to the page, which works when the app is opened
-from its own folder (for example `app/family-piano.html` on your computer). `--no-candidates` leaves the pieces under review out.
+Use `--pieces-url pieces/` for a copy of the app that sits next to the `pieces/` folder (for example offline on your computer).
+`--no-candidates` leaves the pieces under review out.
 
 ## How to fill in content
 
