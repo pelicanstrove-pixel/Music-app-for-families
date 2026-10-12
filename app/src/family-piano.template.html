@@ -170,6 +170,7 @@
 #fp-app .fp-score{background:#fff;border:1px solid var(--line);border-radius:12px;padding:8px;max-height:440px;overflow:auto}
 #fp-app .fp-score svg{width:100%;height:auto;display:block;color:#000}
 #fp-app .fp-score g.note{cursor:pointer}
+#fp-app .fp-score.fp-sheetbox{max-height:75vh}
 #fp-app .fp-score g.fp-on,#fp-app .fp-score g.fp-on *{fill:var(--blue);color:var(--blue)}
 #fp-app .fp-score g.fp-next,#fp-app .fp-score g.fp-next *{fill:#b85c00;color:#b85c00}
 #fp-app .fp-wstatus{font-weight:800;font-size:18px}
@@ -252,6 +253,8 @@
   #fp-printout .fp-paper{width:100%;max-width:none;aspect-ratio:auto;padding:0;box-shadow:none;overflow:visible}
   #fp-printout .fp-paper .fp-pagebreak{break-before:page;page-break-before:always;border-top:0}
   #fp-printout .fp-paper svg{max-width:100%;height:auto}
+  #fp-printout .fp-paper .fp-system{break-inside:avoid;page-break-inside:avoid;margin-bottom:.12in}
+  #fp-printout .fp-paper .fp-system > svg{width:100%;display:block}
 }
 </style>
 
@@ -368,9 +371,19 @@ var TEXT = {
   folded: function(r){ return "Range " + r + " is wider than your keyboard \u00B7 some notes are moved by octaves"; },
   checkMine: "Check my playing", checkSummary: function(ok, total, wrong){ return ok + " of " + total + " notes right on time \u00B7 " + wrong + " wrong " + (wrong === 1 ? "note" : "notes"); },
   waitSummary: function(total, first, wrong){ return "You played all " + total + ". " + first + " right the first time \u00B7 " + wrong + " wrong " + (wrong === 1 ? "try" : "tries") + "."; },
+  sheetMusic: "Sheet music", sheetHide: "Hide sheet music", sheetPrint: "Print sheet music", sheetPdf: "Save as PDF",
+  sheetPdfHint: "In the print window, choose \u201CSave as PDF\u201D as the printer, then print the file whenever you like.",
+  sheetOffline: "The sheet music for this piece couldn\u2019t be loaded (no internet, or the piece files are not hosted with the app).",
+  sheetNone: "There is no sheet music for this piece in the app yet.",
   game: "Game", gameTitle: function(t){ return "Game: " + t; },
   gView: "View", gViews: [["fall","Falling notes"],["sheet","Sheet music"]],
   gMode: "How to play", gModes: [["challenge","Play in time"],["practice","Wait for me"]],
+  gDiff: "Difficulty", gDiffs: [["easy","Easy"],["medium","Medium"],["hard","Hard"]],
+  gDiffHelp: { easy: "Slow, lots of time for each note, and only one note of each chord (the app plays the others).",
+               medium: "A bit slower than written, with fair timing.", hard: "Full speed, every note, exact timing, no note names." },
+  gListen: "Play with", gListenOpts: [["midi","Digital piano"],["mic","Microphone"],["screen","On-screen keys"]],
+  gNoMidi: "This browser can\u2019t hear a digital piano (Safari, iPhone and iPad can\u2019t). Use Chrome, Edge or Firefox, or pick another way.",
+  gSheetOff: "The sheet music for this piece couldn\u2019t be loaded here, so the game shows falling notes instead. (The piece files must be hosted with the app; see the README.)",
   gNames: "Show note names", gStart: "Start", gPause: "Pause", gResume: "Resume", gStop: "Stop", gAgain: "Play again", gBack: "Back to pieces",
   gScore: "Score", gCombo: "Combo", gAcc: "Accuracy",
   gPerfect: "Perfect!", gGood: "Good", gMiss: "Miss", gWrong: "Oops",
@@ -639,9 +652,11 @@ function screenPieces(c){
       (a.review ? '<span class="fp-reviewchip" title="' + esc(TEXT.reviewTip) + '">' + esc(TEXT.underReview) + "</span>" : "") +
       (loading ? '<span class="fp-loading" role="status">' + esc(TEXT.scoreLoading) + "</span>" : "") +
       (a.play && soundOn() ? '<button type="button" class="fp-btn fp-yellow" data-act="listen" data-id="' + esc(a.asset_id) + '" aria-expanded="' + !!(ui.player && ui.player.id === a.asset_id) + '">\u266B ' + esc(TEXT.listen) + "</button>" : "") +
+      (a.score || a.scoreSrc ? '<button type="button" class="fp-btn" data-act="sheetmusic" data-id="' + esc(a.asset_id) + '" aria-expanded="' + (ui.sheetOpen === a.asset_id) + '">\uD83C\uDFBC ' + esc(ui.sheetOpen === a.asset_id ? TEXT.sheetHide : TEXT.sheetMusic) + "</button>" : "") +
       (a.play ? '<button type="button" class="fp-btn" data-act="game" data-id="' + esc(a.asset_id) + '">\uD83C\uDFAE ' + esc(TEXT.game) + "</button>" : "") +
       (a.url ? '<a class="fp-btn" href="' + esc(a.url) + '" target="_blank" rel="noopener">' + esc(TEXT.openScore) + "</a>" : "") + "</div>" +
-      (a.play && soundOn() && ui.player && ui.player.id === a.asset_id ? playerHtml(a) : "") + "</div>";
+      (a.play && soundOn() && ui.player && ui.player.id === a.asset_id ? playerHtml(a) : "") +
+      (ui.sheetOpen === a.asset_id ? sheetHtml(a) : "") + "</div>";
   }).join("") + "</div>" : '<div class="fp-card"><p>' + esc(CONTENT.assets.length ? TEXT.noMatch : TEXT.piecesEmpty) + "</p></div>";
   var title = c.mode === "reader" ? TEXT.nav.reader[1][1] : TEXT.nav.standard[3][1];
   var review = CONTENT.assets.some(function(a){ return a.review; }) ? '<p class="fp-note">' + esc(TEXT.reviewIntro) + "</p>" : "";
@@ -847,6 +862,8 @@ function screenHelp(){
              ["Can it play through our digital piano?", "Yes, in Chrome, Edge or Firefox (not Safari, iPhone or iPad). Connect the piano by USB or Bluetooth MIDI, go to Family \u2192 Sound, press Find my digital piano and pick it under Play through."],
              ["Our keyboard is small. Does that matter?", "Tell the app its size in Family \u2192 Your keyboard and listening (1 to 7 octaves, or a full piano). The app moves pieces by octaves to fit, and the on-screen keys and the game show only your keys. If your keyboard has octave buttons, say which way you moved it."],
              ["How does the app hear my child play?", "Three ways: a digital piano connected by USB or Bluetooth MIDI (Chrome, Edge or Firefox), the microphone for an acoustic piano (single notes and chords; it checks the notes it is waiting for, and for big chords one quiet note may be missing), or the on-screen keys. Pick one in Family \u2192 Your keyboard and listening. Microphone sound is checked in the browser only and never recorded or sent."],
+             ["Can I print the sheet music?", "Yes. In Pieces, press Sheet music to read it on screen, then Print sheet music, or Save as PDF to keep a file and print it later. It prints in black and white on US Letter paper, a whole line of music at a time."],
+             ["What can I change in the game?", "Difficulty (Easy is slower, gives more time for each note and asks for one note of each chord; Hard is full speed with exact timing), how the app hears you (digital piano, microphone or on-screen keys), falling notes or sheet music, play in time or wait for me, which hands, and the speed."],
              ["What do the colors on the music mean?", "Blue: the note playing now. Orange: the note to play next. Green: played right. Red: a wrong note. Grey: a note that was missed."],
              ["How does Compose work?", "Press Record and play on your digital piano, the on-screen keys or (one note at a time works best) an acoustic piano with the microphone. Stop, then play it back as played or as written, print the sheet music, or download it as MusicXML (opens in MuseScore and other music programs) or MIDI. Songs are saved with each child and in backups."],
              ["Is there a metronome?", "Yes. Press Metronome in the side menu. Set the tempo (or tap it), beats in a bar, clicks per beat and the sound. It keeps going while you use other screens, and stops by itself when the player, the game or Compose starts its own beat. The player, the game (play in time) and Compose also have their own metronome switch."],
@@ -1100,6 +1117,41 @@ function fillScore(a){
   if (SCORES[a.asset_id]) { box.innerHTML = SCORES[a.asset_id]; reapplyMarks(); markScore(); return; }
   box.textContent = TEXT.scoreLoading;
   loadScore(a).then(function(){ fillScore(a); }, function(){ box.textContent = TEXT.scoreNone; });
+}
+/* Pieces: the sheet music on its own, to read on screen or print (or save as PDF from the print window). */
+function sheetHtml(a){
+  var body = a.score ? '<div class="fp-score fp-sheetbox" id="fp-score" aria-label="' + esc(TEXT.sheetMusic + ": " + a.title) + '"></div>'
+                     : "<p>" + esc(a.scoreFail ? TEXT.sheetOffline : TEXT.sheetNone) + "</p>";
+  return '<div class="fp-player" role="group" aria-label="' + esc(TEXT.sheetMusic + ": " + a.title) + '">' +
+    (a.score ? '<div class="fp-row"><button type="button" class="fp-btn fp-primary" data-act="sheetprint" data-id="' + esc(a.asset_id) + '">\uD83D\uDDA8 ' + esc(TEXT.sheetPrint) + "</button>" +
+      '<button type="button" class="fp-btn" data-act="sheetprint" data-pdf="1" data-id="' + esc(a.asset_id) + '">' + esc(TEXT.sheetPdf) + "</button></div>" : "") +
+    (ui.sheetMsg ? '<p role="status">' + esc(ui.sheetMsg) + "</p>" : "") +
+    (a.review ? '<p class="fp-note">' + esc(TEXT.reviewNote) + "</p>" : "") + body + "</div>";
+}
+/* Print the drawn score one line (system) at a time, so no line is cut in half between two sheets of paper. */
+function printSheet(a){
+  var svg = document.querySelector("#fp-score svg"); if (!svg) return;
+  var vb = svg.viewBox && svg.viewBox.baseVal, R = svg.getBoundingClientRect(), parts = [];
+  var systems = vb && R.width ? svg.querySelectorAll("g.system") : [];
+  function clean(c){ c.querySelectorAll(".fp-on,.fp-next,.fp-ok,.fp-bad,.fp-miss").forEach(function(e){ e.classList.remove("fp-on", "fp-next", "fp-ok", "fp-bad", "fp-miss"); }); return c; }
+  Array.prototype.forEach.call(systems, function(sys, i){
+    var r = sys.getBoundingClientRect(), k = vb.width / R.width, pad = 8;
+    if (!r.height) return;
+    var c = clean(svg.cloneNode(true));
+    Array.prototype.forEach.call(c.querySelectorAll("g.system"), function(g, j){ if (j !== i) g.remove(); });
+    c.setAttribute("viewBox", vb.x + " " + (vb.y + (r.top - R.top) * k - pad) + " " + vb.width + " " + (r.height * k + 2 * pad));
+    c.removeAttribute("width"); c.removeAttribute("height");
+    // the music inside keeps the size of the whole page (its percentages would otherwise follow the cropped view)
+    Array.prototype.forEach.call(c.children, function(k){ if (k.tagName.toLowerCase() === "svg") k.setAttribute("style", "width:" + vb.width + "px;height:" + vb.height + "px"); });
+    parts.push('<div class="fp-system">' + c.outerHTML + "</div>");
+  });
+  if (!parts.length) parts.push(clean(svg.cloneNode(true)).outerHTML);
+  removePrintout();
+  var out = document.createElement("div"); out.id = "fp-printout";
+  out.innerHTML = '<div class="fp-paper"><h2>' + esc(a.title) + "</h2><p>" + esc(a.composer) + (a.attribution_text ? " \u00B7 <small>" + esc(a.attribution_text) + "</small>" : "") + "</p>" +
+    (a.review ? "<p><small>" + esc(TEXT.underReview) + "</small></p>" : "") + parts.join("") + "</div>";
+  document.body.appendChild(out); document.documentElement.classList.add("fp-printing");
+  window.print(); setTimeout(removePrintout, 1000);
 }
 var marked = { on:[], next:[] };
 function setMarks(kind, ids){
@@ -1424,20 +1476,25 @@ function listenStop(){ LISTEN.fn = null; if (!LISTEN.micTest) micStop(); }
 
 /* ----- the judge: is each played note right, early/late, wrong or missed? ----- */
 var WIN = { perfect:0.09, good:0.2 };
-function makeJudge(notes, onMark){
+var GAME_DIFF = {   // the game's difficulty: timing window (seconds) and the starting speed, note names and chords
+  easy:   { win:{ perfect:0.14, good:0.32 }, speed:50, names:true, oneNote:true },
+  medium: { win:WIN, speed:70, names:true, oneNote:false },
+  hard:   { win:{ perfect:0.06, good:0.13 }, speed:100, names:false, oneNote:false } };
+function makeJudge(notes, onMark, win){
+  win = win || WIN;
   var J = { notes:notes, p:0, g:0, miss:0, wrong:0, combo:0, maxCombo:0, score:0, last:"" };
   J.hit = function(m, t){
     var best = null, bd = 1e9;
-    notes.forEach(function(n){ if (!n.res && sameNote(m, n.want)) { var dd = Math.abs(n.t - t); if (dd <= WIN.good && dd < bd) { bd = dd; best = n; } } });
+    notes.forEach(function(n){ if (!n.res && sameNote(m, n.want)) { var dd = Math.abs(n.t - t); if (dd <= win.good && dd < bd) { bd = dd; best = n; } } });
     if (best) {
-      best.res = bd <= WIN.perfect ? "perfect" : "good";
+      best.res = bd <= win.perfect ? "perfect" : "good";
       if (best.res === "perfect") J.p++; else J.g++;
       J.combo++; J.maxCombo = Math.max(J.maxCombo, J.combo);
       J.score += Math.round((best.res === "perfect" ? 100 : 60) * (1 + Math.min(J.combo, 50) / 50));
       J.last = best.res; onMark(best, "fp-ok");
     } else { J.wrong++; J.combo = 0; J.last = "wrong"; onMark(null, "fp-bad", m); }
   };
-  J.tick = function(t){ var lag = S.settings.listen === "mic" ? 0.3 : 0; notes.forEach(function(n){ if (!n.res && t > n.t + WIN.good + lag) { n.res = "miss"; J.miss++; J.combo = 0; J.last = "miss"; onMark(n, "fp-miss"); } }); };
+  J.tick = function(t){ var lag = S.settings.listen === "mic" ? 0.3 : 0; notes.forEach(function(n){ if (!n.res && t > n.t + win.good + lag) { n.res = "miss"; J.miss++; J.combo = 0; J.last = "miss"; onMark(n, "fp-miss"); } }); };
   J.done = function(){ return notes.every(function(n){ return n.res; }); };
   J.accuracy = function(){ var tot = notes.length || 1; return Math.max(0, (J.p + J.g * 0.7 - J.wrong * 0.25) / tot); };
   return J;
@@ -1454,13 +1511,20 @@ function starsFor(acc){ return acc >= 0.95 ? 3 : acc >= 0.8 ? 2 : acc >= 0.6 ? 1
 
 /* ----- the game: falling notes or scrolling sheet music, played in time or at your own pace ----- */
 var G = null;
+function sheetLineOk(a){ return !!(a && a.score && a.score.line && window.DecompressionStream); }
+function gameSheet(){ return ui.game.view === "sheet" && sheetLineOk(assetById(ui.game.id)); }   // without the score, sheet view falls back to falling notes
 function screenGame(c){
   var a = assetById(ui.game.id); if (!a || !a.play) { ui.screen = "pieces"; return screenPieces(c); }
   var o = ui.game, best = (c.games || {})[a.asset_id];
   function chips(act, list, val){ return '<div class="fp-chips" role="group">' + list.map(function(x){
     return '<button type="button" data-act="' + act + '" data-v="' + x[0] + '" aria-pressed="' + (val === x[0]) + '">' + esc(x[1]) + "</button>"; }).join("") + "</div>"; }
+  var sheetOk = sheetLineOk(a), diff = o.diff || "medium";
   var setup = '<div class="fp-card fp-stack">' +
+    '<div class="fp-row"><b>' + esc(TEXT.gDiff) + "</b>" + chips("gdiff", TEXT.gDiffs, diff) + '<span class="fp-range-note">' + esc(TEXT.gDiffHelp[diff]) + "</span></div>" +
+    '<div class="fp-row"><b>' + esc(TEXT.gListen) + "</b>" + chips("glisten", TEXT.gListenOpts, S.settings.listen) + "</div>" +
+    (S.settings.listen === "midi" && !navigator.requestMIDIAccess ? '<p class="fp-range-note">' + esc(TEXT.gNoMidi) + "</p>" : "") +
     '<div class="fp-row"><b>' + esc(TEXT.gView) + "</b>" + chips("gview", TEXT.gViews, o.view) + "</div>" +
+    (o.view === "sheet" && !sheetOk ? '<p class="fp-note">' + esc(TEXT.gSheetOff) + "</p>" : "") +
     '<div class="fp-row"><b>' + esc(TEXT.gMode) + "</b>" + chips("gmode", TEXT.gModes, o.mode) + "</div>" +
     '<div class="fp-row"><b>' + esc(TEXT.hands) + "</b>" + chips("ghands", TEXT.handNames, o.hands) + "</div>" +
     '<div class="fp-row"><label for="fp-gspeed"><b>' + esc(TEXT.speed) + '</b></label><input id="fp-gspeed" type="range" min="40" max="120" step="5" value="' + o.speed + '" data-act="gspeed"><span>' + o.speed + "%</span>" +
@@ -1473,7 +1537,7 @@ function screenGame(c){
     '<span style="margin-left:auto" class="fp-row">' +
     (G && G.running ? '<button type="button" class="fp-btn fp-yellow" data-act="gpause">' + esc(G.paused ? TEXT.gResume : TEXT.gPause) + '</button><button type="button" class="fp-btn" data-act="gstop" style="background:#fff">' + esc(TEXT.gStop) + "</button>"
                     : '<button type="button" class="fp-btn fp-yellow" data-act="gstart">\u25B6 ' + esc(TEXT.gStart) + "</button>") + "</span></div>" +
-    (o.view === "sheet" ? '<div class="fp-sheetlane" id="fp-gsheet"><div class="fp-hitline"></div><div class="fp-strip" id="fp-gstrip"></div></div><canvas id="fp-gcanvas" style="height:150px;margin-top:8px"></canvas>'
+    (o.view === "sheet" && sheetOk ? '<div class="fp-sheetlane" id="fp-gsheet"><div class="fp-hitline"></div><div class="fp-strip" id="fp-gstrip"></div></div><canvas id="fp-gcanvas" style="height:150px;margin-top:8px"></canvas>'
                         : '<canvas id="fp-gcanvas" aria-label="' + esc(TEXT.gHowTo) + '"></canvas>') + "</div>";
   var results = G && G.result ? G.result : "";
   return head(TEXT.gameTitle(a.title), true, esc(TEXT.gHowTo)) + '<div class="fp-stack">' + (G && G.running ? "" : (a.review ? '<p class="fp-note">' + esc(TEXT.reviewNote) + "</p>" : "") + setup) + stage + results +
@@ -1500,9 +1564,15 @@ function gameStart(){
   var c = active(), a = assetById(ui.game.id), o = ui.game, d = a.play, fit = fitPiece(a, o.hands);
   if (G) gameStop(true);
   var spq = 60 / (d.bpm * o.speed / 100);
-  var notes = pieceNotes(a).filter(function(n){ return o.hands === "both" || (o.hands === "right" ? n.hand === 0 : n.hand === 1); })
-    .map(function(n){ return { on:n.on, off:n.off, hand:n.hand, m:n.m, want:fit.map(n.m), id:n.id, t:0, res:null }; });
-  var along = pieceNotes(a).filter(function(n){ return !(o.hands === "both" || (o.hands === "right" ? n.hand === 0 : n.hand === 1)); });
+  var cfg = GAME_DIFF[o.diff] || GAME_DIFF.medium, all = pieceNotes(a);
+  var mine = all.filter(function(n){ return o.hands === "both" || (o.hands === "right" ? n.hand === 0 : n.hand === 1); });
+  if (cfg.oneNote) {   // easy: one note of each chord (the top one in the right hand, the bottom one in the left); the app plays the rest
+    var pick = {};
+    mine.forEach(function(n){ var k = n.hand + ":" + n.on.toFixed(4), p = pick[k]; if (!p || (n.hand === 0 ? n.m > p.m : n.m < p.m)) pick[k] = n; });
+    mine = mine.filter(function(n){ return pick[n.hand + ":" + n.on.toFixed(4)] === n; });
+  }
+  var notes = mine.map(function(n){ return { on:n.on, off:n.off, hand:n.hand, m:n.m, want:fit.map(n.m), id:n.id, t:0, res:null }; });
+  var along = all.filter(function(n){ return mine.indexOf(n) < 0; });
   G = { running:true, paused:false, a:a, spq:spq, notes:notes, along:along, beat:-d.beatsPerBar * d.beat, lead:d.beatsPerBar * d.beat,
         lastNow:null, groups:[], gi:0, got:[], feed:"", feedT:0, pressed:{}, result:"", end:d.end };
   if (o.mode === "practice") notes.forEach(function(n){
@@ -1512,13 +1582,13 @@ function gameStart(){
     if (n) markId(n.id, cls);
     G.feed = cls === "fp-ok" ? (n.res === "perfect" ? TEXT.gPerfect : TEXT.gGood) : cls === "fp-bad" ? TEXT.gWrong : TEXT.gMiss; G.feedT = performance.now();
     if (cls === "fp-bad" && m != null) G.pressed[m] = { bad:true, until:performance.now() + 300 };
-  });
+  }, cfg.win);
   LISTEN.fn = function(m, when){ if (G && G.running && !G.paused) gameInput(m, when); };
   render();
   audioReady().then(function(){
     listenStart();
     G.lastNow = AU.ctx.currentTime;
-    if (o.view === "sheet") gameSheetSetup();
+    if (gameSheet()) gameSheetSetup();
     gameSetupCanvas();
     if (o.mode === "challenge") gameSchedule();
     requestAnimationFrame(gameFrame);
@@ -1566,7 +1636,7 @@ function gameFrame(){
   var finished = o.mode === "challenge" ? (G.judge.done() && G.beat > G.end) : G.gi >= G.groups.length;
   if (finished) { gameFinish(); return; }
   gameDraw(); gameHud();
-  if (o.view === "sheet") gameSheetMove();
+  if (gameSheet()) gameSheetMove();
   requestAnimationFrame(gameFrame);
 }
 function gameHud(){
@@ -1581,9 +1651,9 @@ function gameDraw(){
   x.clearRect(0, 0, W, H); x.fillStyle = "#14304d"; x.fillRect(0, 0, W, H);
   // bar lines
   var d = G.a.play; x.strokeStyle = "rgba(255,255,255,.12)"; x.lineWidth = 1 * dpr;
-  if (o.view !== "sheet") d.bars.forEach(function(b){ var y = hitY - (b - G.beat) * G.spq * pps; if (y > 0 && y < hitY) { x.beginPath(); x.moveTo(0, y); x.lineTo(W, y); x.stroke(); } });
+  if (!gameSheet()) d.bars.forEach(function(b){ var y = hitY - (b - G.beat) * G.spq * pps; if (y > 0 && y < hitY) { x.beginPath(); x.moveTo(0, y); x.lineTo(W, y); x.stroke(); } });
   // falling notes
-  if (o.view !== "sheet") G.notes.forEach(function(n){
+  if (!gameSheet()) G.notes.forEach(function(n){
     var k = G.keys[n.want]; if (!k) return;
     var yb = hitY - (n.on - G.beat) * G.spq * pps, h = Math.max(6 * dpr, (n.off - n.on) * G.spq * pps - 2 * dpr), yt = yb - h;
     if (yt > hitY || yb < -10) return;
@@ -1608,11 +1678,23 @@ function gameDraw(){
 }
 function roundRect(x, l, t, w, h, r){ r = Math.min(r, w / 2, h / 2); x.beginPath(); x.moveTo(l + r, t); x.arcTo(l + w, t, l + w, t + h, r); x.arcTo(l + w, t + h, l, t + h, r); x.arcTo(l, t + h, l, t, r); x.arcTo(l, t, l + w, t, r); x.closePath(); }
 /* Sheet-music view: the score as one long line scrolls past a fixed yellow line. */
-function gameSheetSetup(){
-  var strip = document.getElementById("fp-gstrip"), a = G.a; if (!strip || !a.score || !a.score.line) return;
-  var load = SCORES["line:" + a.asset_id] ? Promise.resolve(SCORES["line:" + a.asset_id]) :
+function loadLine(a){
+  return SCORES["line:" + a.asset_id] ? Promise.resolve(SCORES["line:" + a.asset_id]) :
     new Response(new Blob([b64buf(a.score.line)]).stream().pipeThrough(new DecompressionStream("gzip"))).text().then(function(t){ return (SCORES["line:" + a.asset_id] = t); });
-  load.then(function(svg){
+}
+function gameSheetPreview(){   // before Start (or after the results): the music, parked where Start begins
+  var strip = document.getElementById("fp-gstrip"), lane = document.getElementById("fp-gsheet"), a = assetById(ui.game.id); if (!strip || !sheetLineOk(a)) return;
+  loadLine(a).then(function(svg){
+    if (!strip.isConnected || (G && G.running)) return;
+    strip.innerHTML = svg; reapplyMarks();
+    var first = pieceNotes(a)[0], el = first && first.id && document.getElementById(first.id), lead = a.play.beatsPerBar * a.play.beat;
+    var x = el ? (el.querySelector(".notehead") || el).getBoundingClientRect().left - strip.getBoundingClientRect().left : 0;
+    strip.style.transform = "translateX(" + (lane.clientWidth * 0.3 - x + lead * 60) + "px)";
+  }, function(){});
+}
+function gameSheetSetup(){
+  var strip = document.getElementById("fp-gstrip"), a = G.a; if (!strip || !sheetLineOk(a)) return;
+  loadLine(a).then(function(svg){
     strip.innerHTML = svg; reapplyMarks();
     var left = strip.getBoundingClientRect().left, pts = {};
     G.notes.forEach(function(n){ var el = n.id && document.getElementById(n.id); if (!el) return;
@@ -1661,7 +1743,7 @@ function gamePause(){
     if (G.paused) { stopAll(); G.pausedBeat = G.beat; }
     else { G.beat = G.pausedBeat; G.notes.forEach(function(n){ if (!n.res && n.on < G.beat) { n.res = "miss"; G.judge.miss++; markId(n.id, "fp-miss"); } }); gameSchedule(); }
   }
-  render(); gameSetupCanvas(); if (ui.game.view === "sheet") gameSheetSetup();
+  render(); gameSetupCanvas(); if (gameSheet()) gameSheetSetup();
 }
 function gamePointer(e){
   if (!G || !G.running || !G.keys) return;
@@ -2051,13 +2133,14 @@ function render(focusHead){
     if (ps && pb) drawSheet(pb, ps, { scale: ui.opts.large ? 1.35 : 1 }); }
   if (ui.screen === "metro") metroDrawStart();
   if (ui.player && ui.screen === "pieces") { fillScore(assetById(ui.player.id)); if (W) updateWait(); }
-  if (ui.screen === "game" && G && G.running) { gameSetupCanvas(); if (ui.game.view === "sheet" && !document.querySelector("#fp-gstrip svg")) gameSheetSetup(); }
-  else if (ui.screen === "game") { G = G && G.result ? G : null; if (document.getElementById("fp-gcanvas")) gamePreview(); }
+  else if (ui.sheetOpen && ui.screen === "pieces") fillScore(assetById(ui.sheetOpen));
+  if (ui.screen === "game" && G && G.running) { gameSetupCanvas(); if (gameSheet() && !document.querySelector("#fp-gstrip svg")) gameSheetSetup(); }
+  else if (ui.screen === "game") { G = G && G.result ? G : null; if (document.getElementById("fp-gcanvas")) gamePreview(); gameSheetPreview(); }
   if (!drillHost.hidden) syncDrills(c);
   if (focusHead) { var h = document.getElementById("fp-h1"); if (h) h.focus(); }
 }
 
-function go(screen){ if (REC.on) recStop(); MARKS = {}; if (ui.player) { stopAll(); ui.player = null; W = null; } if (G) { gameStop(true); G = null; } listenStop(); ui.screen = screen; ui.msg = ""; ui.grown = false; ui.viewWeek = null; ui.editing = null; render(true); }
+function go(screen){ if (REC.on) recStop(); MARKS = {}; if (ui.player) { stopAll(); ui.player = null; W = null; } if (G) { gameStop(true); G = null; } listenStop(); ui.screen = screen; ui.msg = ""; ui.sheetOpen = null; ui.sheetMsg = ""; ui.grown = false; ui.viewWeek = null; ui.editing = null; render(true); }
 
 /* Printing: copy the paper to a direct child of <body> and hide the rest of the page
    (works inside a Squarespace page as well as on its own). */
@@ -2120,18 +2203,32 @@ root.addEventListener("click", function(e){
     case "viewweek": ui.viewWeek = parseInt(t.dataset.n, 10); ui.screen = "week"; render(true); break;
     case "backweek": ui.viewWeek = null; render(true); break;
     case "nextlevel": var nx = nextLevelOf(c); if (nx) { c.level = nx.id; c.week = 1; c.complete = false; save(); go("week"); } break;
+    case "sheetmusic":
+      stopAll(); ui.player = null; W = null; MARKS = {}; ui.sheetMsg = "";
+      if (ui.sheetOpen === t.dataset.id) { ui.sheetOpen = null; ui.loadingPiece = null; render(); break; }
+      ui.sheetOpen = null;
+      var sid = t.dataset.id; withPiece(sid, function(){ ui.sheetOpen = sid; render(); }); break;
+    case "sheetprint":
+      var sa = assetById(t.dataset.id); ui.sheetMsg = t.dataset.pdf ? TEXT.sheetPdfHint : "";
+      if (t.dataset.pdf) render();
+      if (sa && sa.score) loadScore(sa).then(function(){ fillScore(sa); printSheet(sa); }, function(){ ui.sheetMsg = TEXT.scoreNone; render(); });
+      break;
     case "listen":
-      W = null; MARKS = {};
+      W = null; MARKS = {}; ui.sheetOpen = null;
       if (ui.player && ui.player.id === t.dataset.id) { stopAll(); ui.player = null; ui.loadingPiece = null; render(); break; }
       stopAll(); ui.player = null;
       var lid = t.dataset.id; withPiece(lid, function(){ ui.player = newPlayer(assetById(lid)); render(); }); break;
     case "pplay": ui.player.result = ""; playerStart(false); break;
     case "game": stopAll(); ui.player = null; W = null;
       var gid = t.dataset.id; withPiece(gid, function(){
-        ui.game = ui.game && ui.game.id === gid ? ui.game : { id:gid, view:"fall", mode:"practice", hands:"right", speed:70, names:true };
+        ui.game = ui.game && ui.game.id === gid ? ui.game : { id:gid, view:"fall", mode:"practice", hands:"right", speed:70, names:true, diff:"medium" };
         ui.screen = "game"; G = null; render(true); }); break;
     case "gview": ui.game.view = t.dataset.v; G = null; render(); break;
     case "gmode": ui.game.mode = t.dataset.v; G = null; render(); break;
+    case "gdiff": var gd = GAME_DIFF[t.dataset.v]; if (gd) { ui.game.diff = t.dataset.v; ui.game.speed = gd.speed; ui.game.names = gd.names; } G = null; render(); break;
+    case "glisten": S.settings.listen = t.dataset.v; if (t.dataset.v !== "mic") { LISTEN.micTest = false; micStop(); }
+      if (t.dataset.v === "midi" && navigator.requestMIDIAccess && !AU.midi) findMidi(true);
+      save(); G = null; render(); break;
     case "ghands": ui.game.hands = t.dataset.v; G = null; render(); break;
     case "gstart": MARKS = {}; gameStart(); break;
     case "recstart": recStart(); break;
