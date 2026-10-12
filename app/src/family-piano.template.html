@@ -197,6 +197,8 @@
 #fp-app .fp-game canvas{display:block;width:100%;height:440px;border-radius:10px;touch-action:none;background:#14304d}
 #fp-app .fp-hud{display:flex;flex-wrap:wrap;gap:14px;align-items:center;padding:4px 4px 10px;font-weight:800}
 #fp-app .fp-hud .fp-big{font-size:22px}
+#fp-app .fp-hud .fp-gvol{display:flex;align-items:center;gap:6px;font-size:20px}
+#fp-app .fp-hud .fp-gvol input{width:110px;accent-color:var(--yellow)}
 #fp-app .fp-hud .fp-feedback{min-width:90px;color:var(--yellow)}
 #fp-app .fp-sheetlane{position:relative;height:230px;overflow:hidden;background:#fff;border-radius:10px}
 #fp-app .fp-sheetlane .fp-strip{position:absolute;left:0;top:10px;height:210px;will-change:transform}
@@ -863,7 +865,7 @@ function screenHelp(){
              ["Our keyboard is small. Does that matter?", "Tell the app its size in Family \u2192 Your keyboard and listening (1 to 7 octaves, or a full piano). The app moves pieces by octaves to fit, and the on-screen keys and the game show only your keys. If your keyboard has octave buttons, say which way you moved it."],
              ["How does the app hear my child play?", "Three ways: a digital piano connected by USB or Bluetooth MIDI (Chrome, Edge or Firefox), the microphone for an acoustic piano (single notes and chords; it checks the notes it is waiting for, and for big chords one quiet note may be missing), or the on-screen keys. Pick one in Family \u2192 Your keyboard and listening. Microphone sound is checked in the browser only and never recorded or sent."],
              ["Can I print the sheet music?", "Yes. In Pieces, press Sheet music to read it on screen, then Print sheet music, or Save as PDF to keep a file and print it later. It prints in black and white on US Letter paper, a whole line of music at a time."],
-             ["What can I change in the game?", "Difficulty (Easy is slower, gives more time for each note and asks for one note of each chord; Hard is full speed with exact timing), how the app hears you (digital piano, microphone or on-screen keys), falling notes or sheet music, play in time or wait for me, which hands, and the speed."],
+             ["What can I change in the game?", "Difficulty (Easy is slower, gives more time for each note and asks for one note of each chord; Hard is full speed with exact timing), how the app hears you (digital piano, microphone or on-screen keys), falling notes or sheet music, play in time or wait for me, which hands (with one hand, tick \u201COther hand plays along\u201D to hear the other hand), the speed, and the volume (the speaker slider, also during the game)."],
              ["What do the colors on the music mean?", "Blue: the note playing now. Orange: the note to play next. Green: played right. Red: a wrong note. Grey: a note that was missed."],
              ["How does Compose work?", "Press Record and play on your digital piano, the on-screen keys or (one note at a time works best) an acoustic piano with the microphone. Stop, then play it back as played or as written, print the sheet music, or download it as MusicXML (opens in MuseScore and other music programs) or MIDI. Songs are saved with each child and in backups."],
              ["Is there a metronome?", "Yes. Press Metronome in the side menu. Set the tempo (or tap it), beats in a bar, clicks per beat and the sound. It keeps going while you use other screens, and stops by itself when the player, the game or Compose starts its own beat. The player, the game (play in time) and Compose also have their own metronome switch."],
@@ -1529,11 +1531,13 @@ function screenGame(c){
     '<div class="fp-row"><b>' + esc(TEXT.hands) + "</b>" + chips("ghands", TEXT.handNames, o.hands) + "</div>" +
     '<div class="fp-row"><label for="fp-gspeed"><b>' + esc(TEXT.speed) + '</b></label><input id="fp-gspeed" type="range" min="40" max="120" step="5" value="' + o.speed + '" data-act="gspeed"><span>' + o.speed + "%</span>" +
     '<label class="fp-check"><input type="checkbox" data-act="gnames"' + (o.names ? " checked" : "") + "> " + esc(TEXT.gNames) + "</label>" +
+    (o.hands !== "both" ? '<label class="fp-check"><input type="checkbox" data-act="galong"' + (o.along ? " checked" : "") + "> " + esc(TEXT.along) + "</label>" : "") +
     (o.mode === "challenge" ? '<label class="fp-check"><input type="checkbox" data-act="gmetro"' + (o.metro ? " checked" : "") + "> " + esc(TEXT.mGame) + "</label>" : "") + "</div>" +
     '<div class="fp-row">' + rangeNote(a) + (best ? '<span class="fp-range-note">' + esc(TEXT.gBest(best.best)) + " " + new Array(best.stars + 1).join("\u2B50") + "</span>" : "") + "</div>" +
     (S.settings.listen === "mic" ? '<p class="fp-range-note">' + esc(TEXT.micTip) + "</p>" : "") + "</div>";
   var stage = '<div class="fp-game"><div class="fp-hud" aria-live="off"><span>' + esc(TEXT.gScore) + ' <span class="fp-big" id="fp-gscore">0</span></span>' +
     "<span>" + esc(TEXT.gCombo) + ' <span class="fp-big" id="fp-gcombo">0</span></span><span class="fp-feedback fp-big" id="fp-gfeed"></span>' +
+    '<label class="fp-gvol">\uD83D\uDD0A<span class="fp-sr">' + esc(TEXT.volume) + '</span><input type="range" min="0" max="1" step="0.05" value="' + S.settings.volume + '" data-act="vol" aria-label="' + esc(TEXT.volume) + '"></label>' +
     '<span style="margin-left:auto" class="fp-row">' +
     (G && G.running ? '<button type="button" class="fp-btn fp-yellow" data-act="gpause">' + esc(G.paused ? TEXT.gResume : TEXT.gPause) + '</button><button type="button" class="fp-btn" data-act="gstop" style="background:#fff">' + esc(TEXT.gStop) + "</button>"
                     : '<button type="button" class="fp-btn fp-yellow" data-act="gstart">\u25B6 ' + esc(TEXT.gStart) + "</button>") + "</span></div>" +
@@ -1572,7 +1576,8 @@ function gameStart(){
     mine = mine.filter(function(n){ return pick[n.hand + ":" + n.on.toFixed(4)] === n; });
   }
   var notes = mine.map(function(n){ return { on:n.on, off:n.off, hand:n.hand, m:n.m, want:fit.map(n.m), id:n.id, t:0, res:null }; });
-  var along = all.filter(function(n){ return mine.indexOf(n) < 0; });
+  // the app plays the notes left out of an easy chord, and the other hand only when "Other hand plays along" is ticked
+  var along = all.filter(function(n){ return mine.indexOf(n) < 0 && (o.along || o.hands === "both" || n.hand === (o.hands === "right" ? 0 : 1)); });
   G = { running:true, paused:false, a:a, spq:spq, notes:notes, along:along, beat:-d.beatsPerBar * d.beat, lead:d.beatsPerBar * d.beat,
         lastNow:null, groups:[], gi:0, got:[], feed:"", feedT:0, pressed:{}, result:"", end:d.end };
   if (o.mode === "practice") notes.forEach(function(n){
@@ -2320,6 +2325,7 @@ root.addEventListener("input", function(e){   // the tempo slider shows its numb
     Array.prototype.forEach.call(root.querySelectorAll(".fp-piece"), function(card){ var hit = !q || card.dataset.q.indexOf(q) >= 0; card.hidden = !hit; any = any || hit; });
     return;
   }
+  if (e.target.dataset && e.target.dataset.act === "vol") { S.settings.volume = Number(e.target.value); if (AU.master) AU.master.gain.value = S.settings.volume; }
   if (e.target.dataset && e.target.dataset.act === "mbpm") { metroSettings().bpm = Number(e.target.value); var big = document.querySelector("#fp-app .fp-mbpm"); if (big) big.firstChild.nodeValue = e.target.value; }
 });
 root.addEventListener("change", function(e){
@@ -2349,6 +2355,7 @@ root.addEventListener("change", function(e){
   }
   else if (a === "ccount") composeOpts().countIn = t.checked;
   else if (a === "gmetro") ui.game.metro = t.checked;
+  else if (a === "galong") ui.game.along = t.checked;
   else if (a === "mbpm") { metroSettings().bpm = Number(t.value); save(); render(); }
   else if (a === "mbeats") { metroSettings().beats = Number(t.value); save(); render(); }
   else if (a === "msub") { metroSettings().sub = Number(t.value); save(); render(); }
